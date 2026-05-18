@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0d1b2a">
+<title>扑克海洋 — 从鱼到鲨鱼的扑克之旅</title>
+<style>
+/* ========== RESET & BASE ========== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background:#0d1b2a;color:#c8d0d8;min-height:100vh;overflow-x:hidden;
+  background-image:radial-gradient(ellipse at 50% 0,#142538 0%,#0d1b2a 60%,#091420 100%);
+}
+a{color:#f0b90b;text-decoration:none}
+a:hover{color:#ffd700}
+
+/* ========== LAYOUT ========== */
+.container{max-width:1100px;margin:0 auto;padding:0 16px}
+.page{display:none;padding:24px 0 60px}
+.page.active{display:block}
+.page-header{text-align:center;margin-bottom:32px}
+.page-header h1{font-size:1.8rem;color:#f0b90b;margin-bottom:8px}
+.page-header p{font-size:0.95rem;color:#8899aa}
+
+/* ========== NAV ========== */
+.nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px;background:rgba(13,27,42,0.95);
+  backdrop-filter:blur(8px);border-bottom:1px solid rgba(240,185,11,0.15);
+  position:sticky;top:0;z-index:100;
+}
+.nav-logo{display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700;color:#f0b90b}
+.nav-logo svg{width:28px;height:28px}
+.nav-links{display:flex;gap:4px;list-style:none;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;-ms-overflow-style:none;scrollbar-width:none}.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{
+  padding:6px 14px;border-radius:6px;font-size:0.85rem;color:#8899aa;transition:all 0.2s;cursor:pointer;
+}
+.nav-links a:hover,.nav-links a.active{color:#f0b90b;background:rgba(240,185,11,0.1)}
+
+/* ========== HOME PAGE ========== */
+.hero{
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;padding:40px 16px 20px;
+}
+.hero-characters{
+  display:flex;align-items:center;justify-content:center;gap:0;
+  width:100%;max-width:500px;margin-bottom:16px;
+}
+.hero-title{font-size:2.5rem;font-weight:800;color:#f0b90b;margin-bottom:8px;
+  text-shadow:0 0 40px rgba(240,185,11,0.2);letter-spacing:2px;
+}
+.hero-sub{font-size:1rem;color:#6a8a9a;margin-bottom:24px}
+.hero-btn{
+  display:inline-block;padding:14px 48px;border-radius:12px;
+  background:linear-gradient(135deg,#f0b90b,#d4a008);color:#0d1b2a;
+  font-size:1.1rem;font-weight:700;border:none;cursor:pointer;
+  transition:transform 0.2s,box-shadow 0.2s;box-shadow:0 4px 24px rgba(240,185,11,0.3);
+}
+.hero-btn:hover{transform:translateY(-2px);box-shadow:0 6px 32px rgba(240,185,11,0.4)}
+
+/* Game grid on home page */
+.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:32px}
+.game-card{
+  background:linear-gradient(135deg,#1b2838,#152030);border-radius:12px;
+  padding:20px;border:1px solid rgba(240,185,11,0.08);cursor:pointer;
+  transition:all 0.3s;position:relative;overflow:hidden;
+}
+.game-card:hover{transform:translateY(-3px);border-color:rgba(240,185,11,0.2);box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+.game-card .gc-icon{font-size:2rem;margin-bottom:10px}
+.game-card h3{font-size:1.05rem;color:#e8eef4;margin-bottom:6px}
+.game-card p{font-size:0.85rem;color:#6a8a9a;line-height:1.5}
+.game-card .gc-badge{
+  display:inline-block;padding:2px 10px;border-radius:10px;
+  font-size:0.7rem;font-weight:600;margin-top:10px;
+}
+.badge-new{background:rgba(240,185,11,0.15);color:#f0b90b}
+.badge-soon{background:rgba(100,120,140,0.15);color:#6a8a9a}
+
+/* ========== GAME SCREEN ========== */
+.game-area{
+  max-width:800px;margin:0 auto;
+  background:linear-gradient(180deg,#0f2430,#0a1a22);border-radius:16px;
+  border:1px solid rgba(240,185,11,0.1);padding:20px;position:relative;
+  min-height:500px;
+}
+.game-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:16px;padding-bottom:12px;
+  border-bottom:1px solid rgba(240,185,11,0.1);
+}
+.game-header h2{font-size:1.1rem;color:#f0b90b}
+.game-stats{display:flex;gap:16px;font-size:0.85rem}
+.game-stat{display:flex;align-items:center;gap:4px}
+.gs-icon{font-size:1rem}
+.gs-val{color:#e8eef4;font-weight:600}
+
+/* Table area - characters facing off */
+.table-scene{
+  display:flex;align-items:center;justify-content:center;
+  gap:8px;margin:8px 0 16px;position:relative;min-height:140px;
+}
+.character-box{
+  flex:0 0 120px;text-align:center;position:relative;z-index:2;
+}
+.character-box svg{width:110px;height:110px;display:block;margin:0 auto}
+.char-name{font-size:0.75rem;margin-top:2px;font-weight:600}
+.char-name.fish{color:#ff8c42}
+.char-name.shark{color:#4a8ca8}
+.char-speech{
+  position:absolute;top:-10px;font-size:0.75rem;color:#8899aa;
+  background:rgba(0,0,0,0.6);padding:3px 10px;border-radius:8px;
+  white-space:nowrap;opacity:0;transition:opacity 0.3s;
+}
+.char-speech.show{opacity:1}
+.fish .char-speech{left:50%;transform:translateX(-50%)}
+.shark .char-speech{left:50%;transform:translateX(-50%)}
+
+/* Versus divider */
+.vs-divider{
+  font-size:1.5rem;font-weight:800;color:rgba(240,185,11,0.2);
+  flex:0 0 40px;text-align:center;z-index:1;
+}
+
+/* Table felt center */
+.table-felt{
+  flex:1;max-width:280px;
+  background:radial-gradient(ellipse,#1a4a2a,#0f2a1a);
+  border-radius:40px;border:3px solid #5a3a1a;padding:16px;
+  text-align:center;position:relative;z-index:2;
+  box-shadow:inset 0 0 30px rgba(0,0,0,0.3),0 4px 20px rgba(0,0,0,0.4);
+}
+.table-felt .round-label{font-size:0.7rem;color:#6a8a6a;margin-bottom:6px}
+.table-felt .hand-cards{display:flex;justify-content:center;gap:8px;margin-bottom:6px}
+
+/* Playing cards */
+.card{
+  width:50px;height:70px;background:#fff;border-radius:6px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:3px;left:4px;
+  font-size:0.55rem;line-height:1;
+}
+.card .cr{font-size:1.1rem;line-height:1}
+.card .cs{font-size:0.85rem;line-height:1;margin-top:-2px}
+.card.red{color:#d32f2f}
+.card.black{color:#222}
+.card.card-back{
+  background:linear-gradient(135deg,#1a3a5a,#2a5a8a);
+  border:2px solid #f0b90b;
+}
+.card.card-back::after{
+  content:'🐟';font-size:1.5rem;
+}
+
+/* Scenario text */
+.scenario-box{
+  text-align:center;margin:12px 0 16px;padding:12px;
+  background:rgba(0,0,0,0.2);border-radius:10px;
+}
+.scenario-pos{font-size:0.8rem;color:#6a8a9a;margin-bottom:4px}
+.scenario-text{font-size:0.95rem;color:#c8d0d8;line-height:1.5}
+.scenario-text strong{color:#f0b90b}
+
+/* Action buttons */
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.btn-action{
+  padding:12px 28px;border-radius:10px;border:2px solid transparent;
+  font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.2s;
+  min-width:100px;text-transform:uppercase;letter-spacing:1px;
+}
+.btn-fold{background:rgba(200,50,50,0.15);border-color:rgba(200,50,50,0.3);color:#e06060}
+.btn-fold:hover{background:rgba(200,50,50,0.25);border-color:#c83232}
+.btn-call{background:rgba(50,150,200,0.15);border-color:rgba(50,150,200,0.3);color:#60b0e0}
+.btn-call:hover{background:rgba(50,150,200,0.25);border-color:#3296c8}
+.btn-raise{background:rgba(240,185,11,0.15);border-color:rgba(240,185,11,0.3);color:#f0b90b}
+.btn-raise:hover{background:rgba(240,185,11,0.25);border-color:#f0b90b}
+.btn-action:disabled{opacity:0.4;cursor:not-allowed;transform:none!important}
+.btn-action:not(:disabled):hover{transform:translateY(-2px)}
+
+/* Result overlay */
+.result-box{
+  display:none;text-align:center;padding:16px;margin-top:12px;
+  border-radius:12px;animation:fadeIn 0.3s;
+}
+.result-box.show{display:block}
+.result-box.correct{background:rgba(68,204,68,0.1);border:1px solid rgba(68,204,68,0.2)}
+.result-box.wrong{background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.2)}
+.result-box .rb-icon{font-size:2rem;margin-bottom:6px}
+.result-box .rb-text{font-size:0.95rem;margin-bottom:4px}
+.result-box .rb-detail{font-size:0.8rem;color:#8899aa}
+.btn-next{
+  margin-top:12px;padding:8px 24px;border-radius:8px;
+  background:rgba(240,185,11,0.15);color:#f0b90b;border:1px solid rgba(240,185,11,0.2);
+  cursor:pointer;font-size:0.9rem;transition:all 0.2s;
+}
+.btn-next:hover{background:rgba(240,185,11,0.25)}
+
+/* Start screen */
+.start-screen{text-align:center;padding:30px 16px}
+.start-screen .ss-icon{font-size:4rem;margin-bottom:12px}
+.start-screen h3{font-size:1.4rem;color:#f0b90b;margin-bottom:8px}
+.start-screen p{font-size:0.9rem;color:#6a8a9a;margin-bottom:20px;line-height:1.6}
+.start-screen .ss-rules{text-align:left;display:inline-block;margin-bottom:20px}
+.start-screen .ss-rules li{margin:6px 0;font-size:0.85rem;color:#8899aa;list-style:none}
+.start-screen .ss-rules li::before{content:'▸ ';color:#f0b90b}
+
+/* Game over */
+.gameover-screen{text-align:center;padding:30px 16px}
+.gameover-screen .go-title{font-size:1.6rem;font-weight:800;margin-bottom:8px}
+.gameover-screen .go-rank{font-size:3rem;margin-bottom:8px}
+.gameover-screen .go-desc{font-size:0.95rem;color:#6a8a9a;margin-bottom:16px;line-height:1.6}
+.gameover-screen .go-stats{display:flex;justify-content:center;gap:24px;margin-bottom:20px}
+.gameover-screen .go-stat{text-align:center}
+.gameover-screen .go-stat .num{font-size:1.5rem;font-weight:700;color:#f0b90b}
+.gameover-screen .go-stat .lbl{font-size:0.75rem;color:#6a8a9a}
+
+/* ========== SHARK / FISH SVG EXPRESSIONS ========== */
+.character-box .expr-mouth,.character-box .expr-eye{transition:all 0.3s}
+.fish-happy .expr-mouth{transform:translateY(-2px)}
+.fish-scared .expr-eye{transform:scale(1.3);transform-origin:122px 90px}
+.fish-scared .expr-mouth{transform:scaleY(1.5);transform-origin:128px 112px}
+.shark-angry .expr-eye{transform:scale(0.8)}
+.shark-angry .expr-mouth{transform:translateY(2px)}
+.shark-amused .expr-mouth{transform:scaleY(1.3);transform-origin:50px 108px}
+
+/* Mystery box for Fish or Shark */
+.mystery-box{
+  width:110px;height:110px;margin:0 auto;display:flex;
+  align-items:center;justify-content:center;
+  background:#1a2a3a;border-radius:50%;border:3px solid #f0b90b;
+  font-size:4rem;transition:all 0.5s;
+}
+.mystery-box.reveal-fish{background:#ff8c42;border-color:#e07b3a}
+.mystery-box.reveal-shark{background:#4a7a9a;border-color:#3a6a8a}
+@keyframes mysteryReveal{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+.mystery-reveal{animation:mysteryReveal 0.5s}
+/* --- end mystery box --- */
+
+/* Odds calc 2x2 grid */
+.odds-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.btn-odds{
+  padding:14px 10px;border-radius:10px;border:2px solid rgba(240,185,11,0.2);
+  background:rgba(240,185,11,0.08);color:#e8eef4;font-size:0.95rem;
+  cursor:pointer;transition:all 0.2s;font-weight:600;text-align:center;
+}
+.btn-odds:hover{background:rgba(240,185,11,0.15);border-color:rgba(240,185,11,0.3);transform:translateY(-1px)}
+.btn-odds:disabled{opacity:0.4;cursor:not-allowed;transform:none!important}
+.btn-odds.selected{background:rgba(68,204,68,0.15);border-color:#44cc44;color:#44cc44}
+.btn-odds.wrong{background:rgba(255,68,68,0.15);border-color:#ff4444;color:#ff4444}
+
+/* Odds-felt for card/board display */
+.odds-felt{max-width:300px!important}
+@media(max-width:640px){.odds-felt{max-width:220px!important}.odds-actions{gap:6px}.btn-odds{padding:10px 6px;font-size:0.85rem}}
+@media(max-width:420px){.odds-felt{max-width:180px!important}}
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+@keyframes bounce{
+  0%,100%{transform:translateY(0)}
+  40%{transform:translateY(-10px)}
+  60%{transform:translateY(-4px)}
+}
+.shake{animation:shake 0.5s}
+.bounce{animation:bounce 0.4s}
+.fish-swim{animation:fishSwim 3s ease-in-out infinite}
+@keyframes fishSwim{
+  0%,100%{transform:translateX(0)}
+  50%{transform:translateX(6px)}
+}
+
+/* ========== RESPONSIVE ========== */
+@media(max-width:640px){
+  .nav{padding:10px 12px}
+  .nav-logo{font-size:1rem}
+  .nav-links a{padding:5px 10px;font-size:0.78rem}
+  .hero-title{font-size:1.8rem}
+  .hero-sub{font-size:0.85rem}
+  .character-box{flex:0 0 80px}
+  .character-box svg{width:80px;height:80px}
+  .vs-divider{font-size:1rem;flex:0 0 24px}
+  .table-felt{max-width:200px;padding:12px}
+  .card{width:42px;height:60px}
+  .card .cr{font-size:0.95rem}
+  .card .cs{font-size:0.7rem}
+  .btn-action{padding:10px 20px;min-width:80px;font-size:0.9rem}
+  .game-area{padding:12px;border-radius:12px}
+  .game-stats{font-size:0.75rem;gap:8px}
+  .game-grid{grid-template-columns:1fr}
+  .scenario-text{font-size:0.88rem}
+}
+@media(max-width:420px){
+  .character-box{flex:0 0 64px}
+  .character-box svg{width:64px;height:64px}
+  .table-felt{max-width:160px;padding:8px}
+  .table-felt .round-label{font-size:0.6rem}
+  .card{width:36px;height:52px}
+  .card .cr{font-size:0.8rem}
+  .card .cs{font-size:0.6rem}
+  .vs-divider{flex:0 0 16px;font-size:0.85rem}
+  .game-header h2{font-size:0.95rem}
+  .hero-title{font-size:1.5rem}
+  .char-name{font-size:0.65rem}
+  .char-speech{font-size:0.65rem;white-space:normal;max-width:80px}
+}
+</style>
+</head>
+<body>
+
+<!-- ========== NAV ========== -->
+<nav class="nav">
+  <div class="nav-logo">
+    <svg viewBox="0 0 200 200"><path d="M30,100 L5,65 L5,135 Z" fill="#f0b90b" opacity="0.8"/>
+    <ellipse cx="80" cy="100" rx="50" ry="28" fill="#f0b90b" opacity="0.8"/>
+    <circle cx="108" cy="90" r="8" fill="#0d1b2a"/>
+    <circle cx="108" cy="90" r="4" fill="#fff"/></svg>
+    扑克海洋
+  </div>
+  <ul class="nav-links">
+    <li><a class="active" data-page="home">首页</a></li>
+    <li><a data-page="preflop-duel">翻前决斗</a></li>
+	    <li><a data-page="fish-or-shark">是鱼是鲨</a></li>
+	    <li><a data-page="odds-calc">赔率速算</a></li>
+		    <li><a data-page="mind-read">读心术</a></li>
+		    <li><a data-page="allin-push">全压赌命</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+
+<!-- ========== HOME PAGE ========== -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-characters">
+      <!-- Fish (left) -->
+      <svg viewBox="0 0 200 200" width="130" height="130">
+        <path d="M 25,100 L 5,72 L 5,128 Z" fill="#ff8c42"/>
+        <ellipse cx="80" cy="100" rx="55" ry="30" fill="#ff8c42"/>
+        <path d="M 65,72 Q 75,40 90,42 Q 80,55 80,72 Z" fill="#e07b3a"/>
+        <path d="M 70,118 Q 60,140 48,136 Q 58,126 62,116 Z" fill="#e07b3a"/>
+        <ellipse cx="80" cy="108" rx="38" ry="16" fill="#ffaa66" opacity="0.4"/>
+        <circle cx="115" cy="90" r="9" fill="white"/>
+        <circle cx="118" cy="90" r="5" fill="#222"/>
+        <circle cx="116" cy="88" r="2" fill="white"/>
+        <path d="M 128,104 Q 132,114 122,118" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div style="font-size:2rem;font-weight:800;color:rgba(240,185,11,0.15);margin:0 4px">VS</div>
+      <!-- Shark (right) -->
+      <svg viewBox="0 0 200 200" width="140" height="140">
+        <ellipse cx="115" cy="100" rx="55" ry="25" fill="#4a7a9a"/>
+        <path d="M 165,100 L 192,72 L 192,128 Z" fill="#4a7a9a"/>
+        <path d="M 105,78 Q 100,38 88,34 Q 94,55 90,78 Z" fill="#3a6a8a"/>
+        <ellipse cx="115" cy="108" rx="38" ry="13" fill="#6a9aba" opacity="0.4"/>
+        <ellipse cx="72" cy="100" rx="22" ry="20" fill="#4a7a9a"/>
+        <circle cx="65" cy="90" r="6" fill="white" opacity="0.9"/>
+        <circle cx="63" cy="90" r="3" fill="#111"/>
+        <circle cx="62" cy="89" r="1" fill="white"/>
+        <path d="M 52,105 Q 60,114 72,108" stroke="#222" stroke-width="1.5" fill="none"/>
+        <path d="M 54,106 L 56,109 L 58,105 L 60,109 L 62,105" stroke="white" stroke-width="1.5" fill="white"/>
+        <path d="M 90,96 Q 92,100 90,104" stroke="#3a6a8a" stroke-width="1.2" fill="none"/>
+        <path d="M 95,94 Q 97,100 95,106" stroke="#3a6a8a" stroke-width="1.2" fill="none"/>
+      </svg>
+    </div>
+    <h1 class="hero-title">扑克海洋</h1>
+    <p class="hero-sub">从鱼到鲨鱼的扑克成长之旅 🐟➜🦈</p>
+    <button class="hero-btn" onclick="navigate('preflop-duel')">开始冒险</button>
+  </div>
+
+  <div class="game-grid">
+    <div class="game-card" onclick="navigate('preflop-duel')">
+      <div class="gc-icon">⚔️</div>
+      <h3>翻前决斗</h3>
+      <p>小鱼 vs 鲨鱼！面对不同翻前局面，做出正确的选择。答对积累筹码，答错被鲨鱼咬一口！</p>
+      <span class="gc-badge badge-new">立即挑战</span>
+    </div>
+    <div class="game-card" onclick="navigate('fish-or-shark')">
+      <div class="gc-icon">🐟</div>
+      <h3>是鱼是鲨</h3>
+      <p>看打牌风格猜身份——这个玩家是鱼还是鲨鱼？</p>
+      <span class="gc-badge badge-new">新游戏</span>
+    </div>
+    <div class="game-card" onclick="navigate('odds-calc')">
+      <div class="gc-icon">🧮</div>
+      <h3>赔率速算</h3>
+      <p>听牌形势中，你的中奖概率是多少？快速心算挑战！</p>
+      <span class="gc-badge badge-new">新游戏</span>
+    </div>
+    <div class="game-card" onclick="navigate('mind-read')">
+      <div class="gc-icon">👀</div>
+      <h3>读心术</h3>
+      <p>从对手的行动中读出他的牌——你能看穿鲨鱼的心思吗？</p>
+      <span class="gc-badge badge-new">立即挑战</span>
+    </div>
+    <div class="game-card" onclick="navigate('allin-push')">
+      <div class="gc-icon">🃏</div>
+      <h3>全压赌命</h3>
+      <p>最后一手牌，ALL-IN or FOLD？鲨鱼就在对面盯着你！</p>
+      <span class="gc-badge badge-new">立即挑战</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== PREFLOP DUEL PAGE ========== -->
+<div id="page-preflop-duel" class="page">
+  <!-- Start Screen -->
+  <div id="pd-start" class="start-screen">
+    <div class="ss-icon">⚔️</div>
+    <h3>翻前决斗</h3>
+    <p>你是牌桌上的一条小鱼，面对经验丰富的鲨鱼……<br>每回合给你一手牌 + 一个翻前局面，选对动作才能生存！</p>
+    <ul class="ss-rules">
+      <li>共 10 回合，每回合从 3 个动作中选择</li>
+      <li>答对 +10 分，连对额外加分</li>
+      <li>答错失去一条命（共 3 条命）</li>
+      <li>坚持到底，看看你能从鱼进化成什么！</li>
+    </ul>
+    <button class="hero-btn" onclick="preflopDuel.start()">开始游戏</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="pd-game" style="display:none">
+    <div class="game-area">
+      <div class="game-header">
+        <h2>⚔️ 翻前决斗</h2>
+        <div class="game-stats">
+          <span class="game-stat"><span class="gs-icon">🏆</span><span class="gs-val" id="pd-score">0</span></span>
+          <span class="game-stat"><span class="gs-icon">❤️</span><span class="gs-val" id="pd-lives">3</span></span>
+          <span class="game-stat"><span class="gs-icon">🎯</span><span class="gs-val" id="pd-round">1/10</span></span>
+        </div>
+      </div>
+
+      <!-- Table scene with characters -->
+      <div class="table-scene">
+        <div class="character-box fish" id="pd-fish">
+          <svg viewBox="0 0 200 200" width="110" height="110" id="pd-fish-svg">
+            <path d="M 25,100 L 5,72 L 5,128 Z" fill="#ff8c42"/>
+            <ellipse cx="80" cy="100" rx="55" ry="30" fill="#ff8c42"/>
+            <path d="M 65,72 Q 75,40 90,42 Q 80,55 80,72 Z" fill="#e07b3a"/>
+            <path d="M 70,118 Q 60,140 48,136 Q 58,126 62,116 Z" fill="#e07b3a"/>
+            <ellipse cx="80" cy="108" rx="38" ry="16" fill="#ffaa66" opacity="0.4"/>
+            <g class="expr-eye">
+              <circle cx="115" cy="90" r="9" fill="white"/>
+              <circle cx="118" cy="90" r="5" fill="#222"/>
+              <circle cx="116" cy="88" r="2" fill="white"/>
+            </g>
+            <path class="expr-mouth" d="M 128,104 Q 132,114 122,118" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <!-- Cheek blush -->
+            <ellipse cx="108" cy="105" rx="6" ry="3" fill="#ff6b6b" opacity="0.3"/>
+          </svg>
+          <div class="char-name fish">🐟 小鱼</div>
+          <div class="char-speech" id="pd-fish-speech">嗯…让我想想</div>
+        </div>
+
+        <div class="vs-divider">VS</div>
+
+        <div class="table-felt">
+          <div class="round-label" id="pd-hand-label">你的手牌</div>
+          <div class="hand-cards" id="pd-cards">
+            <div class="card card-back"></div>
+            <div class="card card-back"></div>
+          </div>
+        </div>
+
+        <div class="character-box shark" id="pd-shark">
+          <svg viewBox="0 0 200 200" width="110" height="110" id="pd-shark-svg">
+            <ellipse cx="115" cy="100" rx="55" ry="25" fill="#4a7a9a"/>
+            <path d="M 165,100 L 192,72 L 192,128 Z" fill="#4a7a9a"/>
+            <path d="M 105,78 Q 100,38 88,34 Q 94,55 90,78 Z" fill="#3a6a8a"/>
+            <ellipse cx="115" cy="108" rx="38" ry="13" fill="#6a9aba" opacity="0.4"/>
+            <ellipse cx="72" cy="100" rx="22" ry="20" fill="#4a7a9a"/>
+            <g class="expr-eye">
+              <circle cx="65" cy="90" r="6" fill="white" opacity="0.9"/>
+              <circle cx="63" cy="90" r="3" fill="#111"/>
+              <circle cx="62" cy="89" r="1" fill="white"/>
+            </g>
+            <path class="expr-mouth" d="M 52,105 Q 60,114 72,108" stroke="#222" stroke-width="1.5" fill="none"/>
+            <path d="M 54,106 L 56,109 L 58,105 L 60,109 L 62,105" stroke="white" stroke-width="1.5" fill="white"/>
+            <path d="M 90,96 Q 92,100 90,104" stroke="#3a6a8a" stroke-width="1.2" fill="none"/>
+            <path d="M 95,94 Q 97,100 95,106" stroke="#3a6a8a" stroke-width="1.2" fill="none"/>
+          </svg>
+          <div class="char-name shark">🦈 鲨鱼</div>
+          <div class="char-speech" id="pd-shark-speech">来吧，让我看看你的水平</div>
+        </div>
+      </div>
+
+      <!-- Scenario -->
+      <div class="scenario-box">
+        <div class="scenario-pos" id="pd-position"></div>
+        <div class="scenario-text" id="pd-scenario"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions" id="pd-actions">
+        <button class="btn-action btn-fold" data-action="fold" onclick="preflopDuel.act('fold')">弃牌<br><span style="font-size:0.65rem;font-weight:400;opacity:0.6">FOLD</span></button>
+        <button class="btn-action btn-call" data-action="call" onclick="preflopDuel.act('call')">跟注<br><span style="font-size:0.65rem;font-weight:400;opacity:0.6">CALL</span></button>
+        <button class="btn-action btn-raise" data-action="raise" onclick="preflopDuel.act('raise')">加注<br><span style="font-size:0.65rem;font-weight:400;opacity:0.6">RAISE</span></button>
+      </div>
+
+      <!-- Result -->
+      <div class="result-box" id="pd-result">
+        <div class="rb-icon" id="pd-result-icon"></div>
+        <div class="rb-text" id="pd-result-text"></div>
+        <div class="rb-detail" id="pd-result-detail"></div>
+        <button class="btn-next" id="pd-next-btn" onclick="preflopDuel.next()">下一回合 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="pd-gameover" style="display:none">
+    <div class="game-area">
+      <div class="gameover-screen">
+        <div class="go-rank" id="pd-go-rank">🐟</div>
+        <div class="go-title" id="pd-go-title">小鱼</div>
+        <div class="go-desc" id="pd-go-desc">你还在扑克海洋里学习游泳...</div>
+        <div class="go-stats">
+          <div class="go-stat"><div class="num" id="pd-go-score">0</div><div class="lbl">总得分</div></div>
+          <div class="go-stat"><div class="num" id="pd-go-correct">0/10</div><div class="lbl">正确率</div></div>
+          <div class="go-stat"><div class="num" id="pd-go-streak">0</div><div class="lbl">最长连对</div></div>
+        </div>
+        <button class="hero-btn" onclick="preflopDuel.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
+        <br><br>
+        <button class="btn-next" onclick="navigate('home')" style="margin-top:8px">返回首页</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== FISH OR SHARK PAGE ========== -->
+<div id="page-fish-or-shark" class="page">
+  <!-- Start Screen -->
+  <div id="fs-start" class="start-screen">
+    <div class="ss-icon">🐟</div>
+    <h3>是鱼是鲨</h3>
+    <p>扑克桌上，你能分辨谁是鱼、谁是鲨鱼吗？<br>看玩家的打牌方式，猜猜 TA 是 recreational player 还是 pro！</p>
+    <ul class="ss-rules">
+      <li>每回合给你一个牌局场景，判断是鱼还是鲨鱼</li>
+      <li>答对 +10 分，连对额外加分</li>
+      <li>答错失去一条命（共 3 条命）</li>
+      <li>10 回合后看你的识人准确率！</li>
+    </ul>
+    <button class="hero-btn" onclick="fishOrShark.start()">开始游戏</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="fs-game" style="display:none">
+    <div class="game-area">
+      <div class="game-header">
+        <h2>🐟 是鱼是鲨</h2>
+        <div class="game-stats">
+          <span class="game-stat"><span class="gs-icon">🏆</span><span class="gs-val" id="fs-score">0</span></span>
+          <span class="game-stat"><span class="gs-icon">❤️</span><span class="gs-val" id="fs-lives">3</span></span>
+          <span class="game-stat"><span class="gs-icon">🎯</span><span class="gs-val" id="fs-round">1/10</span></span>
+        </div>
+      </div>
+
+      <!-- Table scene -->
+      <div class="table-scene">
+        <div class="character-box fish" id="fs-fish">
+          <svg viewBox="0 0 200 200" width="110" height="110" id="fs-fish-svg">
+            <path d="M 25,100 L 5,72 L 5,128 Z" fill="#ff8c42"/>
+            <ellipse cx="80" cy="100" rx="55" ry="30" fill="#ff8c42"/>
+            <path d="M 65,72 Q 75,40 90,42 Q 80,55 80,72 Z" fill="#e07b3a"/>
+            <path d="M 70,118 Q 60,140 48,136 Q 58,126 62,116 Z" fill="#e07b3a"/>
+            <ellipse cx="80" cy="108" rx="38" ry="16" fill="#ffaa66" opacity="0.4"/>
+            <g class="expr-eye">
+              <circle cx="115" cy="90" r="9" fill="white"/>
+              <circle cx="118" cy="90" r="5" fill="#222"/>
+              <circle cx="116" cy="88" r="2" fill="white"/>
+            </g>
+            <path class="expr-mouth" d="M 128,104 Q 132,114 122,118" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <ellipse cx="108" cy="105" rx="6" ry="3" fill="#ff6b6b" opacity="0.3"/>
+          </svg>
+          <div class="char-name fish">🐟 你</div>
+          <div class="char-speech" id="fs-fish-speech">让我看看这人的水平...</div>
+        </div>
+
+        <div class="vs-divider">VS</div>
+
+        <div class="character-box" id="fs-mystery">
+          <div class="mystery-box" id="fs-mystery-figure">❓</div>
+          <div class="char-name" style="color:#f0b90b">神秘玩家</div>
+          <div class="char-speech" id="fs-mystery-speech">...</div>
+        </div>
+      </div>
+
+      <!-- Scenario -->
+      <div class="scenario-box">
+        <div class="scenario-text" id="fs-scenario"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions" id="fs-actions">
+        <button class="btn-action" style="background:linear-gradient(135deg,#ff8c42,#e07b3a);border-color:#ff8c42;color:#fff" onclick="fishOrShark.act(true)">
+          🐟 是鱼
+        </button>
+        <button class="btn-action" style="background:linear-gradient(135deg,#4a7a9a,#3a6a8a);border-color:#4a7a9a;color:#fff" onclick="fishOrShark.act(false)">
+          🦈 是鲨鱼
+        </button>
+      </div>
+
+      <!-- Result -->
+      <div class="result-box" id="fs-result">
+        <div class="rb-icon" id="fs-result-icon"></div>
+        <div class="rb-text" id="fs-result-text"></div>
+        <div class="rb-detail" id="fs-result-detail"></div>
+        <button class="btn-next" id="fs-next-btn" onclick="fishOrShark.next()">下一回合 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="fs-gameover" style="display:none">
+    <div class="game-area">
+      <div class="gameover-screen">
+        <div class="go-rank" id="fs-go-rank">🐟</div>
+        <div class="go-title" id="fs-go-title">小鱼</div>
+        <div class="go-desc" id="fs-go-desc">你对玩家的判断力还有待提高...</div>
+        <div class="go-stats">
+          <div class="go-stat"><div class="num" id="fs-go-score">0</div><div class="lbl">总得分</div></div>
+          <div class="go-stat"><div class="num" id="fs-go-correct">0/10</div><div class="lbl">正确率</div></div>
+          <div class="go-stat"><div class="num" id="fs-go-streak">0</div><div class="lbl">最长连对</div></div>
+        </div>
+        <button class="hero-btn" onclick="fishOrShark.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
+        <br><br>
+        <button class="btn-next" onclick="navigate('home')" style="margin-top:8px">返回首页</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ODDS CALC PAGE ========== -->
+<div id="page-odds-calc" class="page">
+  <div id="oc-start" class="start-screen">
+    <div class="ss-icon">🧮</div>
+    <h3>赔率速算</h3>
+    <p>扑克是数学的游戏！<br>快速计算赔率和中牌概率，看你的数学直觉有多准！</p>
+    <ul class="ss-rules">
+      <li>每回合展示一个赔率/概率问题，从4个选项中选出正确答案</li>
+      <li>答对 +10 分，连对额外加分</li>
+      <li>答错失去一条命（共 3 条命）</li>
+      <li>10 回合后看你的扑克数学水平！</li>
+    </ul>
+    <button class="hero-btn" onclick="oddsCalc.start()">开始计算</button>
+  </div>
+
+  <div id="oc-game" style="display:none">
+    <div class="game-area">
+      <div class="game-header">
+        <h2>🧮 赔率速算</h2>
+        <div class="game-stats">
+          <span class="game-stat"><span class="gs-icon">🏆</span><span class="gs-val" id="oc-score">0</span></span>
+          <span class="game-stat"><span class="gs-icon">❤️</span><span class="gs-val" id="oc-lives">3</span></span>
+          <span class="game-stat"><span class="gs-icon">🎯</span><span class="gs-val" id="oc-round">1/10</span></span>
+        </div>
+      </div>
+      <div class="table-scene">
+        <div class="character-box fish" id="oc-fish">
+          <svg viewBox="0 0 200 200" width="110" height="110" id="oc-fish-svg">
+            <path d="M 25,100 L 5,72 L 5,128 Z" fill="#ff8c42"/>
+            <ellipse cx="80" cy="100" rx="55" ry="30" fill="#ff8c42"/>
+            <path d="M 65,72 Q 75,40 90,42 Q 80,55 80,72 Z" fill="#e07b3a"/>
+            <path d="M 70,118 Q 60,140 48,136 Q 58,126 62,116 Z" fill="#e07b3a"/>
+            <ellipse cx="80" cy="108" rx="38" ry="16" fill="#ffaa66" opacity="0.4"/>
+            <g class="expr-eye"><circle cx="115" cy="90" r="9" fill="white"/><circle cx="118" cy="90" r="5" fill="#222"/><circle cx="116" cy="88" r="2" fill="white"/></g>
+            <path class="expr-mouth" d="M 128,104 Q 132,114 122,118" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <ellipse cx="108" cy="105" rx="6" ry="3" fill="#ff6b6b" opacity="0.3"/>
+          </svg>
+          <div class="char-name fish">🐟 你</div>
+          <div class="char-speech" id="oc-fish-speech">让我算算概率...</div>
+        </div>
+        <div class="table-felt odds-felt" id="oc-felt">
+          <div id="oc-hand-display" style="display:none">
+            <div class="round-label">你的手牌</div>
+            <div class="hand-cards" id="oc-cards"><div class="card card-back"></div><div class="card card-back"></div></div>
+            <div class="round-label" style="margin-top:6px">翻牌</div>
+            <div class="hand-cards" id="oc-board"></div>
+          </div>
+          <div id="oc-no-cards">
+            <div style="font-size:2.5rem;margin-bottom:2px">💰</div>
+            <div style="font-size:0.8rem;color:#8899aa">底池赔率问题</div>
+          </div>
+        </div>
+        <div class="character-box shark" id="oc-shark">
+          <svg viewBox="0 0 200 200" width="110" height="110" id="oc-shark-svg">
+            <ellipse cx="115" cy="100" rx="55" ry="25" fill="#4a7a9a"/>
+            <path d="M 165,100 L 192,72 L 192,128 Z" fill="#4a7a9a"/>
+            <path d="M 105,78 Q 100,38 88,34 Q 94,55 90,78 Z" fill="#3a6a8a"/>
+            <ellipse cx="115" cy="108" rx="38" ry="13" fill="#6a9aba" opacity="0.4"/>
+            <ellipse cx="72" cy="100" rx="22" ry="20" fill="#4a7a9a"/>
+            <g class="expr-eye"><circle cx="65" cy="90" r="6" fill="white" opacity="0.9"/><circle cx="63" cy="90" r="3" fill="#111"/><circle cx="62" cy="89" r="1" fill="white"/></g>
+            <path class="expr-mouth" d="M 52,105 Q 60,114 72,108" stroke="#222" stroke-width="1.5" fill="none"/>
+            <path d="M 54,106 L 56,109 L 58,105 L 60,109 L 62,105" stroke="white" stroke-width="1.5" fill="white"/>
+            <path d="M 90,96 Q 92,100 90,104" stroke="#3a6a8a" stroke-width="1.2" fill="none"/>
+            <path d="M 95,94 Q 97,100 95,106" stroke="#3a6a8a" stroke-width="1.2" fill="none"/>
+          </svg>
+          <div class="char-name shark">🦈 荷官</div>
+          <div class="char-speech" id="oc-shark-speech">计算时间！</div>
+        </div>
+      </div>
+      <div class="scenario-box">
+        <div class="scenario-text" id="oc-question"></div>
+      </div>
+      <div class="odds-actions" id="oc-actions">
+        <button class="btn-odds" data-idx="0" onclick="oddsCalc.act(0)"><span style="opacity:0.5;font-weight:400">A.</span> <span id="oc-opt-0"></span></button>
+        <button class="btn-odds" data-idx="1" onclick="oddsCalc.act(1)"><span style="opacity:0.5;font-weight:400">B.</span> <span id="oc-opt-1"></span></button>
+        <button class="btn-odds" data-idx="2" onclick="oddsCalc.act(2)"><span style="opacity:0.5;font-weight:400">C.</span> <span id="oc-opt-2"></span></button>
+        <button class="btn-odds" data-idx="3" onclick="oddsCalc.act(3)"><span style="opacity:0.5;font-weight:400">D.</span> <span id="oc-opt-3"></span></button>
+      </div>
+      <div class="result-box" id="oc-result">
+        <div class="rb-icon" id="oc-result-icon"></div>
+        <div class="rb-text" id="oc-result-text"></div>
+        <div class="rb-detail" id="oc-result-detail"></div>
+        <button class="btn-next" id="oc-next-btn" onclick="oddsCalc.next()">下一回合</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="oc-gameover" style="display:none">
+    <div class="game-area">
+      <div class="gameover-screen">
+        <div class="go-rank" id="oc-go-rank">🐟</div>
+        <div class="go-title" id="oc-go-title">小鱼</div>
+        <div class="go-desc" id="oc-go-desc">你的数学直觉还需要磨练...</div>
+        <div class="go-stats">
+          <div class="go-stat"><div class="num" id="oc-go-score">0</div><div class="lbl">总得分</div></div>
+          <div class="go-stat"><div class="num" id="oc-go-correct">0/10</div><div class="lbl">正确率</div></div>
+          <div class="go-stat"><div class="num" id="oc-go-streak">0</div><div class="lbl">最长连对</div></div>
+        </div>
+        <button class="hero-btn" onclick="oddsCalc.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
+        <br><br>
+        <button class="btn-next" onclick="navigate('home')" style="margin-top:8px">返回首页</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MIND READ PAGE ========== -->
+<div id="page-mind-read" class="page">
+  <div id="mr-start" class="start-screen">
+    <div class="ss-icon">👀</div>
+    <h3>读心术</h3>
+    <p>鲨鱼的心思你能看穿吗？<br>根据牌面和对手的行动，猜猜对手到底有什么牌！</p>
+    <ul class="ss-rules">
+      <li>每回合展示一个牌局，根据信息猜对手的手牌类型</li>
+      <li>答对 +10 分，连对额外加分</li>
+      <li>答错失去一条命（共 3 条命）</li>
+      <li>10 回合后看你的读心准确率！</li>
+    </ul>
+    <button class="hero-btn" onclick="mindRead.start()">开始读心</button>
+  </div>
+  <div id="mr-game" style="display:none">
+    <div class="game-area">
+      <div class="game-header">
+        <h2>👀 读心术</h2>
+        <div class="game-stats">
+          <span class="game-stat"><span class="gs-icon">🏆</span><span class="gs-val" id="mr-score">0</span></span>
+          <span class="game-stat"><span class="gs-icon">❤️</span><span class="gs-val" id="mr-lives">3</span></span>
+          <span class="game-stat"><span class="gs-icon">🎯</span><span class="gs-val" id="mr-round">1/10</span></span>
+        </div>
+      </div>
+      <div class="table-scene">
+        <div class="character-box fish" id="mr-fish">
+          <svg viewBox="0 0 200 200" width="110" height="110" id="mr-fish-svg">
+            <path d="M 25,100 L 5,72 L 5,128 Z" fill="#ff8c42"/>
+            <ellipse cx="80" cy="100" rx="55" ry="30" fill="#ff8c42"/>
+            <path d="M 65,72 Q 75,40 90,42 Q 80,55 80,72 Z" fill="#e07b3a"/>
+            <path d="M 70,118 Q 60,140 48,136 Q 58,126 62,116 Z" fill="#e07b3a"/>
+            <ellipse cx="80" cy="108" rx="38" ry="16" fill="#ffaa66" opacity="0.4"/>
+            <g class="expr-eye"><circle cx="115" cy="90" r="9" fill="white"/><circle cx="118" cy="90" r="5" fill="#222"/><circle cx="116" cy="88" r="2" fill="white"/></g>
+            <path class="expr-mouth" d="M 128,104 Q 132,114 122,118" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <ellipse cx="108" cy="105" rx="6" ry="3" fill="#ff6b6b" opacity="0.3"/>
+          </svg>
+          <div class="char-name fish">🐟 你</div>
+          <div class="char-speech" id="mr-fish-speech">让我看穿你的心思！</div>
+        </div>
+        <div class="table-felt odds-felt" id="mr-felt">
+          <div class="round-label">公共牌</div>
+          <div class="hand-cards" id="mr-board">
+            <div class="card card-back"></div>
+            <div class="card card-back"></div>
+            <div class="card card-back"></div>
+          </div>
+        </div>
+        <div class="character-box shark" id="mr-shark">
+          <svg viewBox="0 0 200 200" width="110" height="110" id="mr-shark-svg">
+            <ellipse cx="115" cy="100" rx="55" ry="25" fill="#4a7a9a"/>
+            <path d="M 165,100 L 192,72 L 192,128 Z" fill="#4a7a9a"/>
+            <path d="M 105,78 Q 100,38 88,34 Q 94,55 90,78 Z" fill="#3a6a8a"/>
+            <ellipse cx="115" cy="108" rx="38" ry="13" fill="#6a9aba" opacity="0.4"/>
+            <ellipse cx="72" cy="100" rx="22" ry="20" fill="#4a7a9a"/>
+            <g class="expr-eye"><circle cx="65" cy="90" r="6" fill="white" opacity="0.9"/><circle cx="63" cy="90" r="3" fill="#111"/><circle cx="62" cy="89" r="1" fill="white"/></g>
+            <path class="expr-mouth" d="M 52,105 Q 60,114 72,108" stroke="#222" stroke-width="1.5" fill="none"/>
+            <path d="M 54,106 L 56,109 L 58,105 L 60,109 L 62,105" stroke="white" stroke-width="1.5" fill="white"/>
+            <path d="M 90,96 Q 92,100 90,104" stroke="#3a6a8a" stroke-width="1.2" fill="none"/>
+            <path d="M 95,94 Q 97,100 95,106" stroke="#3a6a8a" stroke-width="1.2" fill="none"/>
+          </svg>
+          <div class="char-name shark">🦈 神秘对手</div>
+          <div class="char-speech" id="mr-shark-speech">你猜不到我在想什么...</div>
+        </div>
+      </div>
+      <div class="scenario-box">
+        <div class="scenario-pos" id="mr-action-line"></div>
+        <div class="scenario-text" id="mr-question"></div>
+      </div>
+      <div class="odds-actions" id="mr-actions">
+        <button class="btn-odds" data-idx="0" onclick="mindRead.act(0)"><span style="opacity:0.5;font-weight:400">A.</span> <span id="mr-opt-0"></span></button>
+        <button class="btn-odds" data-idx="1" onclick="mindRead.act(1)"><span style="opacity:0.5;font-weight:400">B.</span> <span id="mr-opt-1"></span></button>
+        <button class="btn-odds" data-idx="2" onclick="mindRead.act(2)"><span style="opacity:0.5;font-weight:400">C.</span> <span id="mr-opt-2"></span></button>
+        <button class="btn-odds" data-idx="3" onclick="mindRead.act(3)"><span style="opacity:0.5;font-weight:400">D.</span> <span id="mr-opt-3"></span></button>
+      </div>
+      <div class="result-box" id="mr-result">
+        <div class="rb-icon" id="mr-result-icon"></div>
+        <div class="rb-text" id="mr-result-text"></div>
+        <div class="rb-detail" id="mr-result-detail"></div>
+        <button class="btn-next" id="mr-next-btn" onclick="mindRead.next()">下一回合</button>
+      </div>
+    </div>
+  </div>
+  <div id="mr-gameover" style="display:none">
+    <div class="game-area">
+      <div class="gameover-screen">
+        <div class="go-rank" id="mr-go-rank">🐟</div>
+        <div class="go-title" id="mr-go-title">小鱼</div>
+        <div class="go-desc" id="mr-go-desc"></div>
+        <div class="go-stats">
+          <div class="go-stat"><div class="num" id="mr-go-score">0</div><div class="lbl">总得分</div></div>
+          <div class="go-stat"><div class="num" id="mr-go-correct">0/10</div><div class="lbl">正确率</div></div>
+          <div class="go-stat"><div class="num" id="mr-go-streak">0</div><div class="lbl">最长连对</div></div>
+        </div>
+        <button class="hero-btn" onclick="mindRead.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
+        <br><br>
+        <button class="btn-next" onclick="navigate('home')" style="margin-top:8px">返回首页</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ALL-IN PUSH PAGE ========== -->
+<div id="page-allin-push" class="page">
+  <div id="ap-start" class="start-screen">
+    <div class="ss-icon">🃏</div>
+    <h3>全压赌命</h3>
+    <p>锦标赛后期，盲注高涨，你的筹码所剩无几……<br>ALL-IN or FOLD？每一个决定都关乎生死！</p>
+    <ul class="ss-rules">
+      <li>每回合你有一手牌和一定的筹码量</li>
+      <li>选择 ALL-IN 或 FOLD，基于GTO翻前全压范围</li>
+      <li>答对 +10 分，连对额外加分</li>
+      <li>答错失去一条命（共 3 条命）</li>
+      <li>10 回合后看你的全压决策水平！</li>
+    </ul>
+    <button class="hero-btn" onclick="allinPush.start()">开始赌命</button>
+  </div>
+  <div id="ap-game" style="display:none">
+    <div class="game-area">
+      <div class="game-header">
+        <h2>🃏 全压赌命</h2>
+        <div class="game-stats">
+          <span class="game-stat"><span class="gs-icon">🏆</span><span class="gs-val" id="ap-score">0</span></span>
+          <span class="game-stat"><span class="gs-icon">❤️</span><span class="gs-val" id="ap-lives">3</span></span>
+          <span class="game-stat"><span class="gs-icon">🎯</span><span class="gs-val" id="ap-round">1/10</span></span>
+        </div>
+      </div>
+      <div class="table-scene">
+        <div class="character-box fish" id="ap-fish">
+          <svg viewBox="0 0 200 200" width="110" height="110" id="ap-fish-svg">
+            <path d="M 25,100 L 5,72 L 5,128 Z" fill="#ff8c42"/>
+            <ellipse cx="80" cy="100" rx="55" ry="30" fill="#ff8c42"/>
+            <path d="M 65,72 Q 75,40 90,42 Q 80,55 80,72 Z" fill="#e07b3a"/>
+            <path d="M 70,118 Q 60,140 48,136 Q 58,126 62,116 Z" fill="#e07b3a"/>
+            <ellipse cx="80" cy="108" rx="38" ry="16" fill="#ffaa66" opacity="0.4"/>
+            <g class="expr-eye"><circle cx="115" cy="90" r="9" fill="white"/><circle cx="118" cy="90" r="5" fill="#222"/><circle cx="116" cy="88" r="2" fill="white"/></g>
+            <path class="expr-mouth" d="M 128,104 Q 132,114 122,118" stroke="#222" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <ellipse cx="108" cy="105" rx="6" ry="3" fill="#ff6b6b" opacity="0.3"/>
+          </svg>
+          <div class="char-name fish">🐟 你</div>
+          <div class="char-speech" id="ap-fish-speech">这把拼了！</div>
+        </div>
+        <div class="table-felt odds-felt" id="ap-felt" style="max-width:220px!important">
+          <div class="round-label" id="ap-blind-label">盲注: 500/1000</div>
+          <div class="hand-cards" id="ap-cards">
+            <div class="card card-back"></div>
+            <div class="card card-back"></div>
+          </div>
+          <div id="ap-stack-display" style="font-size:1.2rem;font-weight:700;color:#f0b90b;margin-top:6px"></div>
+          <div id="ap-pos-display" style="font-size:0.75rem;color:#6a8a9a;margin-top:2px"></div>
+        </div>
+        <div class="character-box shark" id="ap-shark">
+          <svg viewBox="0 0 200 200" width="110" height="110" id="ap-shark-svg">
+            <ellipse cx="115" cy="100" rx="55" ry="25" fill="#4a7a9a"/>
+            <path d="M 165,100 L 192,72 L 192,128 Z" fill="#4a7a9a"/>
+            <path d="M 105,78 Q 100,38 88,34 Q 94,55 90,78 Z" fill="#3a6a8a"/>
+            <ellipse cx="115" cy="108" rx="38" ry="13" fill="#6a9aba" opacity="0.4"/>
+            <ellipse cx="72" cy="100" rx="22" ry="20" fill="#4a7a9a"/>
+            <g class="expr-eye"><circle cx="65" cy="90" r="6" fill="white" opacity="0.9"/><circle cx="63" cy="90" r="3" fill="#111"/><circle cx="62" cy="89" r="1" fill="white"/></g>
+            <path class="expr-mouth" d="M 52,105 Q 60,114 72,108" stroke="#222" stroke-width="1.5" fill="none"/>
+            <path d="M 54,106 L 56,109 L 58,105 L 60,109 L 62,105" stroke="white" stroke-width="1.5" fill="white"/>
+            <path d="M 90,96 Q 92,100 90,104" stroke="#3a6a8a" stroke-width="1.2" fill="none"/>
+            <path d="M 95,94 Q 97,100 95,106" stroke="#3a6a8a" stroke-width="1.2" fill="none"/>
+          </svg>
+          <div class="char-name shark">🦈 鲨鱼</div>
+          <div class="char-speech" id="ap-shark-speech">敢推吗？</div>
+        </div>
+      </div>
+      <div class="scenario-box">
+        <div class="scenario-text" id="ap-question"></div>
+      </div>
+      <div class="actions" id="ap-actions">
+        <button class="btn-action" onclick="allinPush.act(true)" style="background:rgba(200,50,50,0.15);border-color:rgba(200,50,50,0.3);color:#e06060;min-width:140px">💀 ALL-IN</button>
+        <button class="btn-action btn-fold" onclick="allinPush.act(false)" style="min-width:140px">✋ FOLD</button>
+      </div>
+      <div class="result-box" id="ap-result">
+        <div class="rb-icon" id="ap-result-icon"></div>
+        <div class="rb-text" id="ap-result-text"></div>
+        <div class="rb-detail" id="ap-result-detail"></div>
+        <button class="btn-next" id="ap-next-btn" onclick="allinPush.next()">下一回合</button>
+      </div>
+    </div>
+  </div>
+  <div id="ap-gameover" style="display:none">
+    <div class="game-area">
+      <div class="gameover-screen">
+        <div class="go-rank" id="ap-go-rank">🐟</div>
+        <div class="go-title" id="ap-go-title">小鱼</div>
+        <div class="go-desc" id="ap-go-desc"></div>
+        <div class="go-stats">
+          <div class="go-stat"><div class="num" id="ap-go-score">0</div><div class="lbl">总得分</div></div>
+          <div class="go-stat"><div class="num" id="ap-go-correct">0/10</div><div class="lbl">正确率</div></div>
+          <div class="go-stat"><div class="num" id="ap-go-streak">0</div><div class="lbl">最长连对</div></div>
+        </div>
+        <button class="hero-btn" onclick="allinPush.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
+        <br><br>
+        <button class="btn-next" onclick="navigate('home')" style="margin-top:8px">返回首页</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+/* ==============================
+   SPA ROUTER
+   ============================== */
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const navLink = document.querySelector(`.nav-links a[data-page="${page}"]`);
+  if (navLink) navLink.classList.add('active');
+  window.scrollTo(0, 0);
+  // Reset game if leaving
+  if (page !== 'preflop-duel' && preflopDuel.state.playing) { preflopDuel.state.playing = false; }
+  if (page !== 'fish-or-shark' && fishOrShark.state.playing) { fishOrShark.state.playing = false; }
+  if (page !== 'odds-calc' && oddsCalc.state.playing) { oddsCalc.state.playing = false; }
+  if (page !== 'mind-read' && typeof mindRead !== 'undefined' && mindRead.state.playing) { mindRead.state.playing = false; }
+  if (page !== 'allin-push' && typeof allinPush !== 'undefined' && allinPush.state.playing) { allinPush.state.playing = false; }
+}
+
+document.querySelectorAll('.nav-links a[data-page]').forEach(a => {
+  a.addEventListener('click', () => navigate(a.dataset.page));
+});
+
+/* ==============================
+   PREFLOP DUEL — GAME DATA
+   ============================== */
+const SCENARIOS = [
+  // Premium hands — raise
+  { hand:['A','♠'], hand2:['A','♥'], pos:'UTG', action:'open', correct:'raise',
+    scenario:'翻前第一次行动，前面无人加注。',
+    reason:'AA是顶级起手牌，任何位置都值得加注造池。' },
+  { hand:['K','♠'], hand2:['K','♥'], pos:'UTG', action:'open', correct:'raise',
+    scenario:'翻前第一次行动，前面无人加注。',
+    reason:'KK仅次于AA，翻前绝对强牌，必须加注。' },
+  { hand:['A','♠'], hand2:['K','♠'], pos:'BTN', action:'vs-open', correct:'raise',
+    scenario:'UTG位开池加注，CO弃牌，你在BTN。',
+    reason:'BTN位置用AKs 3bet，既有位置优势又有牌力，半价值半诈唬。' },
+  { hand:['Q','♠'], hand2:['Q','♥'], pos:'MP', action:'open', correct:'raise',
+    scenario:'翻前第一次行动，前面无人加注。',
+    reason:'QQ是强对子，翻前加注建立底池控制权。' },
+
+  // Marginal facing aggression — call or fold
+  { hand:['J','♠'], hand2:['J','♥'], pos:'MP', action:'vs-open', correct:'call',
+    scenario:'UTG开池加注，你在MP位手持JJ。',
+    reason:'JJ在中间位置面对UTG加注，跟注为主，避免被高张压制。' },
+  { hand:['A','♠'], hand2:['Q','♥'], pos:'UTG', action:'open', correct:'raise',
+    scenario:'翻前第一次行动，前面无人加注。',
+    reason:'AQo在UTG位置属于可开池范围，直接加注。' },
+  { hand:['A','♥'], hand2:['Q','♦'], pos:'CO', action:'vs-3bet', correct:'fold',
+    scenario:'BTN位置3bet了你的CO位开池加注，你手持AQo。',
+    reason:'AQo面对3bet容易被AK/AA/QQ统治，弃牌是长期正EV的选择。' },
+
+  // Position-based
+  { hand:['7','♠'], hand2:['7','♥'], pos:'BTN', action:'vs-open', correct:'call',
+    scenario:'MP位开池加注，全部弃牌到你在BTN。',
+    reason:'小对子BTN位跟注，有位置优势，中三条可以赢大池。' },
+  { hand:['9','♠'], hand2:['8','♠'], pos:'CO', action:'vs-open', correct:'call',
+    scenario:'MP位开池加注，你在CO位手持同花连张。',
+    reason:'同花连张在CO位适合跟注，有位置且翻后潜力大。' },
+  { hand:['K','♠'], hand2:['Q','♠'], pos:'BTN', action:'vs-open', correct:'raise',
+    scenario:'CO位开池加注，你在BTN手持KQs。',
+    reason:'BTN位用KQs 3bet CO位，有位置有牌力，标准操作。' },
+
+  // Blind play
+  { hand:['A','♥'], hand2:['4','♠'], pos:'BB', action:'vs-steal', correct:'call',
+    scenario:'BTN位偷盲加注，SB弃牌，你在BB手持A4o。',
+    reason:'A4o在盲注位对抗偷盲，跟注防守是合理的，有A可跟。' },
+  { hand:['K','♠'], hand2:['3','♦'], pos:'BB', action:'vs-steal', correct:'fold',
+    scenario:'BTN位偷盲加注到3BB，你在BB手持K3o。',
+    reason:'K3o太弱，即使有底池赔率也不值得防守，弃牌。' },
+
+  // Facing 3bet
+  { hand:['A','♠'], hand2:['K','♥'], pos:'CO', action:'facing-3bet', correct:'raise',
+    scenario:'你CO位开池，BTN位3bet，你手持AKo。',
+    reason:'AK是强牌，面对3bet可以4bet反击，对抗QQ+/AK不落下风。' },
+  { hand:['J','♠'], hand2:['10','♠'], pos:'MP', action:'facing-3bet', correct:'fold',
+    scenario:'你MP位开池，CO位3bet，你手持JTs。',
+    reason:'JTs虽然是好牌，但面对3bet没有足够的胜率，弃牌等待更好机会。' },
+
+  // Speculative
+  { hand:['A','♠'], hand2:['2','♠'], pos:'SB', action:'open', correct:'call',
+    scenario:'前面全部弃牌，你在SB位，BB位还没行动。',
+    reason:'A2s在SB位可以溜入或补齐盲注，同花A有潜力。' },
+  { hand:['6','♠'], hand2:['5','♠'], pos:'SB', action:'open', correct:'call',
+    scenario:'前面全部弃牌，你在SB位。',
+    reason:'65s在SB位补齐盲注即可，便宜看翻牌，有顺花潜力。' },
+
+  // Fold trash
+  { hand:['7','♠'], hand2:['2','♥'], pos:'UTG', action:'open', correct:'fold',
+    scenario:'翻前第一次行动，前面无人加注。',
+    reason:'72o是最差起手牌，任何位置都应该直接弃牌。' },
+  { hand:['9','♠'], hand2:['3','♦'], pos:'CO', action:'open', correct:'fold',
+    scenario:'前面全部弃牌到CO位，你手持93o。',
+    reason:'93o太弱，即使在CO位也不值得玩，直接弃牌。' },
+  { hand:['8','♠'], hand2:['2','♥'], pos:'MP', action:'open', correct:'fold',
+    scenario:'翻前第一次行动，前面无人加注。',
+    reason:'82o是垃圾牌，MP位置更不应该玩，弃牌不犹豫。' },
+
+  // 10 more to make a good pool
+  { hand:['K','♠'], hand2:['J','♠'], pos:'HJ', action:'open', correct:'raise',
+    scenario:'翻前第一次行动，前面无人加注。',
+    reason:'KJs在HJ位是标准开池牌，同花高张值得加注。' },
+  { hand:['A','♥'], hand2:['10','♠'], pos:'UTG+1', action:'open', correct:'fold',
+    scenario:'翻前第一次行动，UTG弃牌，你在+1位。',
+    reason:'ATo在UTG+1位置太弱，属于紧的弃牌范围。' },
+  { hand:['Q','♠'], hand2:['9','♥'], pos:'BTN', action:'open', correct:'raise',
+    scenario:'前面全部弃牌到BTN位。',
+    reason:'BTN位可以用较宽范围开池，Q9o是BTN位标准偷盲牌。' },
+  { hand:['5','♠'], hand2:['5','♥'], pos:'MP', action:'open', correct:'raise',
+    scenario:'翻前第一次行动，前面无人加注。',
+    reason:'55在MP位可以开池加注，中三条价值巨大。' },
+  { hand:['A','♠'], hand2:['J','♠'], pos:'UTG', action:'open', correct:'raise',
+    scenario:'翻前第一次行动，前面无人加注。',
+    reason:'AJs在UTG位是标准开池牌，同花A值得加注。' },
+];
+
+const POSITION_NAMES = {
+  UTG: 'UTG（枪口位）', 'UTG+1': 'UTG+1', MP: 'MP（中间位）',
+  HJ: 'HJ（中高位）', CO: 'CO（切菜位）', BTN: 'BTN（按钮位）',
+  SB: 'SB（小盲）', BB: 'BB（大盲）'
+};
+
+const RANK_TIERS = {
+  '小鱼': { score: 0, icon: '🐟', desc: '扑克海洋里最底层的存在，继续学习吧！连鲨鱼都懒得吃你。' },
+  '尼莫': { score: 30, icon: '🐠', desc: '有点进步的小鱼，开始懂得看牌了。但鲨鱼已经开始注意到你了...' },
+  '河豚': { score: 50, icon: '🐡', desc: '碰到危险会鼓起来！你学到了一些基本知识，偶尔能做出正确打法了。' },
+  '海豚': { score: 70, icon: '🐬', desc: '聪明的海豚！你已经有了不错的翻前判断力，regular水平的玩家了。' },
+  '鲸鱼': { score: 90, icon: '🐋', desc: '深海巨鲸！你的翻前决策已经相当扎实，是牌桌上令人敬畏的存在。' },
+  '鲨鱼': { score: 100, icon: '🦈', desc: '你已经是扑克海洋的顶级掠食者！翻前决策犀利精准，新来的小鱼看到你就瑟瑟发抖。' }
+};
+
+/* ==============================
+   PREFLOP DUEL — GAME LOGIC
+   ============================== */
+const preflopDuel = {
+  state: {
+    playing: false,
+    round: 0,
+    score: 0,
+    lives: 3,
+    streak: 0,
+    maxStreak: 0,
+    correct: 0,
+    total: 0,
+    answered: false,
+    scenario: null,
+    usedScenarios: [],
+  },
+
+  start() {
+    this.state = {
+      playing: true,
+      round: 0,
+      score: 0,
+      lives: 3,
+      streak: 0,
+      maxStreak: 0,
+      correct: 0,
+      total: 0,
+      answered: false,
+      scenario: null,
+      usedScenarios: [],
+    };
+    document.getElementById('pd-start').style.display = 'none';
+    document.getElementById('pd-game').style.display = 'block';
+    document.getElementById('pd-gameover').style.display = 'none';
+    this.nextRound();
+  },
+
+  nextRound() {
+    if (this.state.lives <= 0 || this.state.round >= 10) {
+      this.gameOver();
+      return;
+    }
+    this.state.round++;
+    this.state.answered = false;
+    document.getElementById('pd-round').textContent = `${this.state.round}/10`;
+    document.getElementById('pd-lives').textContent = this.state.lives;
+
+    // Hide result
+    const rb = document.getElementById('pd-result');
+    rb.classList.remove('show','correct','wrong');
+
+    // Enable buttons
+    document.querySelectorAll('.btn-action').forEach(b => b.disabled = false);
+
+    // Reset expressions
+    this.setFishExpr('normal');
+    this.setSharkExpr('normal');
+
+    // Reset speech
+    this.say('pd-fish-speech', '嗯…让我想想');
+    this.say('pd-shark-speech', '来吧，让我看看你的水平');
+
+    // Pick a scenario (avoid repeats)
+    let available = SCENARIOS.filter((_, i) => !this.state.usedScenarios.includes(i));
+    if (available.length === 0) this.state.usedScenarios = [];
+    available = SCENARIOS.filter((_, i) => !this.state.usedScenarios.includes(i));
+
+    const idx = Math.floor(Math.random() * available.length);
+    const s = available[idx];
+    // Find the original index
+    const origIdx = SCENARIOS.indexOf(s);
+    this.state.usedScenarios.push(origIdx);
+    this.state.scenario = s;
+
+    // Render cards
+    this.renderCards(s.hand, s.hand2);
+
+    // Render scenario
+    document.getElementById('pd-position').textContent =
+      `📍 位置：${POSITION_NAMES[s.pos] || s.pos}`;
+    document.getElementById('pd-scenario').innerHTML =
+      `<strong>${s.hand[0]}${s.hand[1]} ${s.hand2[0]}${s.hand2[1]}</strong> · ${s.scenario}`;
+  },
+
+  renderCards(c1, c2) {
+    const isRed1 = (c1[1] === '♥' || c1[1] === '♦');
+    const isRed2 = (c2[1] === '♥' || c2[1] === '♦');
+    const container = document.getElementById('pd-cards');
+    container.innerHTML = `
+      <div class="card ${isRed1 ? 'red' : 'black'}">
+        <div class="cr">${c1[0]}</div>
+        <div class="cs">${c1[1]}</div>
+      </div>
+      <div class="card ${isRed2 ? 'red' : 'black'}">
+        <div class="cr">${c2[0]}</div>
+        <div class="cs">${c2[1]}</div>
+      </div>
+    `;
+  },
+
+  act(action) {
+    if (this.state.answered || !this.state.playing) return;
+    this.state.answered = true;
+    this.state.total++;
+
+    const s = this.state.scenario;
+    const correct = action === s.correct;
+
+    // Disable buttons
+    document.querySelectorAll('.btn-action').forEach(b => b.disabled = true);
+
+    // Show result
+    const rb = document.getElementById('pd-result');
+    rb.className = 'result-box show';
+
+    if (correct) {
+      this.state.score += 10;
+      this.state.streak++;
+      this.state.correct++;
+      if (this.state.streak > this.state.maxStreak) this.state.maxStreak = this.state.streak;
+
+      // Streak bonus
+      let bonusMsg = '';
+      if (this.state.streak >= 3) {
+        const bonus = this.state.streak * 2;
+        this.state.score += bonus;
+        bonusMsg = ` 🔥 ${this.state.streak}连对+${bonus}分！`;
+      }
+
+      rb.classList.add('correct');
+      document.getElementById('pd-result-icon').textContent = '✅';
+      document.getElementById('pd-result-text').textContent = '正确！' + bonusMsg;
+      document.getElementById('pd-result-detail').textContent = s.reason;
+
+      this.setFishExpr('happy');
+      this.setSharkExpr('angry');
+      this.say('pd-fish-speech', '嘿嘿，我可不是好欺负的！');
+      this.say('pd-shark-speech', '哼…运气不错嘛');
+
+      // Bounce fish
+      document.getElementById('pd-fish').classList.add('bounce');
+      setTimeout(() => document.getElementById('pd-fish').classList.remove('bounce'), 500);
+
+    } else {
+      this.state.lives--;
+      this.state.streak = 0;
+
+      rb.classList.add('wrong');
+      document.getElementById('pd-result-icon').textContent = '❌';
+      document.getElementById('pd-result-text').textContent =
+        `不对！正确动作是「${this.actionLabel(s.correct)}」`;
+      document.getElementById('pd-result-detail').textContent = s.reason;
+
+      this.setFishExpr('scared');
+      this.setSharkExpr('amused');
+      this.say('pd-fish-speech', '哎呀！被咬了…');
+      this.say('pd-shark-speech', '哈哈，鱼就是鱼');
+
+      // Shake fish
+      document.getElementById('pd-fish').classList.add('shake');
+      setTimeout(() => document.getElementById('pd-fish').classList.remove('shake'), 500);
+    }
+
+    document.getElementById('pd-score').textContent = this.state.score;
+    document.getElementById('pd-lives').textContent = this.state.lives;
+
+    // Change next button text on last round
+    if (this.state.round >= 10 || this.state.lives <= 0) {
+      document.getElementById('pd-next-btn').textContent = '查看结果 →';
+    } else {
+      document.getElementById('pd-next-btn').textContent = '下一回合 →';
+    }
+  },
+
+  next() {
+    if (this.state.lives <= 0 || this.state.round >= 10) {
+      this.gameOver();
+    } else {
+      this.nextRound();
+    }
+  },
+
+  gameOver() {
+    this.state.playing = false;
+    document.getElementById('pd-game').style.display = 'none';
+    document.getElementById('pd-gameover').style.display = 'block';
+
+    // Determine rank
+    const pct = this.state.total > 0 ? (this.state.correct / this.state.total * 100) : 0;
+    const weightedScore = this.state.score + (pct >= 80 ? 20 : pct >= 60 ? 10 : 0);
+
+    let rank = '小鱼';
+    for (const [name, data] of Object.entries(RANK_TIERS)) {
+      if (weightedScore >= data.score) rank = name;
+    }
+
+    const rankData = RANK_TIERS[rank];
+
+    document.getElementById('pd-go-rank').textContent = rankData.icon;
+    document.getElementById('pd-go-title').textContent = rank;
+    document.getElementById('pd-go-desc').textContent = rankData.desc;
+    document.getElementById('pd-go-score').textContent = this.state.score;
+    document.getElementById('pd-go-correct').textContent =
+      `${this.state.correct}/${this.state.total} (${Math.round(pct)}%)`;
+    document.getElementById('pd-go-streak').textContent = this.state.maxStreak;
+  },
+
+  actionLabel(action) {
+    return { fold: '弃牌 FOLD', call: '跟注 CALL', raise: '加注 RAISE' }[action] || action;
+  },
+
+  setFishExpr(expr) {
+    const el = document.getElementById('pd-fish');
+    el.classList.remove('fish-happy', 'fish-scared');
+    if (expr === 'happy') el.classList.add('fish-happy');
+    if (expr === 'scared') el.classList.add('fish-scared');
+
+    // SVG manipulation for expressions
+    const svg = document.getElementById('pd-fish-svg');
+    const mouth = svg.querySelector('.expr-mouth');
+    const eye = svg.querySelector('.expr-eye circle:first-child');
+    if (!mouth || !eye) return;
+
+    if (expr === 'happy') {
+      mouth.setAttribute('d', 'M 124,104 Q 132,116 120,120');
+      eye.setAttribute('r', '7');
+    } else if (expr === 'scared') {
+      mouth.setAttribute('d', 'M 122,112 Q 128,112 132,112');
+      eye.setAttribute('r', '12');
+    } else {
+      mouth.setAttribute('d', 'M 128,104 Q 132,114 122,118');
+      eye.setAttribute('r', '9');
+    }
+  },
+
+  setSharkExpr(expr) {
+    const el = document.getElementById('pd-shark');
+    el.classList.remove('shark-angry', 'shark-amused');
+    if (expr === 'angry') el.classList.add('shark-angry');
+    if (expr === 'amused') el.classList.add('shark-amused');
+
+    const svg = document.getElementById('pd-shark-svg');
+    const mouth = svg.querySelector('.expr-mouth');
+    const eye = svg.querySelector('.expr-eye circle:first-child');
+    if (!mouth || !eye) return;
+
+    if (expr === 'angry') {
+      mouth.setAttribute('d', 'M 50,108 Q 60,104 72,106');
+      eye.setAttribute('r', '5');
+    } else if (expr === 'amused') {
+      mouth.setAttribute('d', 'M 48,108 Q 60,118 74,110');
+      eye.setAttribute('r', '7');
+    } else {
+      mouth.setAttribute('d', 'M 52,105 Q 60,114 72,108');
+      eye.setAttribute('r', '6');
+    }
+  },
+
+  say(elId, text) {
+    const el = document.getElementById(elId);
+    el.textContent = text;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2000);
+  }
+};
+
+/* ==============================
+   FISH OR SHARK — GAME DATA
+   ============================== */
+const IDENTITY_SCENARIOS = [
+  // Fish plays (isFish: true)
+  { desc:'UTG位置用AA只是溜入平跟，翻牌后有人下注就弃牌了。', isFish:true, reason:'AA在任何位置都值得加注造池。溜入AA让底池变小翻后难打，典型的设陷阱害了自己。' },
+  { desc:'MP位加注CO位3bet，BB位置用72o跟注了3bet，说"看看翻牌又不贵"。', isFish:true, reason:'72o是最烂起手牌，面对3bet胜率极低，跟注就是送钱。鲨鱼绝不会在这种情况入池。' },
+  { desc:'翻牌有同花听牌，手持nuts同花听牌在翻牌直接全压100BB。', isFish:true, reason:'听牌不是成牌，没有弃牌率的超池全压是负EV。鲨鱼会计算赔率和弃牌率再行动。' },
+  { desc:'BTN位置用AK只是溜入，想"诱捕"盲注玩家。', isFish:true, reason:'AK需要加注造池减少对手。溜入AK让太多人便宜看翻牌容易被反超，纯属自作聪明。' },
+  { desc:'翻牌A72彩虹，手持22一路跟注三条街，对手亮出AK。', isFish:true, reason:'底对在A高翻牌不值一条街价值，跟注三条街纯粹送筹码。鲨鱼翻牌就弃了。' },
+  { desc:'UTG位置用AKo最小加注到2BB开池。', isFish:true, reason:'最小加注是示弱信号，无法有效造池减少对手。标准开池应是2.5-3BB。' },
+  { desc:'连续10手牌全部入池，72o、J2o都玩，说"今天运气好挡不住"。', isFish:true, reason:'VPIP 100%是鱼标志特征。鲨鱼选择性入池，垃圾牌直接弃，耐心等待好牌。' },
+  { desc:'翻前拿到KK，"感觉不对"直接弃牌，说AA肯定在对面。', isFish:true, reason:'KK是第二好起手牌，凭感觉弃掉是典型鱼行为。扑克靠概率不靠感觉。' },
+  { desc:'UTG加注3BB，BTN位置用93o跟注，说"翻牌什么都有可能"。', isFish:true, reason:'93o是垃圾牌，面对UTG加注胜率极低。鲨鱼在BTN也不会玩这种牌。' },
+  { desc:'河牌面有4张同花，手持22跟注了对手2倍底池重注，对手亮出同花。', isFish:true, reason:'底对在四花面面对重注几乎不可能赢，这是典型的"不信你有"综合征。' },
+  { desc:'UTG加注CO 3bet，BTN用JTo冷跟3bet。', isFish:true, reason:'JTo是容易被统治的牌，冷跟3bet翻后极难玩，长期负EV。鲨鱼在这里秒弃。' },
+  { desc:'翻牌啥也没中，向底池下注2倍底池，被加注后秒弃白白损失。', isFish:true, reason:'没牌时的超池下注没有意义。有经验的玩家一眼看穿你的软弱，加注就收池了。' },
+  // Shark plays (isFish: false)
+  { desc:'CO位开池，BTN位置用A5s 3bet，成功迫使对手弃牌。', isFish:false, reason:'A5s是完美3bet诈唬牌——有高牌补牌和同花潜力，且有AA/AK阻断效果。' },
+  { desc:'翻牌击中底对，转牌河牌对手连续下注，分析后弃牌，对手亮出顶对顶踢脚。', isFish:false, reason:'底对面对连续下注没有摊牌价值，鲨鱼懂得适时放弃不做无意义的跟注。' },
+  { desc:'翻牌击中顶对但牌面湿润有顺花可能，选择过牌控制底池。', isFish:false, reason:'顶对在湿润面需控制底池，过牌可避免被加注同时诱导对手诈唬。' },
+  { desc:'MP开池，BTN用87s跟注3bet，有位置看翻牌。', isFish:false, reason:'同花连张在位置优势下跟注3bet很有潜力，中了大牌能赢大池。鲨鱼善于赔率投资。' },
+  { desc:'面对从不开池加注的紧手玩家的4bet，弃掉了AK。', isFish:false, reason:'面对nit的4bet，AK不再是好牌。鲨鱼能根据对手范围做出大弃牌不被手牌迷惑。' },
+  { desc:'河牌击中第二对，下注被差牌跟注，成功拿到薄价值。', isFish:false, reason:'薄价值下注是区分鲨鱼和鱼的重要标志。鲨鱼能在河牌从更差的牌那里榨取价值。' },
+  { desc:'翻牌和转牌都过牌，河牌对手下注，用A高牌跟注，对手只是K高。', isFish:false, reason:'读准对手范围后的抓诈唬是高级技术，需准确判断对手没有成牌的能力。' },
+  { desc:'UTG溜入，CO位用KQo加注隔离，成功拿下底池。', isFish:false, reason:'隔离溜入者是标准鲨鱼打法，利用位置和牌力优势单挑不让溜入者便宜看牌。' },
+  { desc:'翻牌对手下注，用后门同花听牌跟注(float)，转牌对手过牌后下注拿下。', isFish:false, reason:'浮板(float)技巧——利用位置和后续牌面变化偷池，是鲨鱼常规武器。' },
+  { desc:'河牌面有4张顺子，对手下重注，弃掉了手中的三条，对手亮出顺子。', isFish:false, reason:'读牌精准的大弃牌！三条虽强但对手范围只可能是顺子时，鲨鱼能做正确弃牌。' },
+  { desc:'CO位开池BTN 3bet，CO用A5s 4bet诈唬，迫使对手弃牌。', isFish:false, reason:'高级4bet诈唬！A5s有阻断牌效果，是完美的4bet诈唬牌让对手3bet白费。' },
+  { desc:'翻牌击中两头顺听牌，对手下注，跟注看转牌。转牌没中对手过牌后果断下注偷池。', isFish:false, reason:'听牌时算赔率跟注，没中利用对手过牌信号偷池——鲨鱼的多武器打法。' },
+];
+
+/* ==============================
+   FISH OR SHARK — GAME LOGIC
+   ============================== */
+const fishOrShark = {
+  state: {
+    playing: false, round: 0, score: 0, lives: 3,
+    streak: 0, maxStreak: 0, correct: 0, total: 0,
+    answered: false, scenario: null, usedScenarios: [],
+  },
+
+  start() {
+    this.state = {
+      playing: true, round: 0, score: 0, lives: 3,
+      streak: 0, maxStreak: 0, correct: 0, total: 0,
+      answered: false, scenario: null, usedScenarios: [],
+    };
+    document.getElementById('fs-start').style.display = 'none';
+    document.getElementById('fs-game').style.display = 'block';
+    document.getElementById('fs-gameover').style.display = 'none';
+    document.getElementById('fs-mystery-figure').textContent = '❓';
+    document.getElementById('fs-mystery-figure').className = 'mystery-box';
+    this.nextRound();
+  },
+
+  nextRound() {
+    if (this.state.lives <= 0 || this.state.round >= 10) {
+      this.gameOver();
+      return;
+    }
+    this.state.round++;
+    this.state.answered = false;
+    document.getElementById('fs-round').textContent = this.state.round + '/10';
+    document.getElementById('fs-lives').textContent = this.state.lives;
+
+    const rb = document.getElementById('fs-result');
+    rb.classList.remove('show', 'correct', 'wrong');
+
+    document.querySelectorAll('#fs-actions .btn-action').forEach(b => b.disabled = false);
+
+    this.setFishExpr('normal');
+    document.getElementById('fs-fish-speech').textContent = '让我看看这人的水平...';
+
+    const mb = document.getElementById('fs-mystery-figure');
+    mb.textContent = '❓';
+    mb.className = 'mystery-box';
+
+    let available = IDENTITY_SCENARIOS.filter((_, i) => !this.state.usedScenarios.includes(i));
+    if (available.length === 0) this.state.usedScenarios = [];
+    available = IDENTITY_SCENARIOS.filter((_, i) => !this.state.usedScenarios.includes(i));
+
+    const idx = Math.floor(Math.random() * available.length);
+    const s = available[idx];
+    this.state.usedScenarios.push(IDENTITY_SCENARIOS.indexOf(s));
+    this.state.scenario = s;
+
+    document.getElementById('fs-scenario').textContent = s.desc;
+  },
+
+  act(guessFish) {
+    if (this.state.answered || !this.state.playing) return;
+    this.state.answered = true;
+    this.state.total++;
+
+    const s = this.state.scenario;
+    const correct = guessFish === s.isFish;
+
+    document.querySelectorAll('#fs-actions .btn-action').forEach(b => b.disabled = true);
+
+    const rb = document.getElementById('fs-result');
+    rb.className = 'result-box show';
+
+    const mb = document.getElementById('fs-mystery-figure');
+    mb.className = 'mystery-box mystery-reveal';
+
+    if (correct) {
+      this.state.score += 10;
+      this.state.streak++;
+      this.state.correct++;
+      if (this.state.streak > this.state.maxStreak) this.state.maxStreak = this.state.streak;
+
+      let bonusMsg = '';
+      if (this.state.streak >= 3) {
+        const bonus = this.state.streak * 2;
+        this.state.score += bonus;
+        bonusMsg = ' \u{1F525} ' + this.state.streak + '连对+' + bonus + '分！';
+      }
+
+      rb.classList.add('correct');
+
+      if (s.isFish) {
+        document.getElementById('fs-result-icon').textContent = '✅';
+        document.getElementById('fs-result-text').textContent = '没错！他就是鱼！' + bonusMsg;
+        mb.textContent = '\u{1F41F}';
+        mb.classList.add('reveal-fish');
+        document.getElementById('fs-fish-speech').textContent = '哈哈，我就知道是条鱼！';
+      } else {
+        document.getElementById('fs-result-icon').textContent = '✅';
+        document.getElementById('fs-result-text').textContent = '果然！这是个鲨鱼！' + bonusMsg;
+        mb.textContent = '\u{1F988}';
+        mb.classList.add('reveal-shark');
+        document.getElementById('fs-fish-speech').textContent = '好险，还好我看穿了！';
+      }
+      document.getElementById('fs-result-detail').textContent = s.reason;
+
+      this.setFishExpr('happy');
+      document.getElementById('fs-fish').classList.add('bounce');
+      setTimeout(() => document.getElementById('fs-fish').classList.remove('bounce'), 500);
+    } else {
+      this.state.lives--;
+      this.state.streak = 0;
+
+      rb.classList.add('wrong');
+
+      if (s.isFish) {
+        document.getElementById('fs-result-icon').textContent = '❌';
+        document.getElementById('fs-result-text').textContent = '不对！他是鱼啊，你看走眼了！';
+        mb.textContent = '\u{1F41F}';
+        mb.classList.add('reveal-fish');
+      } else {
+        document.getElementById('fs-result-icon').textContent = '❌';
+        document.getElementById('fs-result-text').textContent = '你被骗了！他是鲨鱼！';
+        mb.textContent = '\u{1F988}';
+        mb.classList.add('reveal-shark');
+      }
+      document.getElementById('fs-result-detail').textContent = s.reason;
+
+      this.setFishExpr('scared');
+      document.getElementById('fs-fish-speech').textContent = '啊？我看错了...';
+      document.getElementById('fs-fish').classList.add('shake');
+      setTimeout(() => document.getElementById('fs-fish').classList.remove('shake'), 500);
+    }
+
+    document.getElementById('fs-score').textContent = this.state.score;
+    document.getElementById('fs-lives').textContent = this.state.lives;
+
+    if (this.state.round >= 10 || this.state.lives <= 0) {
+      document.getElementById('fs-next-btn').textContent = '查看结果 →';
+    } else {
+      document.getElementById('fs-next-btn').textContent = '下一回合 →';
+    }
+  },
+
+  next() {
+    if (this.state.lives <= 0 || this.state.round >= 10) {
+      this.gameOver();
+    } else {
+      this.nextRound();
+    }
+  },
+
+  gameOver() {
+    this.state.playing = false;
+    document.getElementById('fs-game').style.display = 'none';
+    document.getElementById('fs-gameover').style.display = 'block';
+
+    const pct = this.state.total > 0 ? (this.state.correct / this.state.total * 100) : 0;
+    const weightedScore = this.state.score + (pct >= 80 ? 20 : pct >= 60 ? 10 : 0);
+
+    let rank = '小鱼';
+    for (const [name, data] of Object.entries(RANK_TIERS)) {
+      if (weightedScore >= data.score) rank = name;
+    }
+
+    const rankData = RANK_TIERS[rank];
+
+    document.getElementById('fs-go-rank').textContent = rankData.icon;
+    document.getElementById('fs-go-title').textContent = rank + '（识人段位）';
+    document.getElementById('fs-go-desc').textContent = rankData.desc;
+    document.getElementById('fs-go-score').textContent = this.state.score;
+    document.getElementById('fs-go-correct').textContent =
+      this.state.correct + '/' + this.state.total + ' (' + Math.round(pct) + '%)';
+    document.getElementById('fs-go-streak').textContent = this.state.maxStreak;
+  },
+
+  setFishExpr(expr) {
+    const el = document.getElementById('fs-fish');
+    el.classList.remove('fish-happy', 'fish-scared');
+    if (expr === 'happy') el.classList.add('fish-happy');
+    if (expr === 'scared') el.classList.add('fish-scared');
+
+    const svg = document.getElementById('fs-fish-svg');
+    const mouth = svg.querySelector('.expr-mouth');
+    const eye = svg.querySelector('.expr-eye circle:first-child');
+    if (!mouth || !eye) return;
+
+    if (expr === 'happy') {
+      mouth.setAttribute('d', 'M 124,104 Q 132,116 120,120');
+      eye.setAttribute('r', '7');
+    } else if (expr === 'scared') {
+      mouth.setAttribute('d', 'M 122,112 Q 128,112 132,112');
+      eye.setAttribute('r', '12');
+    } else {
+      mouth.setAttribute('d', 'M 128,104 Q 132,114 122,118');
+      eye.setAttribute('r', '9');
+    }
+  },
+};
+
+/* ==============================
+   ODDS CALC — GENERATOR
+   ============================== */
+const DRAWS=[
+  {o:2,n:'口袋对中三条'},{o:3,n:'三条补成葫芦'},{o:4,n:'卡顺听牌'},
+  {o:6,n:'两高张'},{o:8,n:'两头顺听牌'},{o:9,n:'同花听牌'},
+  {o:12,n:'同花+卡顺听牌'},{o:14,n:'顶对+同花听牌'},{o:15,n:'同花顺听牌'},
+];
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a}
+
+function makeQuiz(){
+  const t=pick(['draw','draw','rule','pot','pot']);
+  const d=pick(DRAWS);
+  function fill(arr){while(arr.length<3){const v=Math.abs(arr[0]+arr.length*7)%97+1;if(!arr.includes(v))arr.push(v)}return arr}
+
+  if(t==='draw'){
+    const denom=pick([47,46]);
+    const c=Math.round(d.o/denom*100);
+    const stage=denom===47?'转牌':'河牌';
+    const wrongs=fill([Math.round(d.o/50*100),Math.round((d.o-1)/denom*100),d.o*2].filter(v=>v!==c&&v>0&&v<100));
+    const all=shuffle([c,...wrongs.slice(0,3)]);
+    return {q:'翻牌圈'+d.n+'，'+stage+'中牌概率？',opts:all.map(v=>'约'+v+'%'),correct:all.indexOf(c),explain:d.o+'÷'+denom+'≈'+c+'%',icon:'🃏'};
+  }
+  if(t==='rule'){
+    const mult=pick([4,2]);
+    const c=d.o*mult;
+    const wrongs=fill([Math.round(d.o/47*100),mult===4?d.o*3:Math.round(d.o/46*100),c+4,c-4].filter(v=>v!==c&&v>0&&v<100));
+    const all=shuffle([c,...wrongs.slice(0,3)]);
+    return {q:(mult===4?'翻牌':'转牌')+'圈'+d.n+'，四二法则到河牌概率？',opts:all.map(v=>'约'+v+'%'),correct:all.indexOf(c),explain:d.o+'×'+mult+'='+c+'%',icon:'🧮'};
+  }
+  // Pot odds
+  const pot=pick([50,75,100,120,150,180,200,250,300,400,500,600,800,1000]);
+  const bet=Math.max(5,Math.round(pot*pick([0.25,0.33,0.5,0.67,0.75,1.0])));
+  const c=Math.round(bet/(pot+bet+bet)*100);
+  const wrongs=fill([Math.round(bet/(pot+bet)*100),Math.round(bet/pot*100),c+5,c-5].filter(v=>v!==c&&v>0&&v<100));
+  const all=shuffle([c,...wrongs.slice(0,3)]);
+  return {q:'底池'+pot+'，对手下注'+bet+'，跟注需要多少胜率？',opts:all.map(v=>v+'%'),correct:all.indexOf(c),explain:bet+'÷('+pot+'+'+bet+'+'+bet+')='+c+'%',icon:'💰'};
+}
+
+/* ==============================
+   ODDS CALC — GAME LOGIC
+   ============================== */
+const oddsCalc = {
+  state:{playing:false,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null},
+
+  start(){
+    this.state={playing:true,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null};
+    document.getElementById('oc-start').style.display='none';
+    document.getElementById('oc-game').style.display='block';
+    document.getElementById('oc-gameover').style.display='none';
+    this.nextRound();
+  },
+
+  nextRound(){
+    if(this.state.lives<=0||this.state.round>=10){this.gameOver();return}
+    this.state.round++;this.state.answered=false;
+    document.getElementById('oc-round').textContent=this.state.round+'/10';
+    document.getElementById('oc-lives').textContent=this.state.lives;
+    document.getElementById('oc-result').className='result-box';
+    document.querySelectorAll('.btn-odds').forEach(b=>{b.disabled=false;b.classList.remove('selected','wrong')});
+    this.setFishExpr('normal');this.setSharkExpr('normal');
+    document.getElementById('oc-fish-speech').textContent='让我算算概率...';
+    document.getElementById('oc-shark-speech').textContent='计算时间！';
+
+    const s=makeQuiz();
+    this.state.scenario=s;
+
+    // Show question type icon (always use no-cards display)
+    document.getElementById('oc-hand-display').style.display='none';
+    document.getElementById('oc-no-cards').style.display='block';
+    const labels={'\u{1F0CF}':'听牌概率','\u{1F9EE}':'四二法则','\u{1F4B0}':'底池赔率'};
+    document.getElementById('oc-no-cards').innerHTML='<div style="font-size:2.5rem;margin-bottom:2px">'+s.icon+'</div><div style="font-size:0.8rem;color:#8899aa">'+(labels[s.icon]||'扑克数学')+'</div>';
+
+    document.getElementById('oc-question').textContent=s.q;
+    for(let i=0;i<4;i++)document.getElementById('oc-opt-'+i).textContent=s.opts[i];
+  },
+
+  act(idx){
+    if(this.state.answered||!this.state.playing)return;
+    this.state.answered=true;this.state.total++;
+    const s=this.state.scenario;
+    const correct=idx===s.correct;
+    document.querySelectorAll('.btn-odds').forEach(b=>b.disabled=true);
+    const btns=document.querySelectorAll('.btn-odds');
+    btns[idx].classList.add(correct?'selected':'wrong');
+    if(!correct)btns[s.correct].classList.add('selected');
+
+    const rb=document.getElementById('oc-result');
+    rb.className='result-box show';
+    const labels=['A','B','C','D'];
+
+    if(correct){
+      this.state.score+=10;this.state.streak++;this.state.correct++;
+      if(this.state.streak>this.state.maxStreak)this.state.maxStreak=this.state.streak;
+      let bonus='';
+      if(this.state.streak>=3){const b=this.state.streak*2;this.state.score+=b;bonus=' \u{1F525} '+this.state.streak+'连对+'+b+'分！';}
+      rb.classList.add('correct');
+      document.getElementById('oc-result-icon').textContent='✅';
+      document.getElementById('oc-result-text').textContent='正确！答案'+labels[s.correct]+bonus;
+      document.getElementById('oc-result-detail').textContent=s.explain;
+      this.setFishExpr('happy');this.setSharkExpr('normal');
+      document.getElementById('oc-fish-speech').textContent='算对了！';
+      document.getElementById('oc-shark-speech').textContent='数学不错嘛';
+      document.getElementById('oc-fish').classList.add('bounce');
+      setTimeout(()=>document.getElementById('oc-fish').classList.remove('bounce'),500);
+    }else{
+      this.state.lives--;this.state.streak=0;
+      rb.classList.add('wrong');
+      document.getElementById('oc-result-icon').textContent='❌';
+      document.getElementById('oc-result-text').textContent='不对！正确答案是'+labels[s.correct];
+      document.getElementById('oc-result-detail').textContent=s.explain;
+      this.setFishExpr('scared');this.setSharkExpr('amused');
+      document.getElementById('oc-fish-speech').textContent='啊？算错了...';
+      document.getElementById('oc-shark-speech').textContent='哈哈，再算算？';
+      document.getElementById('oc-fish').classList.add('shake');
+      setTimeout(()=>document.getElementById('oc-fish').classList.remove('shake'),500);
+    }
+    document.getElementById('oc-score').textContent=this.state.score;
+    document.getElementById('oc-lives').textContent=this.state.lives;
+    document.getElementById('oc-next-btn').textContent=(this.state.round>=10||this.state.lives<=0)?'查看结果 →':'下一回合 →';
+  },
+
+  next(){
+    if(this.state.lives<=0||this.state.round>=10)this.gameOver();
+    else this.nextRound();
+  },
+
+  gameOver(){
+    this.state.playing=false;
+    document.getElementById('oc-game').style.display='none';
+    document.getElementById('oc-gameover').style.display='block';
+    const pct=this.state.total>0?(this.state.correct/this.state.total*100):0;
+    const ws=this.state.score+(pct>=80?20:pct>=60?10:0);
+    let r='小鱼';
+    for(const[n,d]of Object.entries(RANK_TIERS)){if(ws>=d.score)r=n;}
+    const rd=RANK_TIERS[r];
+    document.getElementById('oc-go-rank').textContent=rd.icon;
+    document.getElementById('oc-go-title').textContent=r+'（数学段位）';
+    document.getElementById('oc-go-desc').textContent=rd.desc;
+    document.getElementById('oc-go-score').textContent=this.state.score;
+    document.getElementById('oc-go-correct').textContent=this.state.correct+'/'+this.state.total+' ('+Math.round(pct)+'%)';
+    document.getElementById('oc-go-streak').textContent=this.state.maxStreak;
+  },
+
+  setFishExpr(e){
+    const el=document.getElementById('oc-fish');
+    el.classList.remove('fish-happy','fish-scared');
+    if(e==='happy')el.classList.add('fish-happy');
+    if(e==='scared')el.classList.add('fish-scared');
+    const svg=document.getElementById('oc-fish-svg');
+    const mouth=svg.querySelector('.expr-mouth');
+    const eye=svg.querySelector('.expr-eye circle:first-child');
+    if(!mouth||!eye)return;
+    if(e==='happy'){mouth.setAttribute('d','M 124,104 Q 132,116 120,120');eye.setAttribute('r','7');}
+    else if(e==='scared'){mouth.setAttribute('d','M 122,112 Q 128,112 132,112');eye.setAttribute('r','12');}
+    else{mouth.setAttribute('d','M 128,104 Q 132,114 122,118');eye.setAttribute('r','9');}
+  },
+
+  setSharkExpr(e){
+    const el=document.getElementById('oc-shark');
+    el.classList.remove('shark-angry','shark-amused');
+    if(e==='amused')el.classList.add('shark-amused');
+    const svg=document.getElementById('oc-shark-svg');
+    if(!svg)return;
+    const mouth=svg.querySelector('.expr-mouth');
+    const eye=svg.querySelector('.expr-eye circle:first-child');
+    if(!mouth||!eye)return;
+    if(e==='amused'){mouth.setAttribute('d','M 48,108 Q 60,118 74,110');eye.setAttribute('r','7');}
+    else{mouth.setAttribute('d','M 52,105 Q 60,114 72,108');eye.setAttribute('r','6');}
+  },
+};
+
+/* ==============================
+   MIND READ — GAME DATA
+   ============================== */
+const MIND_SCENARIOS = [
+  {board:'K♠ 7♥ 2♦',action:'翻前加注，翻牌下注',opts:['顶对','中对','底对','空气'],correct:0,explain:'翻前加注翻牌c-bet，K高翻牌，顶对K是最合理的范围。'},
+  {board:'A♠ Q♥ 9♠',action:'翻前溜入，翻牌check-raise',opts:['顶对','两对','听花','空气'],correct:1,explain:'翻前溜入翻牌check-raise，最可能是两对（A9），翻前溜入A9很自然。'},
+  {board:'J♠ 10♥ 9♠',action:'翻前加注，翻牌下注',opts:['顶对J','超对','顺子','听顺'],correct:2,explain:'JTx湿润翻牌翻前加注翻牌下注，最可能是已成的顺子（KQ或87）。'},
+  {board:'A♦ A♣ 7♠',action:'翻前加注，翻牌过牌跟注',opts:['三条A','顶对A','对7','空气'],correct:3,explain:'翻前加注翻牌过牌跟注示弱，最有可能是没中的高张在float（如KQ）。'},
+  {board:'K♥ Q♥ 10♠',action:'翻前3bet，翻牌下注',opts:['顶对','超对','听顺','三条'],correct:1,explain:'翻前3bet范围极强，翻牌下注，超对AA是最自然的手牌。'},
+  {board:'9♠ 8♠ 3♣',action:'翻前溜入，翻牌反加',opts:['顶对9','两对','同花听牌','顺子听牌'],correct:2,explain:'翻前溜入翻牌反加，同花听牌是常见的半诈唬牌型，有弃牌率和提升空间。'},
+  {board:'A♥ K♠ 7♦',action:'翻前加注，翻牌过牌',opts:['顶对A','顶对K','底对','空气'],correct:3,explain:'翻前加注翻牌过牌示弱，A高牌面没中，可能是完全没中的牌（如QJ）。'},
+  {board:'Q♠ J♥ 10♣ 9♠',action:'翻前溜入，翻牌过牌，转牌下注',opts:['顺子','两对','顶对','听牌'],correct:0,explain:'转牌成顺面，翻前溜入的玩家突然下注，通常意味着已经成顺（KQ或87）。'},
+  {board:'8♣ 7♣ 3♣ 2♠',action:'翻前加注，翻牌下注，转牌再下注',opts:['同花','顶对','超对','空气'],correct:2,explain:'翻前加注翻牌转牌持续下注，超对是标准价值牌（99-JJ等）。'},
+  {board:'A♠ K♠ 10♥',action:'翻前加注，翻牌下注，面对加注全压',opts:['顶对A','顶对K','顺子','听花+卡顺'],correct:3,explain:'翻前加注翻牌下注后面对加注全压，听花+卡顺（如QJs）是强听牌半诈唬的典型牌型。'},
+  {board:'6♠ 6♥ 6♣',action:'翻前溜入，翻牌反加',opts:['明三条','顶对','对子','空气'],correct:0,explain:'翻前溜入翻牌反加，666三条面，明三条是最合理的。'},
+  {board:'A♠ J♠ 7♦ 4♠ 2♣',action:'翻前加注，翻牌下注，转牌过牌，河牌下注',opts:['同花','顶对','对A','空气'],correct:0,explain:'河牌三张♠，翻前加注者河牌下注，同花是合理的价值下注牌型。'},
+  {board:'7♠ 8♠ 9♦',action:'翻前加注被跟注，翻牌过牌跟注',opts:['顺子','听顺','顶对','超对'],correct:1,explain:'翻前加注翻牌过牌跟注，湿润面不c-bet，最可能是听顺牌型（如JTs）。'},
+  {board:'Q♥ 10♠ 4♣',action:'翻前溜入，翻牌下注转牌下注',opts:['顶对Q','顶对10','两对','空气'],correct:0,explain:'翻前溜入翻牌转牌连续下注，QTx干燥面，顶对Q是最合理的价值牌。'},
+  {board:'3♣ 4♣ 5♠',action:'翻前跟注3bet，翻牌下注',opts:['顺子','超对','顶对','听花'],correct:1,explain:'翻前跟注3bet范围紧，翻牌下注，超对（如JJ/QQ）是最合理的。'},
+  {board:'K♠ 10♥ 7♠ 4♠',action:'翻前加注，翻牌过牌跟注，转牌反加',opts:['同花','顶对K','顶对10','听花'],correct:0,explain:'转牌到♠，转牌反加通常意味着已成的同花（如A♠X♠）。'},
+  {board:'A♥ 9♠ 5♦ 10♠ 4♥',action:'翻前溜入，翻牌过牌，转牌下注，河牌下注',opts:['顶对','两对','顺子','三条'],correct:1,explain:'翻前溜入翻牌过牌后连续下注两条街，通常是翻中了很大的牌，两对以上。'},
+  {board:'A♠ 7♥ 2♠ 8♠',action:'翻前加注，翻牌下注，转牌下注',opts:['顶对A','同花','两对','三条'],correct:0,explain:'翻前加注翻牌转牌持续下注，顶对A（如AK/AQ）是最常见的价值下注牌型。'},
+  {board:'K♦ Q♥ J♠',action:'翻前加注被3bet，跟注，翻牌过牌加注',opts:['顺子','顶对','超对','空气'],correct:0,explain:'翻前跟注3bet翻牌过牌加注，AKQ翻牌面，过牌加注最可能是顺子（AT或9T）。'},
+  {board:'8♠ 6♠ 5♥ 4♣',action:'翻前溜入，翻牌跟注，转牌加注',opts:['顺子','顶对','两对','听牌'],correct:0,explain:'转牌成顺面，翻前溜入转牌加注，顺子（75或97）是最合理的解释。'},
+];
+
+const mindRead = {
+  state:{playing:false,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null,usedScenarios:[]},
+
+  start(){
+    this.state={playing:true,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null,usedScenarios:[]};
+    document.getElementById('mr-start').style.display='none';
+    document.getElementById('mr-game').style.display='block';
+    document.getElementById('mr-gameover').style.display='none';
+    this.nextRound();
+  },
+
+  nextRound(){
+    if(this.state.lives<=0||this.state.round>=10){this.gameOver();return}
+    this.state.round++;this.state.answered=false;
+    document.getElementById('mr-round').textContent=this.state.round+'/10';
+    document.getElementById('mr-lives').textContent=this.state.lives;
+    document.getElementById('mr-result').className='result-box';
+    document.querySelectorAll('#mr-actions .btn-odds').forEach(b=>{b.disabled=false;b.classList.remove('selected','wrong')});
+    this.setFishExpr('normal');
+    document.getElementById('mr-fish-speech').textContent='让我看穿你的心思！';
+    document.getElementById('mr-shark-speech').textContent='你猜不到我在想什么...';
+
+    let available=MIND_SCENARIOS.filter((_,i)=>!this.state.usedScenarios.includes(i));
+    if(available.length===0)this.state.usedScenarios=[];
+    available=MIND_SCENARIOS.filter((_,i)=>!this.state.usedScenarios.includes(i));
+    const idx=Math.floor(Math.random()*available.length);
+    const s=available[idx];
+    this.state.usedScenarios.push(MIND_SCENARIOS.indexOf(s));
+    this.state.scenario=s;
+
+    const cards=s.board.split(' ');
+    document.getElementById('mr-board').innerHTML=cards.map(c=>{
+      const suit=c.slice(-1);const rank=c.slice(0,-1);
+      const isRed=(suit==='♥'||suit==='♦');
+      return '<div class="card '+(isRed?'red':'black')+'"><div class="cr">'+rank+'</div><div class="cs">'+suit+'</div></div>';
+    }).join('');
+
+    document.getElementById('mr-action-line').textContent='▸ '+s.action;
+    document.getElementById('mr-question').innerHTML='<strong>这个对手有什么牌？</strong>';
+    for(let i=0;i<4;i++)document.getElementById('mr-opt-'+i).textContent=s.opts[i];
+  },
+
+  act(idx){
+    if(this.state.answered||!this.state.playing)return;
+    this.state.answered=true;this.state.total++;
+    const s=this.state.scenario;
+    const correct=idx===s.correct;
+    document.querySelectorAll('#mr-actions .btn-odds').forEach(b=>b.disabled=true);
+    const btns=document.querySelectorAll('#mr-actions .btn-odds');
+    btns[idx].classList.add(correct?'selected':'wrong');
+    if(!correct)btns[s.correct].classList.add('selected');
+
+    const rb=document.getElementById('mr-result');
+    rb.className='result-box show';
+    const labels=['A','B','C','D'];
+
+    if(correct){
+      this.state.score+=10;this.state.streak++;this.state.correct++;
+      if(this.state.streak>this.state.maxStreak)this.state.maxStreak=this.state.streak;
+      let bonus='';
+      if(this.state.streak>=3){const b=this.state.streak*2;this.state.score+=b;bonus=' 🔥 '+this.state.streak+'连对+'+b+'分！';}
+      rb.classList.add('correct');
+      document.getElementById('mr-result-icon').textContent='✅';
+      document.getElementById('mr-result-text').textContent='正确！答案'+labels[s.correct]+bonus;
+      document.getElementById('mr-result-detail').textContent=s.explain;
+      this.setFishExpr('happy');
+      document.getElementById('mr-fish-speech').textContent='哈哈，被我看穿了！';
+      document.getElementById('mr-fish').classList.add('bounce');
+      setTimeout(()=>document.getElementById('mr-fish').classList.remove('bounce'),500);
+    }else{
+      this.state.lives--;this.state.streak=0;
+      rb.classList.add('wrong');
+      document.getElementById('mr-result-icon').textContent='❌';
+      document.getElementById('mr-result-text').textContent='不对！正确答案是'+labels[s.correct];
+      document.getElementById('mr-result-detail').textContent=s.explain;
+      this.setFishExpr('scared');
+      document.getElementById('mr-fish-speech').textContent='呃…看走眼了';
+      document.getElementById('mr-fish').classList.add('shake');
+      setTimeout(()=>document.getElementById('mr-fish').classList.remove('shake'),500);
+    }
+    document.getElementById('mr-score').textContent=this.state.score;
+    document.getElementById('mr-lives').textContent=this.state.lives;
+    document.getElementById('mr-next-btn').textContent=(this.state.round>=10||this.state.lives<=0)?'查看结果 →':'下一回合 →';
+  },
+
+  next(){
+    if(this.state.lives<=0||this.state.round>=10)this.gameOver();
+    else this.nextRound();
+  },
+
+  gameOver(){
+    this.state.playing=false;
+    document.getElementById('mr-game').style.display='none';
+    document.getElementById('mr-gameover').style.display='block';
+    const pct=this.state.total>0?(this.state.correct/this.state.total*100):0;
+    const ws=this.state.score+(pct>=80?20:pct>=60?10:0);
+    let r='小鱼';
+    for(const[n,d]of Object.entries(RANK_TIERS)){if(ws>=d.score)r=n;}
+    const rd=RANK_TIERS[r];
+    document.getElementById('mr-go-rank').textContent=rd.icon;
+    document.getElementById('mr-go-title').textContent=r+'（读心段位）';
+    document.getElementById('mr-go-desc').textContent=rd.desc;
+    document.getElementById('mr-go-score').textContent=this.state.score;
+    document.getElementById('mr-go-correct').textContent=this.state.correct+'/'+this.state.total+' ('+Math.round(pct)+'%)';
+    document.getElementById('mr-go-streak').textContent=this.state.maxStreak;
+  },
+
+  setFishExpr(e){
+    const el=document.getElementById('mr-fish');
+    el.classList.remove('fish-happy','fish-scared');
+    if(e==='happy')el.classList.add('fish-happy');
+    if(e==='scared')el.classList.add('fish-scared');
+    const svg=document.getElementById('mr-fish-svg');
+    const mouth=svg.querySelector('.expr-mouth');
+    const eye=svg.querySelector('.expr-eye circle:first-child');
+    if(!mouth||!eye)return;
+    if(e==='happy'){mouth.setAttribute('d','M 124,104 Q 132,116 120,120');eye.setAttribute('r','7');}
+    else if(e==='scared'){mouth.setAttribute('d','M 122,112 Q 128,112 132,112');eye.setAttribute('r','12');}
+    else{mouth.setAttribute('d','M 128,104 Q 132,114 122,118');eye.setAttribute('r','9');}
+  },
+};
+
+
+/* ==============================
+   ALL-IN PUSH — GAME DATA
+   ============================== */
+const PUSH_SCENARIOS = [
+  {hand:['A','♠'],hand2:['8','♥'],pos:'BTN',stack:8,correct:true,explain:'BTN位8BB推A8o是标准操作，A8o在BTN推是+EV的。'},
+  {hand:['7','♠'],hand2:['2','♥'],pos:'BTN',stack:10,correct:false,explain:'72o是最烂起手牌，即使BTN位10BB也不应该推，胜率太差。'},
+  {hand:['K','♠'],hand2:['9','♠'],pos:'BTN',stack:9,correct:true,explain:'BTN位9BB推K9s标准操作，K9s有足够的牌力和胜率支持全压。'},
+  {hand:['A','♥'],hand2:['10','♠'],pos:'CO',stack:12,correct:true,explain:'CO位12BB推ATo是标准+EV的，ATo在CO位属于强牌。'},
+  {hand:['8','♠'],hand2:['5','♦'],pos:'CO',stack:10,correct:false,explain:'CO位10BB推85o太弱，应该弃牌等待更好的机会。'},
+  {hand:['J','♠'],hand2:['10','♠'],pos:'SB',stack:7,correct:true,explain:'SB位7BB推JTs是标准，JTs有很好的胜率和可玩性。'},
+  {hand:['7','♠'],hand2:['4','♥'],pos:'SB',stack:8,correct:false,explain:'SB位8BB推74o太弱，虽然SB位可以推宽但还是太差。'},
+  {hand:['Q','♠'],hand2:['7','♠'],pos:'BTN',stack:6,correct:true,explain:'BTN位6BB推Q7s是标准范围，短码时Q7s足够全压。'},
+  {hand:['A','♠'],hand2:['5','♥'],pos:'UTG',stack:10,correct:false,explain:'UTG位10BB推A5o太松，UTG还有多人未行动，应该弃牌。'},
+  {hand:['9','♠'],hand2:['9','♥'],pos:'CO',stack:14,correct:true,explain:'CO位14BB推99是标准操作，大对子在CO位推+EV。'},
+  {hand:['A','♠'],hand2:['Q','♠'],pos:'MP',stack:12,correct:true,explain:'MP位12BB推AQs是标准+EV，AQs在MP位有足够胜率。'},
+  {hand:['6','♠'],hand2:['4','♠'],pos:'BTN',stack:9,correct:false,explain:'BTN位9BB推64s太弱，64s胜率不足以支持全压。'},
+  {hand:['K','♠'],hand2:['2','♠'],pos:'BTN',stack:7,correct:true,explain:'BTN位7BB推K2s是标准操作，K2s有足够的弃牌率和胜率。'},
+  {hand:['Q','♠'],hand2:['6','♦'],pos:'SB',stack:6,correct:true,explain:'SB位6BB推Q6o合理，短码时SB位推任何Qx都可以。'},
+  {hand:['J','♠'],hand2:['8','♠'],pos:'CO',stack:15,correct:false,explain:'CO位15BB推J8s太松，15BB时应该更选择性全压。'},
+  {hand:['A','♠'],hand2:['2','♠'],pos:'BTN',stack:8,correct:true,explain:'BTN位8BB推A2s是标准，A低张同花在BTN全压足够。'},
+  {hand:['5','♠'],hand2:['5','♥'],pos:'UTG',stack:9,correct:false,explain:'UTG位9BB推55太弱，有多人未行动，推出去大概率被跟注且胜率不高。'},
+  {hand:['9','♠'],hand2:['3','♦'],pos:'BTN',stack:12,correct:false,explain:'BTN位12BB推93o太松，93o不在推范围内。'},
+  {hand:['7','♠'],hand2:['6','♠'],pos:'BTN',stack:8,correct:true,explain:'BTN位8BB推76s是标准，同花连张在短码时全压有足够的胜率。'},
+  {hand:['A','♠'],hand2:['J','♠'],pos:'UTG',stack:15,correct:false,explain:'UTG位15BB不应该推AJs，应该标准加注，15BB全压浪费了AJs的牌力。'},
+];
+
+const allinPush = {
+  state:{playing:false,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null,usedScenarios:[]},
+
+  start(){
+    this.state={playing:true,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null,usedScenarios:[]};
+    document.getElementById('ap-start').style.display='none';
+    document.getElementById('ap-game').style.display='block';
+    document.getElementById('ap-gameover').style.display='none';
+    this.nextRound();
+  },
+
+  nextRound(){
+    if(this.state.lives<=0||this.state.round>=10){this.gameOver();return}
+    this.state.round++;this.state.answered=false;
+    document.getElementById('ap-round').textContent=this.state.round+'/10';
+    document.getElementById('ap-lives').textContent=this.state.lives;
+    document.getElementById('ap-result').className='result-box';
+    document.querySelectorAll('#ap-actions .btn-action').forEach(b=>b.disabled=false);
+    this.setFishExpr('normal');this.setSharkExpr('normal');
+    document.getElementById('ap-fish-speech').textContent='这把拼了！';
+    document.getElementById('ap-shark-speech').textContent='敢推吗？';
+
+    let available=PUSH_SCENARIOS.filter((_,i)=>!this.state.usedScenarios.includes(i));
+    if(available.length===0)this.state.usedScenarios=[];
+    available=PUSH_SCENARIOS.filter((_,i)=>!this.state.usedScenarios.includes(i));
+    const idx=Math.floor(Math.random()*available.length);
+    const s=available[idx];
+    this.state.usedScenarios.push(PUSH_SCENARIOS.indexOf(s));
+    this.state.scenario=s;
+
+    const isRed1=(s.hand[1]==='♥'||s.hand[1]==='♦');
+    const isRed2=(s.hand2[1]==='♥'||s.hand2[1]==='♦');
+    document.getElementById('ap-cards').innerHTML='<div class="card '+(isRed1?'red':'black')+'"><div class="cr">'+s.hand[0]+'</div><div class="cs">'+s.hand[1]+'</div></div><div class="card '+(isRed2?'red':'black')+'"><div class="cr">'+s.hand2[0]+'</div><div class="cs">'+s.hand2[1]+'</div></div>';
+
+    const blindLevel=Math.min(10+this.state.round*2,50);
+    document.getElementById('ap-blind-label').textContent='盲注: '+blindLevel+'/'+(blindLevel*2);
+    document.getElementById('ap-stack-display').textContent=s.stack+' BB 筹码';
+    document.getElementById('ap-pos-display').textContent='位置：'+s.pos;
+
+    const posNames={UTG:'枪口位',MP:'中间位',CO:'切菜位',BTN:'按钮位',SB:'小盲'};
+    document.getElementById('ap-question').innerHTML='<strong>'+s.hand[0]+s.hand[1]+' '+s.hand2[0]+s.hand2[1]+'</strong> · '+(posNames[s.pos]||s.pos)+' '+s.stack+'BB，全压还是弃牌？';
+  },
+
+  act(action){
+    if(this.state.answered||!this.state.playing)return;
+    this.state.answered=true;this.state.total++;
+    const s=this.state.scenario;
+    const correct=action===s.correct;
+    document.querySelectorAll('#ap-actions .btn-action').forEach(b=>b.disabled=true);
+
+    const rb=document.getElementById('ap-result');
+    rb.className='result-box show';
+
+    if(correct){
+      this.state.score+=10;this.state.streak++;this.state.correct++;
+      if(this.state.streak>this.state.maxStreak)this.state.maxStreak=this.state.streak;
+      let bonus='';
+      if(this.state.streak>=3){const b=this.state.streak*2;this.state.score+=b;bonus=' 🔥 '+this.state.streak+'连对+'+b+'分！';}
+      rb.classList.add('correct');
+      document.getElementById('ap-result-icon').textContent='✅';
+      document.getElementById('ap-result-text').textContent=(action?'ALL-IN正确！':'弃牌正确！')+bonus;
+      document.getElementById('ap-result-detail').textContent=s.explain;
+      this.setFishExpr('happy');this.setSharkExpr('angry');
+      document.getElementById('ap-fish-speech').textContent=action?'哈哈！这把是对的！':'等待更好的机会…';
+      document.getElementById('ap-shark-speech').textContent=action?'切，让你挖到了':'哈哈，就知道你不敢！';
+      document.getElementById('ap-fish').classList.add('bounce');
+      setTimeout(()=>document.getElementById('ap-fish').classList.remove('bounce'),500);
+    }else{
+      this.state.lives--;this.state.streak=0;
+      rb.classList.add('wrong');
+      document.getElementById('ap-result-icon').textContent='❌';
+      document.getElementById('ap-result-text').textContent='不对！'+(action?'这把应该弃牌！':'这把应该ALL-IN！');
+      document.getElementById('ap-result-detail').textContent=s.explain;
+      this.setFishExpr('scared');this.setSharkExpr('amused');
+      document.getElementById('ap-fish-speech').textContent='呃…做错决定了';
+      document.getElementById('ap-shark-speech').textContent='哈哈，菜鸟就是菜鸟！';
+      document.getElementById('ap-fish').classList.add('shake');
+      setTimeout(()=>document.getElementById('ap-fish').classList.remove('shake'),500);
+    }
+    document.getElementById('ap-score').textContent=this.state.score;
+    document.getElementById('ap-lives').textContent=this.state.lives;
+    document.getElementById('ap-next-btn').textContent=(this.state.round>=10||this.state.lives<=0)?'查看结果 →':'下一回合 →';
+  },
+
+  next(){
+    if(this.state.lives<=0||this.state.round>=10)this.gameOver();
+    else this.nextRound();
+  },
+
+  gameOver(){
+    this.state.playing=false;
+    document.getElementById('ap-game').style.display='none';
+    document.getElementById('ap-gameover').style.display='block';
+    const pct=this.state.total>0?(this.state.correct/this.state.total*100):0;
+    const ws=this.state.score+(pct>=80?20:pct>=60?10:0);
+    let r='小鱼';
+    for(const[n,d]of Object.entries(RANK_TIERS)){if(ws>=d.score)r=n;}
+    const rd=RANK_TIERS[r];
+    document.getElementById('ap-go-rank').textContent=rd.icon;
+    document.getElementById('ap-go-title').textContent=r+'（决策段位）';
+    document.getElementById('ap-go-desc').textContent=rd.desc;
+    document.getElementById('ap-go-score').textContent=this.state.score;
+    document.getElementById('ap-go-correct').textContent=this.state.correct+'/'+this.state.total+' ('+Math.round(pct)+'%)';
+    document.getElementById('ap-go-streak').textContent=this.state.maxStreak;
+  },
+
+  setFishExpr(e){
+    const el=document.getElementById('ap-fish');
+    el.classList.remove('fish-happy','fish-scared');
+    if(e==='happy')el.classList.add('fish-happy');
+    if(e==='scared')el.classList.add('fish-scared');
+    const svg=document.getElementById('ap-fish-svg');
+    const mouth=svg.querySelector('.expr-mouth');
+    const eye=svg.querySelector('.expr-eye circle:first-child');
+    if(!mouth||!eye)return;
+    if(e==='happy'){mouth.setAttribute('d','M 124,104 Q 132,116 120,120');eye.setAttribute('r','7');}
+    else if(e==='scared'){mouth.setAttribute('d','M 122,112 Q 128,112 132,112');eye.setAttribute('r','12');}
+    else{mouth.setAttribute('d','M 128,104 Q 132,114 122,118');eye.setAttribute('r','9');}
+  },
+
+  setSharkExpr(e){
+    const el=document.getElementById('ap-shark');
+    el.classList.remove('shark-angry','shark-amused');
+    if(e==='angry')el.classList.add('shark-angry');
+    if(e==='amused')el.classList.add('shark-amused');
+    const svg=document.getElementById('ap-shark-svg');
+    if(!svg)return;
+    const mouth=svg.querySelector('.expr-mouth');
+    const eye=svg.querySelector('.expr-eye circle:first-child');
+    if(!mouth||!eye)return;
+    if(e==='angry'){mouth.setAttribute('d','M 50,108 Q 60,104 72,106');eye.setAttribute('r','5');}
+    else if(e==='amused'){mouth.setAttribute('d','M 48,108 Q 60,118 74,110');eye.setAttribute('r','7');}
+    else{mouth.setAttribute('d','M 52,105 Q 60,114 72,108');eye.setAttribute('r','6');}
+  },
+};
+
+</script>
+</body>
+</html>
