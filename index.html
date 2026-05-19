@@ -529,7 +529,7 @@ a:hover{color:#ffd700}
           <div class="go-stat"><div class="num" id="pd-go-correct">0/10</div><div class="lbl">正确率</div></div>
           <div class="go-stat"><div class="num" id="pd-go-streak">0</div><div class="lbl">最长连对</div></div>
         </div>
-        <button class="hero-btn" onclick="preflopDuel.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
+        <button class="hero-btn" id="pd-restart-btn" onclick="preflopDuel.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
         <br><br>
         <button class="btn-next" onclick="navigate('home')" style="margin-top:8px">返回首页</button>
 
@@ -636,7 +636,7 @@ a:hover{color:#ffd700}
           <div class="go-stat"><div class="num" id="fs-go-correct">0/10</div><div class="lbl">正确率</div></div>
           <div class="go-stat"><div class="num" id="fs-go-streak">0</div><div class="lbl">最长连对</div></div>
         </div>
-        <button class="hero-btn" onclick="fishOrShark.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
+        <button class="hero-btn" id="fs-restart-btn" onclick="fishOrShark.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
         <br><br>
         <button class="btn-next" onclick="navigate('home')" style="margin-top:8px">返回首页</button>
 
@@ -746,7 +746,7 @@ a:hover{color:#ffd700}
           <div class="go-stat"><div class="num" id="oc-go-correct">0/10</div><div class="lbl">正确率</div></div>
           <div class="go-stat"><div class="num" id="oc-go-streak">0</div><div class="lbl">最长连对</div></div>
         </div>
-        <button class="hero-btn" onclick="oddsCalc.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
+        <button class="hero-btn" id="oc-restart-btn" onclick="oddsCalc.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
         <br><br>
         <button class="btn-next" onclick="navigate('home')" style="margin-top:8px">返回首页</button>
 
@@ -851,7 +851,7 @@ a:hover{color:#ffd700}
           <div class="go-stat"><div class="num" id="mr-go-correct">0/10</div><div class="lbl">正确率</div></div>
           <div class="go-stat"><div class="num" id="mr-go-streak">0</div><div class="lbl">最长连对</div></div>
         </div>
-        <button class="hero-btn" onclick="mindRead.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
+        <button class="hero-btn" id="mr-restart-btn" onclick="mindRead.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
         <br><br>
         <button class="btn-next" onclick="navigate('home')" style="margin-top:8px">返回首页</button>
 
@@ -955,7 +955,7 @@ a:hover{color:#ffd700}
           <div class="go-stat"><div class="num" id="ap-go-correct">0/10</div><div class="lbl">正确率</div></div>
           <div class="go-stat"><div class="num" id="ap-go-streak">0</div><div class="lbl">最长连对</div></div>
         </div>
-        <button class="hero-btn" onclick="allinPush.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
+        <button class="hero-btn" id="ap-restart-btn" onclick="allinPush.start()" style="font-size:0.9rem;padding:12px 36px">再来一局</button>
         <br><br>
         <button class="btn-next" onclick="navigate('home')" style="margin-top:8px">返回首页</button>
 
@@ -1308,6 +1308,8 @@ const preflopDuel = {
     document.getElementById('pd-go-streak').textContent = this.state.maxStreak;
     const rEl = document.getElementById('pd-revive');
     if (rEl) rEl.style.display = this.state.lives <= 0 ? 'block' : 'none';
+    const restartEl = document.getElementById('pd-restart-btn');
+    if (restartEl) restartEl.style.display = this.state.lives <= 0 ? 'none' : '';
   },
 
   actionLabel(action) {
@@ -1575,6 +1577,8 @@ const fishOrShark = {
     document.getElementById('fs-go-streak').textContent = this.state.maxStreak;
     const rEl = document.getElementById('fs-revive');
     if (rEl) rEl.style.display = this.state.lives <= 0 ? 'block' : 'none';
+    const restartEl = document.getElementById('fs-restart-btn');
+    if (restartEl) restartEl.style.display = this.state.lives <= 0 ? 'none' : '';
   },
 
   setFishExpr(expr) {
@@ -1746,6 +1750,8 @@ const oddsCalc = {
     document.getElementById('oc-go-streak').textContent=this.state.maxStreak;
     const rEl = document.getElementById('oc-revive');
     if (rEl) rEl.style.display = this.state.lives <= 0 ? 'block' : 'none';
+    const restartEl = document.getElementById('oc-restart-btn');
+    if (restartEl) restartEl.style.display = this.state.lives <= 0 ? 'none' : '';
   },
 
   setFishExpr(e){
@@ -1909,6 +1915,8 @@ const mindRead = {
     document.getElementById('mr-go-streak').textContent=this.state.maxStreak;
     const rEl = document.getElementById('mr-revive');
     if (rEl) rEl.style.display = this.state.lives <= 0 ? 'block' : 'none';
+    const restartEl = document.getElementById('mr-restart-btn');
+    if (restartEl) restartEl.style.display = this.state.lives <= 0 ? 'none' : '';
   },
 
   setFishExpr(e){
@@ -2059,6 +2067,8 @@ const allinPush = {
     document.getElementById('ap-go-streak').textContent=this.state.maxStreak;
     const rEl = document.getElementById('ap-revive');
     if (rEl) rEl.style.display = this.state.lives <= 0 ? 'block' : 'none';
+    const restartEl = document.getElementById('ap-restart-btn');
+    if (restartEl) restartEl.style.display = this.state.lives <= 0 ? 'none' : '';
   },
 
   setFishExpr(e){
