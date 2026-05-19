@@ -66,7 +66,7 @@ const REDEEM_CODES = {{
     const givenC = m[2].slice(-1);
     // Compute expected checksum
     const s = [...body].reduce((sum, c) => sum + c.charCodeAt(0), 0) % 36;
-    const expectedC = s < 10 ? String(s) : '{CHARS[10:]}'[s - 10];
+    const expectedC = s < 10 ? String(s) : '{CHARS[10:]}'[(s - 10) % {len(CHARS[10:])}];
     return givenC === expectedC;
   }},
 
