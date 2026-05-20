@@ -157,7 +157,6 @@ a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
 .pay-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:999;animation:fadeIn 0.3s}
 .pay-box{background:#2a1a10;border-radius:16px;padding:28px;max-width:360px;width:90%;border:1px solid rgba(240,185,11,0.2);text-align:center}
 .pay-box h3{color:#f0b90b;font-size:1.2rem;margin-bottom:8px}
-.pay-box .pay-qr{width:200px;border-radius:8px;display:block;margin:12px auto}
 .pay-box .pay-price{font-size:2rem;color:#f0b90b;font-weight:800;margin:8px 0}
 .pay-box .pay-desc{color:#a09080;font-size:0.85rem;margin-bottom:16px}
 .pay-box .pay-btn{display:block;width:100%;padding:12px;border-radius:10px;border:none;cursor:pointer;font-size:1rem;font-weight:700;margin-bottom:8px}
@@ -165,6 +164,7 @@ a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
 .pay-btn-secondary{background:rgba(100,120,140,0.15);color:#a09080;border:1px solid rgba(100,120,140,0.2)!important}
 .pay-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(240,185,11,0.2)}
 .pay-msg{margin-top:10px;font-size:0.85rem;min-height:20px}
+
 .dc-header{text-align:center;padding:20px}
 .dc-header .dc-date{font-size:0.9rem;color:#a09080;margin-bottom:4px}
 .dc-header .dc-title{font-size:1.3rem;color:#f0b90b;font-weight:700}
@@ -873,9 +873,52 @@ function showReviveDialog(game,prefix){
   }
   const overlay=document.createElement('div');
   overlay.className='pay-overlay';
-  overlay.innerHTML='<div class="pay-box"><div style="font-size:2.5rem;margin-bottom:8px">🔓</div><h3>永久解锁</h3><div class="pay-price">29.9元</div><div class="pay-desc">一次性付费，永久解锁全部游戏<br>不再有复活次数限制！</div><img src="../alipay_qr.jpg" alt="支付宝收款码" class="pay-qr"><p style="color:#a09080;font-size:0.8rem;margin-bottom:12px">请使用支付宝扫码支付29.9元</p><button class="pay-btn pay-btn-primary" onclick="this.parentElement.querySelector(\'.pay-msg\').textContent=\'感谢支持！正在解锁...\';localStorage.setItem(\'poker_unlocked\',\'true\');setTimeout(()=>{document.querySelector(\'.pay-overlay\').remove();location.reload();},800)">✅ 我已支付</button><button class="pay-btn pay-btn-secondary" onclick="this.closest(\'.pay-overlay\').remove()">取消</button><div class="pay-msg"></div></div>';
+  overlay.innerHTML='<div class="pay-box"><div style="font-size:2.5rem;margin-bottom:8px">🔓</div><h3>永久解锁</h3><div class="pay-desc" style="margin-bottom:16px">通过平台下单购买后，联系卖家获取兑换码<br>输入兑换码即可永久解锁全部游戏！</div><div id="pay-redeem"><input type="text" id="code-input" placeholder="输入兑换码" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(240,185,11,0.2);background:rgba(0,0,0,0.3);color:#e8d5c4;font-size:1rem;text-align:center;outline:none;box-sizing:border-box;margin-bottom:8px"><button class="pay-btn pay-btn-primary" onclick="redeemCode(document.getElementById(\'code-input\').value.trim())">🚀 立即解锁</button></div><button class="pay-btn pay-btn-secondary" onclick="this.closest(\'.pay-overlay\').remove()">取消</button><div class="pay-msg" id="pay-msg"></div></div>'
   document.body.appendChild(overlay);
 }
+
+const REDEEM_SECRET = 'poker-chkn-2026-ryj2225';
+const CODE_PREFIX = 'CHKN';
+
+async function hmacSign(msg, secret) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(String(msg)));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
+async function generateCode(counter) {
+  const hex = await hmacSign(counter, REDEEM_SECRET);
+  return CODE_PREFIX + '-' + String(counter).padStart(4, '0') + '-' + hex.substring(0, 8);
+}
+
+async function validateRedeemCode(code) {
+  if (!code || typeof code !== 'string') return false;
+  code = code.trim().toUpperCase();
+  const parts = code.split('-');
+  if (parts.length !== 3 || parts[0] !== CODE_PREFIX) return false;
+  const counter = parseInt(parts[1], 10);
+  if (isNaN(counter) || counter < 0) return false;
+  const expected = await generateCode(counter);
+  return expected === code;
+}
+
+async function redeemCode(code) {
+  const msg = document.getElementById('pay-msg');
+  if (!code) { msg.textContent = '请输入兑换码'; return; }
+  msg.textContent = '验证中...';
+  const valid = await validateRedeemCode(code);
+  if (valid) {
+    localStorage.setItem('poker_unlocked', 'true');
+    msg.textContent = '🎉 解锁成功！正在刷新...';
+    setTimeout(function(){ document.querySelector('.pay-overlay').remove(); location.reload(); }, 800);
+  } else {
+    msg.textContent = '❌ 兑换码无效，请在平台联系卖家获取正确兑换码';
+  }
+}
+
+function showRedeemTab(){}
+function showWechatTab(){}
 
 function restoreLives(game,prefix){
   game.state.lives=3;game.state.playing=true;game.state.answered=false;
@@ -934,6 +977,59 @@ const SCENARIOS=[
   {hand:['A','♠'],hand2:['J','♠'],pos:'UTG',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'AJs在UTG位是标准开池牌。'},
   {hand:['8','♠'],hand2:['2','♥'],pos:'MP',action:'open',correct:'fold',scenario:'翻前第一次行动，前面无人加注。',reason:'82o是垃圾牌，MP位置更不应该玩。'},
   {hand:['Q','♠'],hand2:['J','♠'],pos:'MP',action:'vs-open',correct:'call',scenario:'UTG开池加注，你在MP手持QJs。',reason:'QJs在MP面对UTG加注，跟注看翻牌有潜力。'},
+,
+  [50 new items]
+  {hand:['A','♥'],hand2:['J','♦'],pos:'UTG',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'AJo在UTG位是标准开池牌。'},
+  {hand:['K','♠'],hand2:['10','♦'],pos:'MP',action:'open',correct:'fold',scenario:'翻前第一次行动，前面无人加注。',reason:'KTo在MP位太弱，紧凶打法弃牌。'},
+  {hand:['6','♥'],hand2:['6','♣'],pos:'CO',action:'open',correct:'raise',scenario:'前面全部弃牌到CO位。',reason:'66在CO位可以开池加注，中三条价值巨大。'},
+  {hand:['A','♠'],hand2:['4','♠'],pos:'BTN',action:'vs-open',correct:'call',scenario:'MP位开池加注，CO弃牌，你在BTN。',reason:'A4s在BTN位跟注，有同花和反超潜力。'},
+  {hand:['K','♥'],hand2:['9','♦'],pos:'SB',action:'vs-steal',correct:'fold',scenario:'BTN位偷盲加注，你在SB位。',reason:'K9o在SB位对抗偷盲太弱。'},
+  {hand:['A','♠'],hand2:['Q','♦'],pos:'BB',action:'vs-steal',correct:'raise',scenario:'BTN位偷盲加注，SB弃牌，你在BB。',reason:'AQo在BB位可以3bet反偷盲。'},
+  {hand:['J','♦'],hand2:['9','♠'],pos:'BTN',action:'open',correct:'raise',scenario:'前面全部弃牌到BTN位。',reason:'J9s在BTN位可以开池，范围较宽。'},
+  {hand:['8','♣'],hand2:['8','♥'],pos:'UTG+1',action:'open',correct:'raise',scenario:'UTG弃牌，你在+1位。',reason:'88在UTG+1可以开池加注。'},
+  {hand:['A','♥'],hand2:['2','♠'],pos:'MP',action:'vs-open',correct:'call',scenario:'UTG开池加注，你在MP位。',reason:'A2s在MP面对UTG开池可以跟注。'},
+  {hand:['K','♦'],hand2:['J','♥'],pos:'CO',action:'vs-open',correct:'fold',scenario:'UTG开池加注，MP跟注，你在CO位。',reason:'KJo面对UTG加注和MP跟注太弱。'},
+  {hand:['Q','♠'],hand2:['8','♠'],pos:'BTN',action:'open',correct:'raise',scenario:'前面全部弃牌到BTN位。',reason:'Q8s在BTN位可以开池。'},
+  {hand:['3','♠'],hand2:['3','♥'],pos:'SB',action:'open',correct:'call',scenario:'前面全部弃牌，你在SB位。',reason:'33在SB位补齐盲注看翻牌。'},
+  {hand:['A','♠'],hand2:['10','♦'],pos:'UTG',action:'facing-3bet',correct:'fold',scenario:'你UTG开池，MP位3bet，你手持ATo。',reason:'ATo面对3bet容易被统治，弃牌为妙。'},
+  {hand:['K','♠'],hand2:['Q','♠'],pos:'MP',action:'facing-3bet',correct:'raise',scenario:'你MP开池，CO位3bet，你手持KQs。',reason:'KQs是强牌可以4bet反击。'},
+  {hand:['9','♥'],hand2:['9','♣'],pos:'CO',action:'facing-3bet',correct:'call',scenario:'你CO开池，BTN位3bet，你手持99。',reason:'99面对3bet可以跟注看翻牌。'},
+  {hand:['J','♠'],hand2:['10','♥'],pos:'BTN',action:'facing-3bet',correct:'call',scenario:'你BTN开池，SB位3bet，你手持JTo。',reason:'JTo面对3bet有位置可以跟注。'},
+  {hand:['A','♥'],hand2:['5','♥'],pos:'SB',action:'vs-steal',correct:'raise',scenario:'BTN位偷盲加注，你在SB位。',reason:'A5s在SB位可以3bet反偷。'},
+  {hand:['7','♣'],hand2:['6','♣'],pos:'BB',action:'vs-steal',correct:'call',scenario:'BTN位偷盲加注，SB弃牌，你在BB。',reason:'76s在BB位跟注防守有潜力。'},
+  {hand:['K','♠'],hand2:['J','♦'],pos:'UTG',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'KJo在UTG位是标准开池。'},
+  {hand:['A','♠'],hand2:['7','♠'],pos:'MP',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'A7s在MP位可以开池加注。'},
+  {hand:['Q','♥'],hand2:['9','♥'],pos:'CO',action:'open',correct:'fold',scenario:'前面全部弃牌到CO位。',reason:'Q9o在CO位太弱，建议弃牌。'},
+  {hand:['10','♠'],hand2:['8','♠'],pos:'BTN',action:'vs-open',correct:'call',scenario:'CO位开池加注，你在BTN位。',reason:'T8s在BTN有位置跟注看翻牌。'},
+  {hand:['5','♠'],hand2:['4','♠'],pos:'SB',action:'open',correct:'call',scenario:'前面全部弃牌，你在SB位。',reason:'54s在SB位补齐盲注即可。'},
+  {hand:['A','♠'],hand2:['K','♦'],pos:'BB',action:'vs-steal',correct:'raise',scenario:'CO位偷盲加注，SB弃牌，你在BB。',reason:'AK在BB位必须3bet反击。'},
+  {hand:['J','♠'],hand2:['J','♥'],pos:'MP',action:'facing-3bet',correct:'raise',scenario:'你MP开池，BTN位3bet，你手持JJ。',reason:'JJ是强对子可以4bet。'},
+  {hand:['A','♠'],hand2:['3','♠'],pos:'BTN',action:'vs-open',correct:'raise',scenario:'CO位溜入，你在BTN手持A3s。',reason:'CO溜入时BTN可以用A3s加注隔离。'},
+  {hand:['K','♠'],hand2:['2','♣'],pos:'BB',action:'vs-steal',correct:'fold',scenario:'BTN位偷盲加注，SB弃牌，你在BB。',reason:'K2o太弱不值得防守。'},
+  {hand:['10','♥'],hand2:['9','♥'],pos:'MP',action:'open',correct:'raise',scenario:'UTG弃牌，你在MP位。',reason:'T9s在MP位可以开池。'},
+  {hand:['A','♠'],hand2:['Q','♠'],pos:'BTN',action:'vs-3bet',correct:'raise',scenario:'CO位开池你加注，BB位3bet，你在BTN。',reason:'AQs是强牌可以4bet。'},
+  {hand:['6','♥'],hand2:['5','♠'],pos:'SB',action:'vs-steal',correct:'fold',scenario:'BTN位偷盲加注，你在SB位。',reason:'65o太弱，SB位直接弃牌。'},
+  {hand:['K','♠'],hand2:['9','♠'],pos:'CO',action:'vs-open',correct:'call',scenario:'MP位开池加注，你在CO位手持K9s。',reason:'K9s在CO位可以跟注。'},
+  {hand:['Q','♠'],hand2:['J','♦'],pos:'UTG',action:'open',correct:'fold',scenario:'翻前第一次行动，前面无人加注。',reason:'QJo在UTG位太弱，紧凶打法弃牌。'},
+  {hand:['A','♠'],hand2:['8','♥'],pos:'BB',action:'vs-steal',correct:'call',scenario:'BTN位偷盲加注，SB弃牌，你在BB。',reason:'A8o在BB位可以跟注防守。'},
+  {hand:['7','♥'],hand2:['7','♣'],pos:'CO',action:'vs-open',correct:'call',scenario:'MP位开池加注，你在CO位手持77。',reason:'77在CO位面对MP开池跟注，中三条赢大池。'},
+  {hand:['K','♠'],hand2:['Q','♥'],pos:'BTN',action:'facing-3bet',correct:'call',scenario:'你BTN开池，SB位3bet，BB位弃牌。',reason:'KQo面对SB的3bet有位置可跟注。'},
+  {hand:['A','♠'],hand2:['J','♣'],pos:'CO',action:'open',correct:'raise',scenario:'前面全部弃牌到CO位。',reason:'AJo在CO位标准开池加注。'},
+  {hand:['10','♠'],hand2:['7','♠'],pos:'BTN',action:'vs-open',correct:'call',scenario:'CO位开池，你在BTN手持T7s。',reason:'T7s在BTN有位置跟注看翻牌。'},
+  {hand:['K','♠'],hand2:['4','♠'],pos:'SB',action:'open',correct:'call',scenario:'前面全部弃牌，你在SB位。',reason:'K4s在SB位补齐盲注即可。'},
+  {hand:['Q','♠'],hand2:['Q','♥'],pos:'BTN',action:'vs-3bet',correct:'raise',scenario:'CO位开池你加注，SB位3bet，你在BTN。',reason:'QQ是强牌面对3bet可以4bet。'},
+  {hand:['8','♠'],hand2:['3','♣'],pos:'BB',action:'vs-steal',correct:'fold',scenario:'BTN位偷盲加注，SB弃牌，你在BB。',reason:'83o是垃圾牌不值得防守。'},
+  {hand:['A','♠'],hand2:['K','♠'],pos:'MP',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'AKs在MP位是顶级强牌必须加注。'},
+  {hand:['J','♠'],hand2:['9','♥'],pos:'CO',action:'vs-open',correct:'fold',scenario:'UTG开池加注，MP跟注，你在CO位。',reason:'J9o面对UTG开池太弱，弃牌。'},
+  {hand:['K','♠'],hand2:['10','♣'],pos:'SB',action:'vs-steal',correct:'call',scenario:'CO位偷盲加注，你在SB位手持KTo。',reason:'KTo在SB位对抗CO偷盲可以跟注。'},
+  {hand:['A','♠'],hand2:['6','♥'],pos:'CO',action:'open',correct:'raise',scenario:'前面全部弃牌到CO位。',reason:'A6o在CO位可以开池加注。'},
+  {hand:['Q','♠'],hand2:['10','♥'],pos:'MP',action:'open',correct:'raise',scenario:'UTG弃牌，你在MP位。',reason:'QTo在MP位可以开池加注。'},
+  {hand:['9','♠'],hand2:['8','♥'],pos:'BTN',action:'facing-3bet',correct:'fold',scenario:'你BTN开池，SB位3bet，BB位跟注3bet。',reason:'98o面对3bet和跟注太弱。'},
+  {hand:['K','♠'],hand2:['J','♣'],pos:'SB',action:'vs-steal',correct:'raise',scenario:'CO位偷盲加注，你在SB手持KJo。',reason:'KJo在SB位可以3bet反偷。'},
+  {hand:['4','♠'],hand2:['4','♥'],pos:'BTN',action:'vs-open',correct:'call',scenario:'CO位开池加注，你在BTN手持44。',reason:'小对子BTN位跟注，中三条赢大池。'},
+  {hand:['A','♠'],hand2:['2','♦'],pos:'BB',action:'vs-steal',correct:'fold',scenario:'BTN位偷盲加注到3BB，SB弃牌。',reason:'A2o在BB位对抗满池偷盲太弱。'},
+  {hand:['K','♠'],hand2:['Q','♣'],pos:'UTG+1',action:'open',correct:'raise',scenario:'UTG弃牌，你在+1位。',reason:'KQo在UTG+1可以开池。'},
+  {hand:['J','♠'],hand2:['J','♣'],pos:'SB',action:'vs-steal',correct:'raise',scenario:'BTN位偷盲加注，你在SB位手持JJ。',reason:'JJ在SB位可以3bet反击偷盲。'}
 ];
 
 const preflopDuel={
@@ -1066,6 +1162,56 @@ const IDENTITY_SCENARIOS=[
   {desc:'翻牌对手下注，用后门同花听牌跟注(float)，转牌对手过牌后下注拿下。',isFish:false,reason:'浮板(float)技巧——利用位置和后续牌面变化偷池。'},
   {desc:'河牌面有4张顺子，对手下重注，弃掉了手中的三条，对手亮出顺子。',isFish:false,reason:'读牌精准的大弃牌！鲨鱼能做正确弃牌。'},
   {desc:'CO位开池BTN3bet，CO用A5s 4bet诈唬，迫使对手弃牌。',isFish:false,reason:'高级4bet诈唬！A5s有阻断牌效果。'},
+  {desc:'翻前AK加注，翻牌三张小牌，持续下注被跟注，转牌过牌，河牌放弃。',isFish:false,reason:'AK没中时控制底池，适时放弃避免损失。'},
+  {desc:'翻前用72o跟注3bet，翻牌中了两对赢了底池，嘲笑3bet的人。',isFish:true,reason:'72o跟注3bet是严重-EV行为，赢了一次下次会输十次。'},
+  {desc:'翻牌击中顶对顶踢脚，湿润面有人check-raise，立即全压。',isFish:true,reason:'顶对在湿润面被check-raise时全压太冒进，应该考虑弃牌。'},
+  {desc:'BTN位置用同花连张跟注UTG加注，翻牌听顺转牌听花，对手下注时加注半诈唬。',isFish:false,reason:'听牌加注是标准半诈唬，有位置优势。'},
+  {desc:'翻前拿到AA慢打到河牌，对手成顺后输了大池。',isFish:true,reason:'AA必须翻前加注造池，慢打AA经常让对手反超。'},
+  {desc:'河牌发现自己输定了，但仍然下注诈唬试图让对手弃牌，对手有坚果跟注。',isFish:true,reason:'明知对手范围强还诈唬是自取灭亡。'},
+  {desc:'翻牌击中三条，过牌让对手继续诈唬，转牌加注拿下底池。',isFish:false,reason:'埋伏三条是经典鲨鱼打法，诱骗对手继续诈唬。'},
+  {desc:'面对紧手玩家的3bet，在小盲位用AJo跟注，翻牌没中弃牌。',isFish:true,reason:'面对紧手3bet AJo不够强，不该跟注。'},
+  {desc:'CO位用KJo开池，BTN位3bet后直接弃牌，没有浪费筹码。',isFish:false,reason:'KJo面对3bet弃牌是正确决定，不被缠打。'},
+  {desc:'翻牌中了底对+卡顺听牌，在有利位置跟注对手下注，转牌没中放弃。',isFish:false,reason:'有听牌时便宜跟注看转牌，没中及时放弃。'},
+  {desc:'每次输了大池后马上买入继续玩，连续三手牌全压送光。',isFish:true,reason:'tilt后连续全压是典型鱼行为，情绪失控。'},
+  {desc:'MP位用ATo开池，CO位3bet，跟注后翻牌没中，对手下注时弃牌。',isFish:true,reason:'ATo面对3bet太弱不该跟注，翻后更难打。'},
+  {desc:'翻牌KQJ两同花，手持AT已经成顺，过牌加注拿下大池。',isFish:false,reason:'成坚果顺子后过牌加注最大化价值。'},
+  {desc:'翻前用A5s做3bet诈唬，翻牌继续下注迫使对手弃牌。',isFish:false,reason:'A5s是优质3bet诈唬牌，有阻断效果和高牌补牌。'},
+  {desc:'翻牌击中两对后慢打，转牌让对手反超后全压支付。',isFish:true,reason:'两对是强牌但需要保护，慢打可能被反超。'},
+  {desc:'SB位用32o补齐盲注，翻牌击中底对，跟注三条街支付对手价值。',isFish:true,reason:'32o在SB位都不该玩，中了底对还支付三条街。'},
+  {desc:'翻前UTG用KK加注，翻牌A高面下注被跟注，转牌对手反加后弃牌。',isFish:false,reason:'KK在A高面面对反加可以弃牌，读准对手范围。'},
+  {desc:'河牌面有同花可能，用中等牌下注三分之二底池获取薄价值。',isFish:false,reason:'薄价值下注是鲨鱼获利的重要手段。'},
+  {desc:'翻前用QJo在UTG位溜入，翻牌中了Q，跟注三条街输给AQ。',isFish:true,reason:'QJo在UTG位不该玩，中了顶对还输给更好的Q。'},
+  {desc:'翻牌同花听牌+两头顺听牌，直接全压诈唬，对手顶对弃牌。',isFish:false,reason:'强听牌全压有极高的弃牌率和胜率。'},
+  {desc:'翻前加注翻牌持续下注，转牌没中直接放弃，没有盲目诈唬。',isFish:false,reason:'c-bet后没中就放弃，避免无效诈唬。'},
+  {desc:'拿到AA后过度兴奋，翻前全压100BB，只赢下盲注。',isFish:true,reason:'AA全压100BB赶走了所有对手，损失价值。'},
+  {desc:'翻牌中了两头顺听牌，计算赔率后弃牌因为跟注赔率不够。',isFish:false,reason:'赔率不合适时放弃听牌是正确选择。'},
+  {desc:'翻前用K5s跟注3bet，翻牌K-high下注三条街被顶对Q跟注。',isFish:true,reason:'K5s跟注3bet太松，中K还是踢脚问题。'},
+  {desc:'大盲位用A8o防守偷盲，翻牌A高面，转牌对手下注时加注拿下。',isFish:false,reason:'A8o防守偷盲合理，中A后加注拿回底池。'},
+  {desc:'翻前用同花连张跟注加注，翻牌听顺转牌成顺，价值下注三条街。',isFish:false,reason:'成顺后价值下注三条街最大化收益。'},
+  {desc:'翻前弃牌后看到翻牌中了四条，后悔拍桌子影响其他人。',isFish:true,reason:'弃牌后抱怨是鱼的表现，鲨鱼关注下一手牌。'},
+  {desc:'翻牌用顶对下注被加注，读准对手是两对后果断弃牌。',isFish:false,reason:'顶对面对加注读懂牌面后弃牌，避免损失。'},
+  {desc:'BTN位用92o跟注CO位加注，翻牌中了9，支付对手三条街。',isFish:true,reason:'92o在任何位置都不该跟注加注。'},
+  {desc:'翻前加注翻牌全没中，但持续下注迫使对手弃牌成功偷池。',isFish:false,reason:'c-bet偷池是标准鲨鱼战术。'},
+  {desc:'翻前用QQ加注，翻牌AKQ中了三条，慢打到河牌只赢了一点。',isFish:true,reason:'三条在湿润面应该快速造池，慢打损失价值。'},
+  {desc:'翻前小对子跟注加注，翻牌中了三条，过牌加注拿下大池。',isFish:false,reason:'中三条后过牌加注是最佳打法。'},
+  {desc:'翻前用A9o跟注3bet，翻牌A高面跟注三条街输给AK。',isFish:true,reason:'A9o跟注3bet踢脚问题严重，中A也是送钱。'},
+  {desc:'连续输了3手牌后深呼吸调整心态，收紧范围等待好牌。',isFish:false,reason:'情绪管理是鲨鱼必备素质，连败后收紧范围。'},
+  {desc:'翻前加注翻牌中了两对，快速下注造池。',isFish:false,reason:'两对是强牌需要保护，快速造池拿价值。'},
+  {desc:'翻牌有顺面，手持对子跟注对手下注，认为对手在诈唬，河牌对手再下注才弃牌。',isFish:true,reason:'有顺面时对子面对下注应直接弃牌。'},
+  {desc:'SB位补齐盲注，翻牌中了卡顺，赔率不合适还跟注，转牌没中弃牌。',isFish:true,reason:'卡顺听牌赔率极差，不应跟注。'},
+  {desc:'翻前用TT加注翻牌中了三条，对手下注时直接加注全压拿下。',isFish:false,reason:'三条要快速造池，拿最大价值。'},
+  {desc:'翻前不加注溜入，翻牌中了两对，对手下注时加注拿下底池。',isFish:true,reason:'翻前溜入是弱打法，应该加注造池。'},
+  {desc:'翻牌同花听牌，计算赔率后发现跟注正EV，跟注后转牌中花拿下。',isFish:false,reason:'计算赔率后的正确跟注是鲨鱼基本功。'},
+  {desc:'翻前用AJs在UTG位溜入，翻牌中了A，对手下注时弃牌。',isFish:true,reason:'AJs在UTG必须加注，溜入浪费了牌力。'},
+  {desc:'翻牌全是小牌，手持AK持续下注被跟注，转牌过牌弃牌。',isFish:false,reason:'AK不中时及时止损，避免无效诈唬。'},
+  {desc:'翻前用KQs在BTN位3bet SB位，翻牌不中但持续下注拿下底池。',isFish:false,reason:'有位置3bet后c-bet是标准操作。'},
+  {desc:'翻前加注翻牌中中对，对手下注时弃牌因为牌面有顺子可能。',isFish:false,reason:'中对在湿润面弃牌是正确选择。'},
+  {desc:'翻前用AA加注，翻牌三张同花没有A花色，对手下注时弃牌。',isFish:true,reason:'AA翻前加注后不该在翻牌弃牌，只有一张牌威胁。'},
+  {desc:'UTG位用KK加注被4bet，直接5bet全压100BB。',isFish:true,reason:'KK被4bet时可以跟注看翻牌，直接全压赶走了所有诈唬。'},
+  {desc:'翻前用56s跟注加注，翻牌中了卡顺+后门花，float跟注后转牌价值下注。',isFish:false,reason:'float听牌利用位置优势偷池，高级技巧。'},
+  {desc:'翻前AK加注翻牌QJx面，持续下注被跟注转牌放弃。',isFish:false,reason:'AK没中时只打一枪就放弃，避免损失。'},
+  {desc:'翻牌用顶对下注，转牌牌面变湿润，过牌控制底池，河牌对手下注后弃牌。',isFish:false,reason:'湿润面控制底池避免损失，鲨鱼打法。'},
+  {desc:'翻前用KJo在UTG加注，翻牌没中但持续下注，被加注后弃牌。',isFish:true,reason:'KJo在UTG开池太松，翻后难打。'}
 ];
 
 const fishOrShark={
@@ -1260,6 +1406,54 @@ const MIND_SCENARIOS = [
   {board:'A♠ 7♥ 2♠ 8♠',action:'翻前加注，翻牌下注，转牌下注',opts:['顶对A','同花','两对','三条'],correct:0,explain:'翻前加注翻牌转牌持续下注，顶对A最常见。'},
   {board:'K♦ Q♥ J♠',action:'翻前加注被3bet，跟注，翻牌过牌加注',opts:['顺子','顶对','超对','空气'],correct:0,explain:'翻前跟注3bet翻牌过牌加注，过牌加注最可能是顺子。'},
   {board:'8♠ 6♠ 5♥ 4♣',action:'翻前溜入，翻牌跟注，转牌加注',opts:['顺子','顶对','两对','听牌'],correct:0,explain:'转牌成顺面，翻前溜入转牌加注，顺子最合理。'},
+  {board:'A♠ K♠ 2♣',action:'翻前溜入，翻牌下注',opts:['顶对A','顶对K','底对','听花'],correct:0,explain:'翻前溜入翻牌下注，顶对A最常见。'},
+  {board:'9♣ 8♣ 7♠',action:'翻前加注，翻牌下注',opts:['超对','顶对9','顺子','同花听牌'],correct:2,explain:'987湿润面，顺子已成。'},
+  {board:'A♥ 9♥ 5♠',action:'翻前3bet，翻牌下注',opts:['顶对A','超对','同花听牌','空气'],correct:1,explain:'3bet范围紧，超对最合理。'},
+  {board:'K♠ 6♠ 6♥',action:'翻前溜入，翻牌反加',opts:['明三条6','顶对K','中对6','同花听牌'],correct:0,explain:'翻前溜入翻牌反加，中了三条。'},
+  {board:'Q♠ 5♠ 4♥',action:'翻前加注，翻牌过牌跟注',opts:['顶对Q','同花听牌','中对','空气'],correct:3,explain:'翻前加注翻牌过牌跟注，没中牌的高张。'},
+  {board:'J♠ 8♠ 2♣',action:'翻前跟注3bet，翻牌过牌加注',opts:['顶对J','同花听牌','三条','超对'],correct:1,explain:'同花听牌是常见半诈唬牌。'},
+  {board:'A♣ 8♣ 8♠',action:'翻前溜入，翻牌下注',opts:['顶对A','明三条8','对8','听花'],correct:1,explain:'翻前溜入翻牌下注，三条8最合理。'},
+  {board:'K♥ J♥ 10♠',action:'翻前加注，翻牌过牌加注',opts:['顺子','超对','顶对K','听顺'],correct:0,explain:'KJ10面顺子已成。'},
+  {board:'10♠ 9♠ 5♦',action:'翻前溜入，翻牌下注转牌下注',opts:['顶对10','两对','听顺','同花听牌'],correct:1,explain:'连续下注两街，两对牌力够强。'},
+  {board:'A♠ Q♠ 10♥ 7♠',action:'翻前加注，翻牌下注，转牌下注',opts:['顶对A','同花','两对','顶对Q'],correct:0,explain:'翻前加注者连续下注，顶对A最常见。'},
+  {board:'6♠ 5♠ 4♥',action:'翻前溜入，翻牌反加',opts:['顺子','顶对6','两对','同花听牌'],correct:0,explain:'溜入者翻牌反加，最可能已成顺子。'},
+  {board:'K♣ Q♥ 7♣ 3♠',action:'翻前加注，翻牌下注转牌过牌',opts:['顶对K','顶对Q','听花','空气'],correct:3,explain:'翻前加注翻牌下注转牌过牌，示弱牌。'},
+  {board:'J♣ 10♣ 9♣',action:'翻前加注被跟注，翻牌过牌跟注',opts:['同花','顺子','超对','顶对J'],correct:2,explain:'翻前加注翻牌过牌跟注，超对在湿润面慢打。'},
+  {board:'A♥ 6♥ 3♠ 2♦',action:'翻前溜入，翻牌过牌，转牌下注',opts:['顶对A','底对','顺子','听顺'],correct:0,explain:'转牌下注最可能是顶对A。'},
+  {board:'K♠ J♠ 7♦ 2♠ 10♣',action:'翻前加注，翻牌下注转牌下注河牌下注',opts:['同花','顶对K','顺子','两对'],correct:1,explain:'翻前加注连下三条街，顶对K标准价值。'},
+  {board:'9♦ 8♥ 7♦',action:'翻前加注，翻牌过牌',opts:['顶对9','顺子听牌','超对','空气'],correct:3,explain:'翻前加注翻牌过牌示弱，没中牌。'},
+  {board:'A♠ 2♠ 2♥',action:'翻前溜入，翻牌反加',opts:['明三条2','顶对A','对2','同花听牌'],correct:0,explain:'翻前溜入翻牌反加，三条2。'},
+  {board:'Q♠ 8♠ 5♣',action:'翻前加注，翻牌下注被跟注，转牌过牌',opts:['顶对Q','同花听牌','中对','空气'],correct:3,explain:'翻前加注翻牌c-bet被跟注转牌过牌，A高。'},
+  {board:'10♥ 8♠ 7♣ 5♦',action:'翻前跟注3bet，翻牌过牌，转牌下注',opts:['顺子','超对','顶对10','两对'],correct:0,explain:'跟注3bet后转牌下注，顺子最合理。'},
+  {board:'K♠ 9♠ 3♦',action:'翻前加注，翻牌下注',opts:['顶对K','超对','同花听牌','空气'],correct:0,explain:'翻前加注翻牌c-bet，顶对K最常见。'},
+  {board:'A♦ 10♣ 10♠ 6♠',action:'翻前溜入，翻牌过牌，转牌加注',opts:['明三条10','顶对A','两对','听花'],correct:0,explain:'翻前溜入转牌加注，三条10最合理。'},
+  {board:'K♣ Q♣ J♠ 9♠',action:'翻前加注，翻牌下注，转牌下注',opts:['顺子','顶对K','超对','听顺'],correct:0,explain:'KQJ9面顺子已成，连续下注顺子价值。'},
+  {board:'7♠ 6♥ 4♣',action:'翻前溜入，翻牌下注',opts:['顶对7','两对','顺子听牌','空气'],correct:0,explain:'翻前溜入翻牌下注，顶对7合理。'},
+  {board:'A♠ 5♠ 5♥ 2♣',action:'翻前加注，翻牌下注，转牌下注',opts:['顶对A','明三条5','两对','同花听牌'],correct:0,explain:'翻前加注者连下两注，顶对A价值。'},
+  {board:'J♠ 9♠ 3♥',action:'翻前加注被3bet，跟注，翻牌过牌跟注',opts:['顶对J','听花','超对','空气'],correct:1,explain:'跟注3bet翻牌过牌跟注，听花合理。'},
+  {board:'Q♣ 9♣ 5♠ 4♣',action:'翻前溜入，翻牌跟注，转牌加注',opts:['顶对Q','同花','两对','听花'],correct:1,explain:'转牌到♣，加注意味同花已成。'},
+  {board:'K♦ 7♣ 7♥ 3♠ 5♣',action:'翻前加注，翻牌下注，转牌过牌，河牌下注',opts:['顶对K','三条7','两对','顶对7'],correct:0,explain:'翻前加注河牌下注，顶对K价值。'},
+  {board:'A♠ 3♠ 3♣',action:'翻前溜入，翻牌反加全压',opts:['三条3','顶对A','对3','空气'],correct:0,explain:'翻前溜入翻牌全压，三条3无疑。'},
+  {board:'K♠ Q♠ 7♦ 6♠',action:'翻前加注，翻牌过牌，转牌下注',opts:['顶对K','同花','听花+卡顺','超对'],correct:2,explain:'转牌到♠，听花+卡顺是半诈唬牌型。'},
+  {board:'10♠ 9♠ 6♥ 5♣',action:'翻前溜入，翻牌下注转牌下注',opts:['顺子','顶对10','两对','听牌'],correct:0,explain:'T965面翻前溜入连下两注，顺子。'},
+  {board:'A♠ Q♠ 7♦ 2♥',action:'翻前加注，翻牌下注，转牌过牌跟注',opts:['顶对A','顶对Q','同花听牌','KQ'],correct:0,explain:'翻前加注翻牌c-bet转牌过牌跟注，顶对A。'},
+  {board:'9♠ 7♥ 5♦ 3♠',action:'翻前溜入，翻牌跟注，转牌加注',opts:['顺子','顶对9','两对','听花'],correct:0,explain:'转牌成顺面，加注最可能是顺子。'},
+  {board:'K♠ 2♠ 2♦',action:'翻前加注，翻牌下注被跟注，转牌过牌',opts:['顶对K','三条2','对2','空气'],correct:3,explain:'翻前加注翻牌c-bet被跟注转牌过牌，AK。'},
+  {board:'A♣ Q♣ J♠ 10♣ 9♣',action:'翻前加注，每条街都下注',opts:['同花','顺子','顶对A','两对'],correct:0,explain:'河牌到♣，翻前加注连下四条街，同花。'},
+  {board:'J♠ 6♠ 5♣',action:'翻前跟注3bet，翻牌过牌加注',opts:['顶对J','听花+卡顺','超对','同花听牌'],correct:1,explain:'跟注3bet后翻牌过牌加注，听花+卡顺半诈唬。'},
+  {board:'Q♠ 9♠ 8♥ 4♠',action:'翻前溜入，翻牌过牌，转牌下注',opts:['顶对Q','同花','顺子','听花'],correct:1,explain:'转牌到♠，下注意味着同花。'},
+  {board:'A♠ 8♠ 5♦ 3♠',action:'翻前加注，翻牌下注，转牌再下注',opts:['顶对A','同花','两对','听花'],correct:0,explain:'翻前加注连下两注，顶对A标准价值。'},
+  {board:'K♠ 10♠ 5♥ 8♥',action:'翻前溜入，翻牌过牌跟注，转牌反加',opts:['顶对K','同花','两对','听花'],correct:2,explain:'转牌反加最可能是成两对。'},
+  {board:'7♠ 6♥ 5♠ 4♣ 3♥',action:'翻前加注，翻牌下注转牌下注河牌下注',opts:['顺子','顶对7','超对','同花'],correct:0,explain:'公共牌已成顺子面，连下三注。'},
+  {board:'A♠ 10♠ 5♠ 2♣',action:'翻前加注，翻牌下注转牌过牌',opts:['顶对A','同花','两对','空气'],correct:0,explain:'翻前加注翻牌c-bet转牌过牌，顶对A。'},
+  {board:'K♠ 9♠ 5♦ 7♣',action:'翻前溜入，翻牌下注转牌下注',opts:['顶对K','两对','顶对9','听牌'],correct:1,explain:'连下两注，两对合理。'},
+  {board:'Q♠ J♠ 9♠ 4♥',action:'翻前加注，翻牌下注转牌再下注',opts:['同花','顶对Q','顺子','超对'],correct:0,explain:'三张♠面，翻前加注者中同花了。'},
+  {board:'9♠ 5♥ 4♠ 3♥',action:'翻前溜入，翻牌跟注，转牌加注',opts:['顶对9','两对','顺子','听花'],correct:2,explain:'转牌成顺面，加注是顺子。'},
+  {board:'A♠ J♠ 6♣',action:'翻前加注，翻牌过牌跟注',opts:['顶对A','同花听牌','顶对J','空气'],correct:1,explain:'翻前加注翻牌过牌跟注，同花听牌合理。'},
+  {board:'8♠ 7♠ 3♣ 5♥',action:'翻前溜入，翻牌过牌跟注，转牌下注',opts:['顺子','顶对8','两对','听牌'],correct:0,explain:'转牌成顺面，下注意味着顺子已成。'},
+  {board:'10♠ 5♠ 4♥ 5♣',action:'翻前加注，翻牌下注转牌过牌跟注',opts:['顶对10','三条5','两对','同花听牌'],correct:0,explain:'翻前加注翻牌c-bet转牌过牌跟注，顶对10。'},
+  {board:'K♠ 7♠ 5♣ 9♥ 3♠',action:'翻前加注，翻牌过牌，转牌过牌，河牌下注',opts:['同花','顶对K','超对','K高'],correct:0,explain:'河牌到♠，下注意味着同花。'},
+  {board:'A♠ J♠ 10♥ 9♦',action:'翻前跟注3bet，翻牌过牌加注',opts:['顶对A','顺子','同花听牌','超对'],correct:1,explain:'跟注3bet翻牌过牌加注，顺子最合理。'}
 ];
 
 const mindRead = {
@@ -1344,7 +1538,57 @@ const PUSH_SCENARIOS = [
   {hand:['5','♠'],hand2:['5','♥'],pos:'UTG',stack:9,correct:false,explain:'UTG位9BB推55太弱。'},
   {hand:['9','♠'],hand2:['3','♦'],pos:'BTN',stack:12,correct:false,explain:'BTN位12BB推93o不在推范围内。'},
   {hand:['7','♠'],hand2:['6','♠'],pos:'BTN',stack:8,correct:true,explain:'BTN位8BB推76s是标准。'},
-  {hand:['A','♠'],hand2:['J','♠'],pos:'UTG',stack:15,correct:false,explain:'UTG位15BB不应该推AJs。'},
+  {hand:['A','♠'],hand2:['J','♠'],pos:'UTG',stack:15,correct:false,explain:'UTG位15BB不应该推AJs。'},,
+  {hand:['A','♠'],hand2:['5','♥'],pos:'BTN',stack:8,correct:true,explain:'BTN位8BB推A5s标准操作。'},
+  {hand:['K','♠'],hand2:['10','♥'],pos:'CO',stack:10,correct:true,explain:'CO位10BB推KTo标准。'},
+  {hand:['7','♠'],hand2:['7','♥'],pos:'UTG',stack:9,correct:true,explain:'UTG位9BB推77是标准+EV。'},
+  {hand:['Q','♠'],hand2:['J','♦'],pos:'MP',stack:11,correct:false,explain:'MP位11BB推QJo太松。'},
+  {hand:['J','♠'],hand2:['9','♠'],pos:'SB',stack:8,correct:true,explain:'SB位8BB推J9s标准。'},
+  {hand:['A','♠'],hand2:['4','♦'],pos:'CO',stack:12,correct:true,explain:'CO位12BB推A4o是标准。'},
+  {hand:['K','♠'],hand2:['8','♦'],pos:'BTN',stack:7,correct:true,explain:'BTN位7BB推K8o标准。'},
+  {hand:['10','♠'],hand2:['9','♠'],pos:'MP',stack:10,correct:false,explain:'MP位10BB推T9s太松。'},
+  {hand:['8','♠'],hand2:['8','♥'],pos:'SB',stack:6,correct:true,explain:'SB位6BB推88标准。'},
+  {hand:['A','♠'],hand2:['K','♠'],pos:'UTG',stack:15,correct:true,explain:'UTG位15BB推AKs毫无疑问。'},
+  {hand:['Q','♠'],hand2:['10','♦'],pos:'BTN',stack:14,correct:false,explain:'BTN位14BB推QTo太松。'},
+  {hand:['K','♠'],hand2:['Q','♠'],pos:'SB',stack:8,correct:true,explain:'SB位8BB推KQs标准。'},
+  {hand:['A','♠'],hand2:['2','♠'],pos:'MP',stack:7,correct:true,explain:'MP位7BB推A2s标准。'},
+  {hand:['J','♠'],hand2:['10','♦'],pos:'UTG',stack:6,correct:true,explain:'UTG位6BB推JTo是标准。'},
+  {hand:['9','♠'],hand2:['8','♠'],pos:'BTN',stack:5,correct:true,explain:'BTN位5BB推98s标准。'},
+  {hand:['K','♠'],hand2:['J','♥'],pos:'MP',stack:15,correct:false,explain:'MP位15BB推KJo太松。'},
+  {hand:['Q','♠'],hand2:['9','♠'],pos:'CO',stack:8,correct:true,explain:'CO位8BB推Q9s标准。'},
+  {hand:['10','♠'],hand2:['8','♠'],pos:'SB',stack:7,correct:true,explain:'SB位7BB推T8s合理。'},
+  {hand:['A','♠'],hand2:['6','♦'],pos:'UTG',stack:9,correct:false,explain:'UTG位9BB推A6o太弱。'},
+  {hand:['K','♠'],hand2:['5','♠'],pos:'BTN',stack:6,correct:true,explain:'BTN位6BB推K5s标准。'},
+  {hand:['7','♠'],hand2:['6','♠'],pos:'BB',stack:4,correct:true,explain:'BB位4BB推76s对抗偷盲标准。'},
+  {hand:['Q','♠'],hand2:['8','♠'],pos:'CO',stack:9,correct:false,explain:'CO位9BB推Q8s太松。'},
+  {hand:['J','♠'],hand2:['J','♥'],pos:'SB',stack:12,correct:true,explain:'SB位12BB推JJ毫无疑问。'},
+  {hand:['A','♠'],hand2:['9','♠'],pos:'BTN',stack:10,correct:true,explain:'BTN位10BB推A9s标准。'},
+  {hand:['K','♠'],hand2:['6','♠'],pos:'SB',stack:7,correct:true,explain:'SB位7BB推K6s合理。'},
+  {hand:['8','♠'],hand2:['5','♠'],pos:'BTN',stack:8,correct:false,explain:'BTN位8BB推85s胜率不足。'},
+  {hand:['A','♠'],hand2:['10','♥'],pos:'MP',stack:12,correct:true,explain:'MP位12BB推ATo标准。'},
+  {hand:['Q','♠'],hand2:['Q','♥'],pos:'CO',stack:20,correct:true,explain:'任何位置任何筹码深度QQ都值得全压。'},
+  {hand:['6','♠'],hand2:['6','♥'],pos:'BTN',stack:12,correct:false,explain:'BTN位12BB推66太松。'},
+  {hand:['K','♠'],hand2:['10','♠'],pos:'CO',stack:7,correct:true,explain:'CO位7BB推KTs标准。'},
+  {hand:['A','♠'],hand2:['K','♦'],pos:'SB',stack:20,correct:true,explain:'SB位20BB推AKs标准。'},
+  {hand:['J','♠'],hand2:['8','♦'],pos:'BTN',stack:7,correct:false,explain:'BTN位7BB推J8o不在范围内。'},
+  {hand:['Q','♠'],hand2:['J','♠'],pos:'UTG',stack:5,correct:true,explain:'UTG位5BB推QJs是标准。'},
+  {hand:['K','♠'],hand2:['9','♦'],pos:'MP',stack:8,correct:true,explain:'MP位8BB推K9o标准。'},
+  {hand:['10','♠'],hand2:['10','♥'],pos:'CO',stack:15,correct:true,explain:'CO位15BB推TT标准。'},
+  {hand:['A','♠'],hand2:['7','♦'],pos:'BTN',stack:9,correct:true,explain:'BTN位9BB推A7o标准。'},
+  {hand:['5','♠'],hand2:['5','♥'],pos:'SB',stack:9,correct:true,explain:'SB位9BB推55标准。'},
+  {hand:['K','♠'],hand2:['Q','♦'],pos:'BB',stack:3,correct:true,explain:'BB位3BB面对偷盲推KQo价值足够。'},
+  {hand:['9','♠'],hand2:['6','♦'],pos:'CO',stack:7,correct:false,explain:'CO位7BB推96o太弱。'},
+  {hand:['A','♠'],hand2:['5','♠'],pos:'UTG',stack:7,correct:true,explain:'UTG位7BB推A5s标准。'},
+  {hand:['J','♠'],hand2:['9','♦'],pos:'MP',stack:6,correct:true,explain:'MP位6BB推J9o合理。'},
+  {hand:['Q','♠'],hand2:['7','♦'],pos:'SB',stack:6,correct:false,explain:'SB位6BB推Q7o太弱。'},
+  {hand:['K','♠'],hand2:['J','♠'],pos:'BTN',stack:14,correct:false,explain:'BTN位14BB推KJs太松。'},
+  {hand:['8','♠'],hand2:['7','♠'],pos:'CO',stack:6,correct:true,explain:'CO位6BB推87s标准。'},
+  {hand:['A','♠'],hand2:['J','♠'],pos:'SB',stack:15,correct:true,explain:'SB位15BB推AJs标准。'},
+  {hand:['K','♠'],hand2:['4','♦'],pos:'BTN',stack:5,correct:true,explain:'BTN位5BB推K4o足够。'},
+  {hand:['Q','♠'],hand2:['10','♠'],pos:'MP',stack:7,correct:false,explain:'MP位7BB推QTs太松。'},
+  {hand:['8','♠'],hand2:['8','♥'],pos:'CO',stack:12,correct:true,explain:'CO位12BB推88标准。'},
+  {hand:['A','♠'],hand2:['Q','♥'],pos:'BTN',stack:20,correct:false,explain:'BTN位20BB推AQo太激进。'},
+  {hand:['10','♠'],hand2:['7','♠'],pos:'SB',stack:6,correct:false,explain:'SB位6BB推T7s胜率不足。'}
 ];
 
 const allinPush = {
@@ -1580,7 +1824,12 @@ function renderAchievements(){
 /* ==============================
    INIT
    ============================== */
-navigate('home');
+  (async function(){
+    const p=new URLSearchParams(window.location.search);
+    const c=p.get('code');
+    if(c&&await validateRedeemCode(c))localStorage.setItem('poker_unlocked','true');
+  })();
+  navigate('home');
 </script>
 </body>
 </html>

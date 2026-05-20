@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#1a0f0a">
+<title>德州扒鸡 — 售后管理系统</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px}
+body{
+  font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background:#1a0f0a;color:#e8d5c4;min-height:100vh;
+  background-image:radial-gradient(ellipse at 50% 0,#2a1a10 0%,#1a0f0a 60%,#0d0805 100%);
+}
+.container{max-width:1000px;margin:0 auto;padding:16px}
+/* Header */
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(240,185,11,0.15);margin-bottom:20px}
+.header h1{font-size:1.3rem;color:#f0b90b;display:flex;align-items:center;gap:8px}
+.header .stats{display:flex;gap:16px;font-size:0.8rem;color:#a09080}
+.header .stats span{display:flex;align-items:center;gap:4px}
+.header .stats strong{color:#f0e8d0}
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid rgba(240,185,11,0.1);padding-bottom:0}
+.tab{padding:10px 20px;border-radius:8px 8px 0 0;cursor:pointer;font-size:0.9rem;color:#a09080;font-weight:600;transition:all 0.2s;border:1px solid transparent;border-bottom:none}
+.tab:hover{color:#f0b90b;background:rgba(240,185,11,0.05)}
+.tab.active{color:#f0b90b;background:rgba(240,185,11,0.1);border-color:rgba(240,185,11,0.15)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+/* Cards */
+.card{background:linear-gradient(135deg,#2a1a10,#1f120a);border-radius:12px;padding:20px;border:1px solid rgba(240,185,11,0.08);margin-bottom:16px}
+.card h3{font-size:1rem;color:#f0b90b;margin-bottom:12px}
+/* Stats Grid */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:linear-gradient(135deg,#2a1a10,#1f120a);border-radius:10px;padding:16px;text-align:center;border:1px solid rgba(240,185,11,0.08)}
+.stat-card .num{font-size:1.8rem;font-weight:800;color:#f0b90b}
+.stat-card .lbl{font-size:0.75rem;color:#a09080;margin-top:4px}
+.stat-card .sub{font-size:0.7rem;color:#6a8a6a;margin-top:2px}
+/* Table */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.85rem}
+th{text-align:left;padding:10px 8px;color:#a09080;font-weight:600;border-bottom:1px solid rgba(240,185,11,0.1);white-space:nowrap;font-size:0.8rem}
+td{padding:10px 8px;border-bottom:1px solid rgba(240,185,11,0.05);vertical-align:middle}
+tr:hover td{background:rgba(240,185,11,0.03)}
+/* Badges */
+.badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:0.7rem;font-weight:600}
+.badge-green{background:rgba(68,204,68,0.15);color:#44cc44}
+.badge-yellow{background:rgba(240,185,11,0.15);color:#f0b90b}
+.badge-red{background:rgba(255,68,68,0.15);color:#ff6666}
+.badge-gray{background:rgba(100,120,140,0.15);color:#8a9aa8}
+.badge-blue{background:rgba(50,150,200,0.15);color:#60b0e0}
+/* Buttons */
+.btn{padding:6px 14px;border-radius:6px;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:4px}
+.btn-primary{background:linear-gradient(135deg,#f0b90b,#d4a008);color:#1a0f0a}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(240,185,11,0.2)}
+.btn-sm{padding:4px 10px;font-size:0.75rem}
+.btn-green{background:rgba(68,204,68,0.15);color:#44cc44;border:1px solid rgba(68,204,68,0.2)}
+.btn-green:hover{background:rgba(68,204,68,0.25)}
+.btn-yellow{background:rgba(240,185,11,0.15);color:#f0b90b;border:1px solid rgba(240,185,11,0.2)}
+.btn-yellow:hover{background:rgba(240,185,11,0.25)}
+.btn-red{background:rgba(255,68,68,0.15);color:#ff6666;border:1px solid rgba(255,68,68,0.2)}
+.btn-red:hover{background:rgba(255,68,68,0.25)}
+.btn-blue{background:rgba(50,150,200,0.15);color:#60b0e0;border:1px solid rgba(50,150,200,0.2)}
+.btn-blue:hover{background:rgba(50,150,200,0.25)}
+.btn-gray{background:rgba(100,120,140,0.15);color:#8a9aa8;border:1px solid rgba(100,120,140,0.2)}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:999;animation:fadeIn 0.2s}
+.modal{background:#2a1a10;border-radius:16px;padding:24px;max-width:480px;width:92%;border:1px solid rgba(240,185,11,0.2);max-height:90vh;overflow-y:auto}
+.modal h3{color:#f0b90b;font-size:1.1rem;margin-bottom:16px}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:0.8rem;color:#a09080;margin-bottom:4px;font-weight:600}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(240,185,11,0.15);background:rgba(0,0,0,0.3);color:#e8d5c4;font-size:0.9rem;outline:none;box-sizing:border-box}
+.form-group input:focus,.form-group textarea:focus{border-color:#f0b90b}
+.form-group textarea{resize:vertical;min-height:60px;font-family:inherit}
+.form-actions{display:flex;gap:8px;margin-top:16px}
+.form-actions .btn{flex:1;justify-content:center;padding:10px}
+/* Search */
+.search-bar{display:flex;gap:8px;margin-bottom:16px}
+.search-bar input{flex:1;padding:10px 14px;border-radius:8px;border:1px solid rgba(240,185,11,0.15);background:rgba(0,0,0,0.3);color:#e8d5c4;font-size:0.9rem;outline:none}
+.search-bar input:focus{border-color:#f0b90b}
+.search-bar input::placeholder{color:#6a5a4a}
+.filter-group{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.filter-tag{padding:4px 12px;border-radius:12px;font-size:0.75rem;cursor:pointer;border:1px solid rgba(240,185,11,0.1);color:#a09080;background:transparent;transition:all 0.2s}
+.filter-tag:hover{color:#f0b90b;border-color:rgba(240,185,11,0.3)}
+.filter-tag.active{background:rgba(240,185,11,0.15);color:#f0b90b;border-color:rgba(240,185,11,0.3)}
+/* Login */
+.login-box{max-width:360px;margin:80px auto;text-align:center}
+.login-box .logo{font-size:3rem;margin-bottom:12px}
+.login-box h2{color:#f0b90b;margin-bottom:6px}
+.login-box .sub{color:#a09080;font-size:0.85rem;margin-bottom:20px}
+.login-box input{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(240,185,11,0.2);background:rgba(0,0,0,0.3);color:#e8d5c4;font-size:1rem;text-align:center;outline:none;margin-bottom:12px;box-sizing:border-box}
+.login-box input:focus{border-color:#f0b90b}
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:10px 24px;border-radius:8px;font-size:0.85rem;z-index:9999;animation:fadeIn 0.3s;pointer-events:none}
+.toast.success{background:rgba(68,204,68,0.9);color:#fff}
+.toast.error{background:rgba(255,68,68,0.9);color:#fff}
+.toast.info{background:rgba(240,185,11,0.9);color:#1a0f0a}
+/* Actions cell */
+.actions-cell{display:flex;gap:4px;flex-wrap:wrap}
+.actions-cell .btn{white-space:nowrap}
+/* Empty state */
+.empty-state{text-align:center;padding:40px 16px;color:#a09080}
+.empty-state .icon{font-size:3rem;margin-bottom:8px}
+.empty-state p{font-size:0.9rem}
+/* Notes popup */
+.notes-preview{font-size:0.75rem;color:#8a7a6a;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.notes-preview:hover{color:#f0b90b}
+/* Code display */
+.code-display{font-family:monospace;font-size:0.8rem;color:#f0b90b;letter-spacing:0.5px;cursor:pointer}
+.code-display:hover{color:#ffd700}
+/* Responsive */
+@media(max-width:600px){
+  .header{flex-direction:column;align-items:flex-start;gap:8px}
+  .header .stats{gap:12px;flex-wrap:wrap}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .search-bar{flex-direction:column}
+  .table-wrap{font-size:0.75rem}
+  td,th{padding:6px 4px}
+  .actions-cell .btn{font-size:0.7rem;padding:3px 6px}
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="container" id="app"></div>
+
+<script>
+/* ==============================
+   CONFIG
+   ============================== */
+const ADMIN_PASSWORD = 'ryj2225';
+const GAME_URL = 'https://baiyunzhi.github.io/poker-ocean/chicken/index.html';
+const REDEEM_SECRET = 'poker-chkn-2026-ryj2225';
+const CODE_PREFIX = 'CHKN';
+const ADMIN_COUNTER_KEY = 'poker_admin_counter';
+const CUSTOMERS_KEY = 'poker_service_customers';
+const PRICE = 29.9;
+
+/* ==============================
+   CRYPTO
+   ============================== */
+async function hmacSign(msg, secret) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(String(msg)));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
+async function generateCode(counter) {
+  const hex = await hmacSign(counter, REDEEM_SECRET);
+  return CODE_PREFIX + '-' + String(counter).padStart(4, '0') + '-' + hex.substring(0, 8);
+}
+
+async function validateCode(code) {
+  if (!code || typeof code !== 'string') return false;
+  code = code.trim().toUpperCase();
+  const parts = code.split('-');
+  if (parts.length !== 3 || parts[0] !== CODE_PREFIX) return false;
+  const counter = parseInt(parts[1], 10);
+  if (isNaN(counter) || counter < 0) return false;
+  return (await generateCode(counter)) === code;
+}
+
+/* ==============================
+   DATA
+   ============================== */
+function getCustomers() {
+  return JSON.parse(localStorage.getItem(CUSTOMERS_KEY) || '[]');
+}
+
+function saveCustomers(customers) {
+  localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(customers));
+}
+
+function getCounter() {
+  return parseInt(localStorage.getItem(ADMIN_COUNTER_KEY) || '0');
+}
+
+function setCounter(val) {
+  localStorage.setItem(ADMIN_COUNTER_KEY, String(val));
+}
+
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+}
+
+function today() {
+  return new Date().toLocaleString('zh-CN');
+}
+
+/* ==============================
+   TOAST
+   ============================== */
+function toast(msg, type) {
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || 'info');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(function() { el.remove(); }, 2000);
+}
+
+/* ==============================
+   COPY
+   ============================== */
+function copyText(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      toast('✅ 已复制: ' + text, 'success');
+    });
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('✅ 已复制', 'success');
+  }
+}
+
+/* ==============================
+   CUSTOMER OPERATIONS
+   ============================== */
+async function addCustomer(wechat, contact, notes) {
+  const customers = getCustomers();
+  const newCustomer = {
+    id: genId(),
+    wechat: wechat.trim(),
+    contact: contact.trim() || '',
+    paid: false,
+    paidAt: '',
+    code: '',
+    codeSent: false,
+    sentAt: '',
+    redeemed: false,
+    redeemedAt: '',
+    notes: notes.trim() || '',
+    createdAt: today()
+  };
+  customers.unshift(newCustomer);
+  saveCustomers(customers);
+  return newCustomer;
+}
+
+function deleteCustomer(id) {
+  if (!confirm('确定删除该客户记录？')) return;
+  let customers = getCustomers();
+  customers = customers.filter(function(c) { return c.id !== id; });
+  saveCustomers(customers);
+  renderCustomers();
+  toast('已删除', 'info');
+}
+
+async function markPaid(id) {
+  const customers = getCustomers();
+  for (const c of customers) {
+    if (c.id === id) {
+      c.paid = true;
+      c.paidAt = today();
+
+      // Auto-generate code if not already assigned
+      if (!c.code) {
+        let counter = getCounter();
+        c.code = await generateCode(counter);
+        setCounter(counter + 1);
+      }
+      break;
+    }
+  }
+  saveCustomers(customers);
+  renderCustomers();
+  toast('✅ 已确认收款，兑换码已自动生成', 'success');
+}
+
+async function markSent(id) {
+  const customers = getCustomers();
+  for (const c of customers) {
+    if (c.id === id) {
+      c.codeSent = true;
+      c.sentAt = today();
+
+      // Generate code if not already
+      if (!c.code) {
+        let counter = getCounter();
+        c.code = await generateCode(counter);
+        setCounter(counter + 1);
+      }
+      break;
+    }
+  }
+  saveCustomers(customers);
+  renderCustomers();
+  toast('✅ 已标记为已发送', 'success');
+}
+
+function markRedeemed(id) {
+  const customers = getCustomers();
+  for (const c of customers) {
+    if (c.id === id) {
+      c.redeemed = true;
+      c.redeemedAt = today();
+      break;
+    }
+  }
+  saveCustomers(customers);
+  renderCustomers();
+  toast('✅ 已标记为已兑换', 'success');
+}
+
+function editCustomer(id) {
+  const customers = getCustomers();
+  const c = customers.find(function(c) { return c.id === id; });
+  if (!c) return;
+  showModal('编辑客户', function(close) {
+    return '<div class="form-group"><label>微信昵称/ID</label><input type="text" id="edit-wechat" value="' + esc(c.wechat) + '"></div>' +
+      '<div class="form-group"><label>联系方式</label><input type="text" id="edit-contact" value="' + esc(c.contact) + '"></div>' +
+      '<div class="form-group"><label>备注</label><textarea id="edit-notes">' + esc(c.notes) + '</textarea></div>' +
+      '<div class="form-actions"><button class="btn btn-primary" onclick="saveEdit(\'' + c.id + '\')">保存</button><button class="btn btn-gray" onclick="closeModal()">取消</button></div>';
+  });
+}
+
+async function generateCodeManually(id) {
+  const customers = getCustomers();
+  for (const c of customers) {
+    if (c.id === id) {
+      let counter = getCounter();
+      c.code = await generateCode(counter);
+      setCounter(counter + 1);
+      break;
+    }
+  }
+  saveCustomers(customers);
+  renderCustomers();
+  toast('✅ 新兑换码已生成', 'success');
+}
+
+function saveEdit(id) {
+  const wechat = document.getElementById('edit-wechat').value.trim();
+  if (!wechat) { toast('请输入微信昵称', 'error'); return; }
+  const customers = getCustomers();
+  for (const c of customers) {
+    if (c.id === id) {
+      c.wechat = wechat;
+      c.contact = document.getElementById('edit-contact').value.trim();
+      c.notes = document.getElementById('edit-notes').value.trim();
+      break;
+    }
+  }
+  saveCustomers(customers);
+  closeModal();
+  renderCustomers();
+  toast('已保存', 'info');
+}
+
+function esc(s) {
+  if (!s) return '';
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ==============================
+   MODAL
+   ============================== */
+let closeModalFn = null;
+
+function showModal(title, contentFn) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'modal-overlay';
+  overlay.innerHTML = '<div class="modal"><h3>' + title + '</h3><div id="modal-body"></div></div>';
+  document.body.appendChild(overlay);
+  const body = document.getElementById('modal-body');
+  body.innerHTML = contentFn();
+  closeModalFn = function() { overlay.remove(); };
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModalFn(); });
+}
+
+function closeModal() {
+  if (closeModalFn) closeModalFn();
+}
+
+/* ==============================
+   RENDER
+   ============================== */
+function renderApp(tab) {
+  const app = document.getElementById('app');
+
+  // Stats
+  const customers = getCustomers();
+  const total = customers.length;
+  const paidCount = customers.filter(function(c) { return c.paid; }).length;
+  const sentCount = customers.filter(function(c) { return c.codeSent; }).length;
+  const redeemedCount = customers.filter(function(c) { return c.redeemed; }).length;
+  const revenue = (paidCount * PRICE).toFixed(0);
+
+  app.innerHTML =
+    '<div class="header">' +
+      '<h1>🐤 德州扒鸡 · 售后管理</h1>' +
+      '<div class="stats">' +
+        '<span>👥 客户 <strong id="stat-total">' + total + '</strong></span>' +
+        '<span>💰 已收款 <strong id="stat-paid">' + paidCount + '</strong></span>' +
+        '<span>📤 已发码 <strong id="stat-sent">' + sentCount + '</strong></span>' +
+        '<span>✅ 已兑换 <strong id="stat-redeemed">' + redeemedCount + '</strong></span>' +
+        '<span>¥' + revenue + '</span>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="tabs">' +
+      '<div class="tab' + (tab === 'customers' ? ' active' : '') + '" onclick="switchTab(\'customers\')">👥 客户管理</div>' +
+      '<div class="tab' + (tab === 'stats' ? ' active' : '') + '" onclick="switchTab(\'stats\')">📊 数据统计</div>' +
+    '</div>' +
+
+    '<div id="tab-customers" class="tab-content' + (tab === 'customers' ? ' active' : '') + '"></div>' +
+    '<div id="tab-stats" class="tab-content' + (tab === 'stats' ? ' active' : '') + '"></div>';
+
+  if (tab === 'customers') renderCustomers();
+  if (tab === 'stats') renderStats();
+}
+
+function switchTab(tab) {
+  renderApp(tab);
+}
+
+function renderCustomers() {
+  const container = document.getElementById('tab-customers');
+  const customers = getCustomers();
+
+  let html = '<div class="search-bar">' +
+    '<input type="text" id="search-input" placeholder="搜索微信昵称/ID..." oninput="filterCustomers()">' +
+    '<button class="btn btn-primary" onclick="showAddModal()">➕ 添加客户</button>' +
+    '</div>';
+
+  html += '<div class="filter-group" id="filter-group">' +
+    '<button class="filter-tag active" data-filter="all" onclick="setFilter(\'all\')">全部 (' + customers.length + ')</button>' +
+    '<button class="filter-tag" data-filter="unpaid" onclick="setFilter(\'unpaid\')">⏳ 未付款 (' + customers.filter(function(c){return !c.paid}).length + ')</button>' +
+    '<button class="filter-tag" data-filter="paid" onclick="setFilter(\'paid\')">💰 已付款 (' + customers.filter(function(c){return c.paid}).length + ')</button>' +
+    '<button class="filter-tag" data-filter="sent" onclick="setFilter(\'sent\')">📤 已发码 (' + customers.filter(function(c){return c.codeSent}).length + ')</button>' +
+    '<button class="filter-tag" data-filter="redeemed" onclick="setFilter(\'redeemed\')">✅ 已兑换 (' + customers.filter(function(c){return c.redeemed}).length + ')</button>' +
+    '</div>';
+
+  html += '<div class="card"><div class="table-wrap"><table><thead><tr>' +
+    '<th>微信</th><th>联系方式</th><th>付款</th><th>兑换码</th><th>已发</th><th>已兑</th><th>备注</th><th>操作</th>' +
+    '</tr></thead><tbody id="customer-table-body">';
+
+  if (customers.length === 0) {
+    html += '<tr><td colspan="8"><div class="empty-state"><div class="icon">🐤</div><p>还没有客户记录，点击"添加客户"开始</p></div></td></tr>';
+  } else {
+    for (const c of customers) {
+      html += renderCustomerRow(c);
+    }
+  }
+
+  html += '</tbody></table></div></div>';
+  container.innerHTML = html;
+}
+
+function renderCustomerRow(c) {
+  const link = c.code ? GAME_URL + '?code=' + c.code : '';
+
+  const paidBadge = c.paid
+    ? '<span class="badge badge-green">✅ 已付</span>'
+    : '<span class="badge badge-red">⏳ 未付</span>';
+
+  const codeHtml = c.code
+    ? '<span class="code-display" onclick="copyText(\'' + c.code + '\')" title="点击复制">' + c.code + '</span>'
+    : '<span style="color:#6a5a4a">—</span>';
+
+  const sentBadge = c.codeSent
+    ? '<span class="badge badge-blue">📤 已发</span>'
+    : '<span class="badge badge-gray">未发</span>';
+
+  const redeemedBadge = c.redeemed
+    ? '<span class="badge badge-green">✅ 已兑</span>'
+    : '<span class="badge badge-gray">未兑</span>';
+
+  const notesHtml = c.notes
+    ? '<span class="notes-preview" title="' + esc(c.notes) + '">' + esc(c.notes.substring(0, 20)) + (c.notes.length > 20 ? '...' : '') + '</span>'
+    : '';
+
+  let actions = '';
+  if (!c.paid && !c.codeSent) {
+    actions += '<button class="btn btn-green btn-sm" onclick="markPaid(\'' + c.id + '\')">💰 确认收款</button>';
+  }
+  if (!c.codeSent) {
+    actions += '<button class="btn btn-blue btn-sm" onclick="markSent(\'' + c.id + '\')">📤 标记已发</button>';
+  }
+  if (c.codeSent && !c.redeemed) {
+    actions += '<button class="btn btn-green btn-sm" onclick="markRedeemed(\'' + c.id + '\')">✅ 标记已兑</button>';
+  }
+  if (c.code) {
+    actions += '<button class="btn btn-yellow btn-sm" onclick="copyText(\'' + link + '\')">📋 复制链接</button>';
+  } else if (c.paid && !c.code) {
+    actions += '<button class="btn btn-yellow btn-sm" onclick="generateCodeManually(\'' + c.id + '\')">🔑 生成码</button>';
+  }
+  actions += '<button class="btn btn-gray btn-sm" onclick="editCustomer(\'' + c.id + '\')">✏️ 编辑</button>';
+  actions += '<button class="btn btn-red btn-sm" onclick="deleteCustomer(\'' + c.id + '\')">🗑️</button>';
+
+  return '<tr>' +
+    '<td><strong>' + esc(c.wechat) + '</strong></td>' +
+    '<td style="font-size:0.75rem;color:#a09080">' + esc(c.contact) + '</td>' +
+    '<td>' + paidBadge + '</td>' +
+    '<td>' + codeHtml + '</td>' +
+    '<td>' + sentBadge + '</td>' +
+    '<td>' + redeemedBadge + '</td>' +
+    '<td>' + notesHtml + '</td>' +
+    '<td><div class="actions-cell">' + actions + '</div></td>' +
+    '</tr>';
+}
+
+function filterCustomers() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const filterEl = document.querySelector('.filter-tag.active');
+  const filter = filterEl ? filterEl.dataset.filter : 'all';
+
+  const customers = getCustomers();
+  const filtered = customers.filter(function(c) {
+    const match = !q || c.wechat.toLowerCase().includes(q) || c.contact.toLowerCase().includes(q) || c.id.toLowerCase().includes(q);
+    if (!match) return false;
+    if (filter === 'unpaid') return !c.paid;
+    if (filter === 'paid') return c.paid;
+    if (filter === 'sent') return c.codeSent;
+    if (filter === 'redeemed') return c.redeemed;
+    return true;
+  });
+
+  const tbody = document.getElementById('customer-table-body');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="icon">🔍</div><p>没有匹配的客户</p></div></td></tr>';
+  } else {
+    tbody.innerHTML = filtered.map(function(c) { return renderCustomerRow(c); }).join('');
+  }
+}
+
+function setFilter(filter) {
+  document.querySelectorAll('.filter-tag').forEach(function(el) {
+    el.classList.toggle('active', el.dataset.filter === filter);
+  });
+  filterCustomers();
+}
+
+function showAddModal() {
+  showModal('添加客户', function() {
+    return '<div class="form-group"><label>微信昵称/ID <span style="color:#ff6666">*</span></label><input type="text" id="new-wechat" placeholder="客户微信昵称"></div>' +
+      '<div class="form-group"><label>联系方式</label><input type="text" id="new-contact" placeholder="手机号或其他"></div>' +
+      '<div class="form-group"><label>备注</label><textarea id="new-notes" placeholder="从哪个平台来的、什么时候付款的等"></textarea></div>' +
+      '<div class="form-actions"><button class="btn btn-primary" onclick="confirmAdd()">添加</button><button class="btn btn-gray" onclick="closeModal()">取消</button></div>';
+  });
+  setTimeout(function() { var el = document.getElementById('new-wechat'); if (el) el.focus(); }, 100);
+}
+
+async function confirmAdd() {
+  const wechat = document.getElementById('new-wechat').value.trim();
+  if (!wechat) { toast('请输入微信昵称', 'error'); return; }
+  const contact = document.getElementById('new-contact').value.trim();
+  const notes = document.getElementById('new-notes').value.trim();
+  await addCustomer(wechat, contact, notes);
+  closeModal();
+  renderCustomers();
+  toast('✅ 客户已添加', 'success');
+}
+
+/* ==============================
+   STATS TAB
+   ============================== */
+function renderStats() {
+  const container = document.getElementById('tab-stats');
+  const customers = getCustomers();
+
+  const total = customers.length;
+  const paid = customers.filter(function(c) { return c.paid; });
+  const paidCount = paid.length;
+  const sentCount = customers.filter(function(c) { return c.codeSent; }).length;
+  const redeemedCount = customers.filter(function(c) { return c.redeemed; }).length;
+  const revenue = paidCount * PRICE;
+  const conversionRate = total > 0 ? (paidCount / total * 100).toFixed(1) : 0;
+
+  let html = '<div class="stats-grid">' +
+    '<div class="stat-card"><div class="num">' + total + '</div><div class="lbl">总客户数</div></div>' +
+    '<div class="stat-card"><div class="num">' + paidCount + '</div><div class="lbl">已付款</div><div class="sub">转化率 ' + conversionRate + '%</div></div>' +
+    '<div class="stat-card"><div class="num">¥' + revenue.toFixed(0) + '</div><div class="lbl">总收入</div></div>' +
+    '<div class="stat-card"><div class="num">' + sentCount + '</div><div class="lbl">已发码</div></div>' +
+    '<div class="stat-card"><div class="num">' + redeemedCount + '</div><div class="lbl">已兑换</div></div>' +
+    '<div class="stat-card"><div class="num">' + (paidCount - redeemedCount) + '</div><div class="lbl">待兑换</div><div class="sub">未激活</div></div>' +
+    '</div>';
+
+  // Recent paid customers
+  html += '<div class="card"><h3>📋 最近收款记录</h3><div class="table-wrap"><table><thead><tr>' +
+    '<th>微信</th><th>收款时间</th><th>金额</th><th>兑换码</th><th>状态</th></tr></thead><tbody>';
+
+  if (paid.length === 0) {
+    html += '<tr><td colspan="5"><div class="empty-state"><p>暂无收款记录</p></div></td></tr>';
+  } else {
+    // Sort by paidAt descending
+    paid.sort(function(a, b) { return b.paidAt.localeCompare(a.paidAt); });
+    for (const c of paid) {
+      const status = c.redeemed ? '<span class="badge badge-green">已兑换</span>'
+        : c.codeSent ? '<span class="badge badge-blue">已发码</span>'
+        : '<span class="badge badge-yellow">待发码</span>';
+      html += '<tr><td>' + esc(c.wechat) + '</td><td style="font-size:0.75rem">' + c.paidAt + '</td><td>¥' + PRICE + '</td><td class="code-display" onclick="copyText(\'' + (c.code || '') + '\')">' + (c.code || '—') + '</td><td>' + status + '</td></tr>';
+    }
+  }
+
+  html += '</tbody></table></div></div>';
+
+  // Export button
+  html += '<button class="btn btn-primary" onclick="exportData()" style="margin-bottom:20px">📥 导出CSV</button>';
+
+  container.innerHTML = html;
+}
+
+/* ==============================
+   EXPORT
+   ============================== */
+function exportData() {
+  const customers = getCustomers();
+  if (customers.length === 0) { toast('没有数据可导出', 'error'); return; }
+
+  let csv = '微信,联系方式,已付款,付款时间,兑换码,已发送,发送时间,已兑换,兑换时间,备注\n';
+  for (const c of customers) {
+    csv += '"' + c.wechat + '","' + c.contact + '",' + c.paid + ',"' + c.paidAt + '","' + c.code + '",' + c.codeSent + ',"' + c.sentAt + '",' + c.redeemed + ',"' + c.redeemedAt + '","' + c.notes + '"\n';
+  }
+
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '德州扒鸡_售后数据_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ 导出成功', 'success');
+}
+
+/* ==============================
+   INIT
+   ============================== */
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const pass = params.get('admin');
+
+  if (pass !== ADMIN_PASSWORD) {
+    document.getElementById('app').innerHTML =
+      '<div class="login-box">' +
+        '<div class="logo">🐤</div>' +
+        '<h2>售后管理系统</h2>' +
+        '<div class="sub">请输入管理员密码</div>' +
+        '<input type="password" id="pwd-input" placeholder="管理员密码" onkeydown="if(event.key===\'Enter\')doLogin()">' +
+        '<button class="btn btn-primary" onclick="doLogin()" style="width:100%;padding:12px;justify-content:center">登录</button>' +
+        '<div id="login-error" style="color:#ff4444;font-size:0.8rem;margin-top:8px"></div>' +
+      '</div>';
+  } else {
+    renderApp('customers');
+  }
+})();
+
+function doLogin() {
+  const pwd = document.getElementById('pwd-input').value;
+  if (pwd === ADMIN_PASSWORD) {
+    window.location.href = 'service.html?admin=' + ADMIN_PASSWORD;
+  } else {
+    document.getElementById('login-error').textContent = '密码错误';
+  }
+}
+</script>
+</body>
+</html>
