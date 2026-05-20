@@ -977,9 +977,7 @@ const SCENARIOS=[
   {hand:['A','♠'],hand2:['J','♠'],pos:'UTG',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'AJs在UTG位是标准开池牌。'},
   {hand:['8','♠'],hand2:['2','♥'],pos:'MP',action:'open',correct:'fold',scenario:'翻前第一次行动，前面无人加注。',reason:'82o是垃圾牌，MP位置更不应该玩。'},
   {hand:['Q','♠'],hand2:['J','♠'],pos:'MP',action:'vs-open',correct:'call',scenario:'UTG开池加注，你在MP手持QJs。',reason:'QJs在MP面对UTG加注，跟注看翻牌有潜力。'},
-,
-  [50 new items]
-  {hand:['A','♥'],hand2:['J','♦'],pos:'UTG',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'AJo在UTG位是标准开池牌。'},
+
   {hand:['K','♠'],hand2:['10','♦'],pos:'MP',action:'open',correct:'fold',scenario:'翻前第一次行动，前面无人加注。',reason:'KTo在MP位太弱，紧凶打法弃牌。'},
   {hand:['6','♥'],hand2:['6','♣'],pos:'CO',action:'open',correct:'raise',scenario:'前面全部弃牌到CO位。',reason:'66在CO位可以开池加注，中三条价值巨大。'},
   {hand:['A','♠'],hand2:['4','♠'],pos:'BTN',action:'vs-open',correct:'call',scenario:'MP位开池加注，CO弃牌，你在BTN。',reason:'A4s在BTN位跟注，有同花和反超潜力。'},
@@ -1538,7 +1536,7 @@ const PUSH_SCENARIOS = [
   {hand:['5','♠'],hand2:['5','♥'],pos:'UTG',stack:9,correct:false,explain:'UTG位9BB推55太弱。'},
   {hand:['9','♠'],hand2:['3','♦'],pos:'BTN',stack:12,correct:false,explain:'BTN位12BB推93o不在推范围内。'},
   {hand:['7','♠'],hand2:['6','♠'],pos:'BTN',stack:8,correct:true,explain:'BTN位8BB推76s是标准。'},
-  {hand:['A','♠'],hand2:['J','♠'],pos:'UTG',stack:15,correct:false,explain:'UTG位15BB不应该推AJs。'},,
+  {hand:['A','♠'],hand2:['J','♠'],pos:'UTG',stack:15,correct:false,explain:'UTG位15BB不应该推AJs。'},
   {hand:['A','♠'],hand2:['5','♥'],pos:'BTN',stack:8,correct:true,explain:'BTN位8BB推A5s标准操作。'},
   {hand:['K','♠'],hand2:['10','♥'],pos:'CO',stack:10,correct:true,explain:'CO位10BB推KTo标准。'},
   {hand:['7','♠'],hand2:['7','♥'],pos:'UTG',stack:9,correct:true,explain:'UTG位9BB推77是标准+EV。'},
