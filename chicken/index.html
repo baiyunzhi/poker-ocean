@@ -338,7 +338,7 @@ a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
         <div id="pd-position" class="scenario-pos"></div>
         <div id="pd-scenario" class="scenario-text"></div>
       </div>
-      <div class="actions">
+      <div id="pd-actions" class="actions">
         <button class="btn-action btn-fold" onclick="preflopDuel.act('fold')">弃牌</button>
         <button class="btn-action btn-call" onclick="preflopDuel.act('call')">跟注</button>
         <button class="btn-action btn-raise" onclick="preflopDuel.act('raise')">加注</button>
@@ -686,7 +686,7 @@ a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
       <div class="scenario-box">
         <div id="ap-question" class="scenario-text"></div>
       </div>
-      <div class="actions">
+      <div id="ap-actions" class="actions">
         <button class="btn-action btn-fold" onclick="allinPush.act(false)">弃牌</button>
         <button class="btn-action btn-raise" onclick="allinPush.act(true)">ALL-IN</button>
       </div>
@@ -1045,7 +1045,7 @@ const preflopDuel={
     document.getElementById('pd-round').textContent=this.state.round+'/10';
     document.getElementById('pd-lives').textContent=this.state.lives;
     const rb=document.getElementById('pd-result');rb.classList.remove('show','correct','wrong');
-    document.querySelectorAll('.btn-action').forEach(b=>b.disabled=false);
+    document.querySelectorAll('#pd-actions .btn-action').forEach(b=>b.disabled=false);
     this.setFishExpr('normal');this.setSharkExpr('normal');
     this.say('pd-fish-speech','嗯…让我想想');
     this.say('pd-shark-speech','来吧，小鸡仔！');
@@ -1067,7 +1067,7 @@ const preflopDuel={
     if(this.state.answered||!this.state.playing)return;
     this.state.answered=true;this.state.total++;
     const s=this.state.scenario;const correct=action===s.correct;
-    document.querySelectorAll('.btn-action').forEach(b=>b.disabled=true);
+    document.querySelectorAll('#pd-actions .btn-action').forEach(b=>b.disabled=true);
     const rb=document.getElementById('pd-result');rb.className='result-box show';
     if(correct){
       this.state.score+=10;this.state.streak++;this.state.correct++;
