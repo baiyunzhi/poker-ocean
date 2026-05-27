@@ -236,7 +236,7 @@ const LOCALE = {
     tabBattle:'对战', tabOdds:'胜率', tabTrain:'训练', tabStats:'统计',
     hn0:'高牌',hn1:'一对',hn2:'两对',hn3:'三条',hn4:'顺子',hn5:'同花',hn6:'葫芦',hn7:'四条',hn8:'同花顺',hn9:'皇家同花顺',
     ph0:'等待',ph1:'翻牌前',ph2:'翻牌',ph3:'转牌',ph4:'河牌',ph5:'摊牌',
-    po0:'前位',po1:'中位',po2:'后位',po3:'盲注位',
+    po0:'枪口',po1:'枪口+1',po2:'中位',po3:'中位+1',po4:'关煞',po5:'庄家',po6:'小盲',po7:'大盲',
     TAG:'紧凶',LP:'松被动',Maniac:'疯子',
     stPrm:'超强牌',stStr:'强牌',stMed:'中等牌',stWk:'弱牌',stTr:'垃圾牌',
     pot:'底池',waiting:'等待开始',curBet:'当前注',
@@ -264,7 +264,7 @@ const LOCALE = {
     tabBattle:'Battle', tabOdds:'Odds', tabTrain:'Training', tabStats:'Stats',
     hn0:'High Card',hn1:'One Pair',hn2:'Two Pair',hn3:'Three of a Kind',hn4:'Straight',hn5:'Flush',hn6:'Full House',hn7:'Four of a Kind',hn8:'Straight Flush',hn9:'Royal Flush',
     ph0:'Waiting',ph1:'Pre-flop',ph2:'Flop',ph3:'Turn',ph4:'River',ph5:'Showdown',
-    po0:'EP',po1:'MP',po2:'LP',po3:'BB',
+    po0:'UTG',po1:'UTG+1',po2:'MP',po3:'MP+1',po4:'CO',po5:'BTN',po6:'SB',po7:'BB',
     TAG:'TAG',LP:'LP',Maniac:'Maniac',
     stPrm:'Premium',stStr:'Strong',stMed:'Medium',stWk:'Weak',stTr:'Trash',
     pot:'Pot',waiting:'Waiting...',curBet:'Bet',
@@ -652,8 +652,9 @@ function estimateEquity(rank, boardLen) {
 // ===== GAME STATE MACHINE =====
 const Phase = { WAITING:0, PREFLOP:1, FLOP:2, TURN:3, RIVER:4, SHOWDOWN:5 };
 function phaseName(p) { return t('ph'+p); }
-const Position = { EARLY:0, MIDDLE:1, LATE:2, BLIND:3 };
-const PosNames = [t('po0'),t('po1'),t('po2'),t('po3')];
+const Position = { UTG:0, UTG1:1, MP:2, MP1:3, CO:4, BTN:5, SB:6, BB:7 };
+const PosNames = [t('po0'),t('po1'),t('po2'),t('po3'),t('po4'),t('po5'),t('po6'),t('po7')];
+const RangeNames = [t('ep'),t('mp'),t('lp'),t('bb')];
 const StyleNames = { 'TAG':t('TAG'), 'LP':t('LP'), 'Maniac':t('Maniac') };
 
 class Player {
@@ -783,11 +784,16 @@ class Game {
   playerHandRank(p) { return evaluate7([...this.board, ...p.holeCards]); }
   positionFor(idx) {
     const rel=(idx-this.dealerIdx+this.players.length)%this.players.length;
-    if (rel===0) return Position.LATE;   // BTN
-    if (rel===1||rel===2) return Position.BLIND; // SB/BB
-    if (rel===3) return Position.EARLY;  // UTG
-    if (rel===4) return Position.MIDDLE; // MP
-    return Position.LATE;                // CO
+    // Map relative position to seat label for 6 players
+    const map = [Position.BTN, Position.SB, Position.BB, Position.UTG, Position.UTG1, Position.MP, Position.MP1, Position.CO];
+    return rel < map.length ? map[rel] : Position.CO;
+  }
+  // Map seat position to range group (EP/MP/LP/BB) for AI decisions
+  rangeGroup(pos) {
+    if (pos <= Position.UTG1) return 0; // EP
+    if (pos <= Position.MP1) return 1;  // MP
+    if (pos <= Position.BTN) return 2;  // LP
+    return 3; // BLIND
   }
   spr() {
     if (this.pot===0) return 0;
@@ -851,8 +857,8 @@ function preflopDecision(ctx, loose) {
   const high=Math.max(ctx.holeCards[0].rank(),ctx.holeCards[1].rank());
   const low=Math.min(ctx.holeCards[0].rank(),ctx.holeCards[1].rank());
   const suited=ctx.holeCards[0].suit()===ctx.holeCards[1].suit();
-  let action=getRangeAction(high,low,suited,POS_SHORT[ctx.position]);
-  if (ctx.position===3&&ctx.currentBet>0 && action===0&&ctx.handStrength>=4)
+  let action=getRangeAction(high,low,suited,POS_SHORT[ctx.rangePos]);
+  if (ctx.rangePos===3&&ctx.currentBet>0 && action===0&&ctx.handStrength>=4)
     return {type:'call', amount:ctx.currentBet};
   if (loose) {
     if (action===0&&ctx.handStrength>=4) return {type:'call', amount:ctx.currentBet};
@@ -864,7 +870,7 @@ function preflopDecision(ctx, loose) {
   switch (action) {
   case 2: {
     let rSize=1; if (ctx.currentBet>0&&ctx.handStrength>=9) rSize=3;
-    const amt=chooseRaiseAmount(ctx.pot, ctx.currentBet, ctx.position===2?2:1);
+    const amt=chooseRaiseAmount(ctx.pot, ctx.currentBet, ctx.rangePos===2?2:1);
     return {type:'raise', amount:amt, size:rSize};
   }
   case 1:
@@ -880,7 +886,7 @@ function preflopDecision(ctx, loose) {
 function postflopDecision(ctx, loose) {
   const {category,outs}=categorizeHand(ctx.holeCards, ctx.board);
   const texture=analyzeBoard(ctx.board);
-  const inPosition=ctx.position===2;
+  const inPosition=ctx.position===Position.CO || ctx.position===Position.BTN;
   if (category==='premium') {
     const sz=texture.isWet?3:2;
     return {type:'raise', amount:chooseRaiseAmount(ctx.pot,ctx.currentBet,sz), size:sz};
@@ -971,6 +977,8 @@ function initGame() {
   game.addPlayer('Diana','TAG',500);
   game.addPlayer('Eve','LP',500);
   human = game.players[0];
+  // Randomize dealer so human gets different positions
+  game.dealerIdx = Math.floor(Math.random() * game.players.length);
 }
 
 function cardHTML(rank,suit) {
@@ -1046,8 +1054,10 @@ function processAiTurns(callback) {
       aiThinkingEl.textContent = t('aiThinking');
     }
 
+    const rawPos = game.positionFor(game.activeIdx);
     const ctx = {
-      position: game.positionFor(game.activeIdx),
+      position: rawPos,
+      rangePos: game.rangeGroup(rawPos),
       round: game.phase===Phase.PREFLOP?0:1,
       handStrength: handStrength(ap.holeCards[0],ap.holeCards[1]),
       currentBet: game.toCall(ap),
@@ -1305,7 +1315,7 @@ function nextQuiz() {
   if (rangeAction===0) correct='fold';
   if (scenario===t('sc2')&&rangeAction===1) correct='fold';
   if (scenario===t('sc1')&&pos===0&&rangeAction===1) correct='fold';
-  quizData={rank1:c1.rank(),suit1:c1.suit(),rank2:c2.rank(),suit2:c2.suit(),strength:hs,sname:handStrengthName(hs),position:PosNames[pos],scenario,correct};
+  quizData={rank1:c1.rank(),suit1:c1.suit(),rank2:c2.rank(),suit2:c2.suit(),strength:hs,sname:handStrengthName(hs),position:RangeNames[pos],scenario,correct};
   updateQuizUI();
 }
 function updateQuizUI() {
