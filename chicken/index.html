@@ -244,13 +244,13 @@ a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
       <div class="gc-icon">⚔️</div>
       <h3>翻前斗鸡</h3>
       <p>小鸡 vs 老鹰！面对不同翻前局面，做出正确的选择。</p>
-      <span class="gc-badge badge-new">立即挑战</span>
+      <span class="gc-badge badge-free" style="background:#22c55e;color:white">🆓免费</span>
     </div>
     <div class="game-card" onclick="navigate('fish-or-shark')">
       <div class="gc-icon">🐟</div>
       <h3>识鸡辨鸡</h3>
       <p>看打牌风格猜身份——这个玩家是小鸡还是老鹰？</p>
-      <span class="gc-badge badge-new">新游戏</span>
+      <span class="gc-badge badge-free" style="background:#22c55e;color:white">🆓免费</span>
     </div>
     <div class="game-card" onclick="navigate('odds-calc')">
       <div class="gc-icon">🧮</div>
@@ -362,7 +362,7 @@ a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
         <div class="go-stat"><div id="pd-go-streak" class="num">0</div><div class="lbl">连对</div></div>
       </div>
       <div id="pd-revive" style="display:none;margin-bottom:12px">
-        <button class="hero-btn" style="background:linear-gradient(135deg,#ff4444,#cc0000);box-shadow:0 4px 24px rgba(255,68,68,0.3);font-size:1rem;padding:12px 32px" onclick="showReviveDialog(preflopDuel,'pd')">💀复活挑战</button>
+        <button class="hero-btn" style="background:linear-gradient(135deg,#ff4444,#cc0000);box-shadow:0 4px 24px rgba(255,68,68,0.3);font-size:1rem;padding:12px 32px" onclick="restoreLives(preflopDuel,'pd')">💀复活挑战</button>
       </div>
       <button id="pd-restart-btn" class="hero-btn" style="font-size:1rem;padding:10px 24px" onclick="preflopDuel.start()">再来一局</button>
       <button class="btn-next" style="margin-top:10px;display:inline-block" onclick="navigate('home')">返回首页</button>
@@ -439,7 +439,7 @@ a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
         <div class="go-stat"><div id="fs-go-streak" class="num">0</div><div class="lbl">连对</div></div>
       </div>
       <div id="fs-revive" style="display:none;margin-bottom:12px">
-        <button class="hero-btn" style="background:linear-gradient(135deg,#ff4444,#cc0000);box-shadow:0 4px 24px rgba(255,68,68,0.3);font-size:1rem;padding:12px 32px" onclick="showReviveDialog(fishOrShark,'fs')">💀复活挑战</button>
+        <button class="hero-btn" style="background:linear-gradient(135deg,#ff4444,#cc0000);box-shadow:0 4px 24px rgba(255,68,68,0.3);font-size:1rem;padding:12px 32px" onclick="restoreLives(fishOrShark,'fs')">💀复活挑战</button>
       </div>
       <button id="fs-restart-btn" class="hero-btn" style="font-size:1rem;padding:10px 24px" onclick="fishOrShark.start()">再来一局</button>
       <button class="btn-next" style="margin-top:10px;display:inline-block" onclick="navigate('home')">返回首页</button>
