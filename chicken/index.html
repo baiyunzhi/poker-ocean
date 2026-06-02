@@ -742,7 +742,13 @@ a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
       </div>
       <div class="ai-info">
         <span>🤖 AI筹码: <strong id="ai-ai-chips">1000</strong></span>
+        <span id="ai-position-label" style="color:#f0b90b;font-weight:600"></span>
         <span>🧑 你的筹码: <strong id="ai-my-chips">1000</strong></span>
+      </div>
+      <div class="ai-info" style="justify-content:center;gap:20px">
+        <span>底池: <strong id="ai-pot">0</strong></span>
+        <span id="ai-stage-label" style="color:#ff8c42"></span>
+        <span>下注: <strong id="ai-bet-display">0</strong></span>
       </div>
       <div style="text-align:center;margin-bottom:8px">
         <div id="ai-ai-hand" class="ai-hand">
@@ -753,9 +759,6 @@ a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
       <div class="table-felt" style="max-width:400px;margin:0 auto">
         <div class="round-label">公共牌</div>
         <div id="ai-board" class="ai-board"></div>
-        <div style="font-size:0.85rem;color:#a09080;margin-top:4px">
-          底池: <strong id="ai-pot">0</strong>
-        </div>
       </div>
       <div style="text-align:center;margin-top:8px">
         <div id="ai-my-hand" class="ai-hand">
@@ -1696,89 +1699,203 @@ function aiStrength(hand,board){
   return Math.max(RANK_VALUES[hand[0][0]],RANK_VALUES[hand[1][0]])>=14?0.3:0.15;
 }
 const aiBattle = {
-  state:{playing:false,round:0,maxRounds:5,myChips:1000,aiChips:1000,pot:0,myHand:[],aiHand:[],board:[],deck:[],stage:'preflop',roundOver:false,wins:0,stageActions:0},
+  state:{playing:false,round:0,maxRounds:5,myChips:1000,aiChips:1000,pot:0,myHand:[],aiHand:[],board:[],deck:[],stage:'preflop',roundOver:false,wins:0,
+         myStreetBet:0,aiStreetBet:0,currentBet:0,myActed:false,aiActed:false,sb:5,bb:10},
   start(){
-    this.state={playing:true,round:0,maxRounds:5,myChips:1000,aiChips:1000,pot:0,myHand:[],aiHand:[],board:[],deck:[],stage:'preflop',roundOver:false,wins:0,stageActions:0};
+    this.state={playing:true,round:0,maxRounds:5,myChips:1000,aiChips:1000,pot:0,myHand:[],aiHand:[],board:[],deck:[],stage:'preflop',roundOver:false,wins:0,
+                myStreetBet:0,aiStreetBet:0,currentBet:0,myActed:false,aiActed:false,sb:5,bb:10};
     document.getElementById('ai-start').style.display='none';document.getElementById('ai-game').style.display='block';document.getElementById('ai-gameover').style.display='none';
     this.nextRound();
   },
+  updateUI(){
+    document.getElementById('ai-chips').textContent=this.state.myChips;
+    document.getElementById('ai-ai-chips').textContent=this.state.aiChips;
+    document.getElementById('ai-my-chips').textContent=this.state.myChips;
+    document.getElementById('ai-pot').textContent=this.state.pot;
+    document.getElementById('ai-round-display').textContent=this.state.round+'/'+this.state.maxRounds;
+    document.getElementById('ai-bet-display').textContent=this.state.currentBet;
+    // Stage label
+    const stageNames={preflop:'翻牌前',flop:'翻牌',turn:'转牌',river:'河牌'};
+    document.getElementById('ai-stage-label').textContent='📌 '+stageNames[this.state.stage];
+    // Position label
+    if(this.state.stage==='preflop'){
+      document.getElementById('ai-position-label').textContent='你:小盲(SB) '+this.state.sb+' | AI:大盲(BB) '+this.state.bb;
+    }else{
+      document.getElementById('ai-position-label').textContent='AI先行动(BB位)';
+    }
+    // Button labels - dynamically change based on situation
+    const callBtn=document.querySelector('#ai-actions .btn-call');
+    const raiseBtn=document.querySelector('#ai-actions .btn-raise');
+    if(this.state.currentBet>0){
+      const toCall=this.state.currentBet-(this.state.stage==='preflop'?this.state.myStreetBet:(this.state.stage==='preflop'?this.state.myStreetBet:0));
+      const mc=this.state.myStreetBet;
+      const actualToCall=Math.max(0,this.state.currentBet-mc);
+      callBtn.textContent=actualToCall>0?'跟注 '+actualToCall:'过牌';
+      const minRaise=Math.min(actualToCall+20,Math.min(200,this.state.myChips));
+      raiseBtn.textContent=this.state.myChips>actualToCall?'加注至 '+Math.min(actualToCall+40,this.state.myChips):'---';
+    }else{
+      callBtn.textContent='过牌';
+      raiseBtn.textContent=this.state.myChips>0?'下注 20':'---';
+    }
+    this.state.lastMsg='';
+  },
+  logMsg(msg,cls){
+    this.state.lastMsg=msg;
+    document.getElementById('ai-result-text').textContent=msg;
+    document.getElementById('ai-result').className='result-box show'+(cls?' '+cls:'');
+  },
+  setButtons(disabled){
+    document.querySelectorAll('#ai-actions .btn-action').forEach(b=>b.disabled=disabled);
+  },
   nextRound(){
     if(this.state.round>=this.state.maxRounds){this.gameOver();return}
-    this.state.round++;this.state.pot=0;this.state.board=[];this.state.stage='preflop';this.state.roundOver=false;this.state.stageActions=0;
-    document.getElementById('ai-round-display').textContent=this.state.round+'/'+this.state.maxRounds;
-    document.getElementById('ai-chips').textContent=this.state.myChips;document.getElementById('ai-ai-chips').textContent=this.state.aiChips;
-    document.getElementById('ai-my-chips').textContent=this.state.myChips;document.getElementById('ai-pot').textContent=0;
-    document.getElementById('ai-result').className='result-box';document.getElementById('ai-board').innerHTML='';
-    document.querySelectorAll('#ai-actions .btn-action').forEach(b=>b.disabled=false);document.getElementById('ai-next-btn').style.display='none';
-    document.getElementById('ai-result-text').textContent='';
+    this.state.round++;
+    const ante=this.state.sb+this.state.bb;
+    if(this.state.myChips<ante||this.state.aiChips<ante){this.gameOver();return}
+    this.state.pot=0;this.state.board=[];this.state.stage='preflop';this.state.roundOver=false;
+    this.state.myStreetBet=0;this.state.aiStreetBet=0;this.state.currentBet=0;
+    this.state.myActed=false;this.state.aiActed=false;
+    const sbi=this.state.sb,bbi=this.state.bb;
+    this.state.myChips-=sbi;this.state.myStreetBet=sbi;
+    this.state.aiChips-=bbi;this.state.aiStreetBet=bbi;
+    this.state.pot=sbi+bbi;this.state.currentBet=bbi;
     this.state.deck=shuffleDeck(createDeck());
     this.state.myHand=[this.state.deck.pop(),this.state.deck.pop()];
     this.state.aiHand=[this.state.deck.pop(),this.state.deck.pop()];
+    document.getElementById('ai-round-display').textContent=this.state.round+'/'+this.state.maxRounds;
+    document.getElementById('ai-board').innerHTML='';
     document.getElementById('ai-my-cards').innerHTML=cardHtml(this.state.myHand[0])+cardHtml(this.state.myHand[1]);
     document.getElementById('ai-ai-cards').innerHTML='<div class="card card-back"></div><div class="card card-back"></div>';
-    document.getElementById('ai-result-text').textContent='第'+this.state.round+'回合 — '+cardStr(this.state.myHand[0])+' '+cardStr(this.state.myHand[1]);
-    document.getElementById('ai-result').className='result-box show';
-    this.state.myChips-=10;this.state.pot+=10;
-    document.getElementById('ai-my-chips').textContent=this.state.myChips;document.getElementById('ai-chips').textContent=this.state.myChips;document.getElementById('ai-pot').textContent=this.state.pot;
+    document.getElementById('ai-next-btn').style.display='none';
+    this.updateUI();
+    const handStr=cardStr(this.state.myHand[0])+' '+cardStr(this.state.myHand[1]);
+    this.logMsg('回合 '+this.state.round+' — 手牌:'+handStr+' | SB '+sbi+' BB '+bbi+'，小盲先行动');
+    this.setButtons(false);
+  },
+  streetDone(){
+    const s=this.state;
+    return s.myActed&&s.aiActed&&s.currentBet===s.myStreetBet&&s.currentBet===s.aiStreetBet;
   },
   act(action){
     if(this.state.roundOver||!this.state.playing)return;
+    const s=this.state;
     if(action==='fold'){
-      this.state.roundOver=true;this.state.aiChips+=this.state.pot;
-      document.getElementById('ai-result-text').textContent='你弃牌了！AI赢得'+this.state.pot+'筹码';
-      document.getElementById('ai-result').className='result-box show wrong';document.querySelectorAll('#ai-actions .btn-action').forEach(b=>b.disabled=true);
-      document.getElementById('ai-next-btn').style.display='inline-block';document.getElementById('ai-ai-cards').innerHTML=cardHtml(this.state.aiHand[0])+cardHtml(this.state.aiHand[1]);
-      document.getElementById('ai-ai-chips').textContent=this.state.aiChips;return;
+      document.getElementById('ai-ai-cards').innerHTML=cardHtml(s.aiHand[0])+cardHtml(s.aiHand[1]);
+      s.roundOver=true;s.aiChips+=s.pot;
+      this.logMsg('你弃牌了！AI赢得 '+s.pot+' 筹码','wrong');
+      this.setButtons(true);document.getElementById('ai-next-btn').style.display='inline-block';
+      this.updateUI();return;
     }
-    if(action==='check'){this.aiRespond();return;}
+    if(action==='check'||action==='call'){
+      const toCall=Math.max(0,s.currentBet-s.myStreetBet);
+      if(toCall>0){
+        const callAmt=Math.min(toCall,s.myChips);
+        s.myChips-=callAmt;s.myStreetBet+=callAmt;s.pot+=callAmt;
+        this.logMsg('你跟注 '+callAmt);this.updateUI();
+      }else{
+        this.logMsg('你过牌');this.updateUI();
+      }
+      s.myActed=true;
+      if(this.streetDone()){this.setButtons(true);setTimeout(()=>this.advanceStreet(),500);}
+      else{this.setButtons(true);setTimeout(()=>this.aiAct(),500);}
+      return;
+    }
     if(action==='raise'){
-      const rAmt=Math.min(40,this.state.myChips);this.state.myChips-=rAmt;this.state.pot+=rAmt*2;
-      document.getElementById('ai-my-chips').textContent=this.state.myChips;document.getElementById('ai-pot').textContent=this.state.pot;
-      document.getElementById('ai-result-text').textContent='你加注'+rAmt+'，AI跟注';
-      this.dealStage();
+      const toCall=Math.max(0,s.currentBet-s.myStreetBet);
+      if(s.myChips<=toCall){this.act('call');return;}
+      const raiseTotal=Math.min(toCall+40,s.myChips);
+      const rAmt=raiseTotal-s.myStreetBet;
+      s.myChips-=rAmt;s.myStreetBet+=rAmt;s.pot+=rAmt;s.currentBet=s.myStreetBet;
+      s.myActed=true;s.aiActed=false; // AI must respond to raise
+      this.logMsg('你加注至 '+s.currentBet+'（+'+rAmt+'）');this.updateUI();
+      this.setButtons(true);setTimeout(()=>this.aiAct(),500);
+      return;
     }
   },
-  aiRespond(){
-    const s=aiStrength(this.state.aiHand,this.state.board);
-    if(s>0.7){const r=Math.min(50,this.state.aiChips);this.state.aiChips-=r;this.state.pot+=r;
-      document.getElementById('ai-result-text').textContent='AI强牌加注'+r;document.getElementById('ai-ai-chips').textContent=this.state.aiChips;document.getElementById('ai-pot').textContent=this.state.pot;
-    }else if(s<0.2&&this.state.stage!=='preflop'&&this.state.round>0){
-      this.state.roundOver=true;this.state.myChips+=this.state.pot;
-      document.getElementById('ai-result-text').textContent='AI弃牌！你赢得'+this.state.pot+'筹码';
-      document.getElementById('ai-result').className='result-box show correct';document.querySelectorAll('#ai-actions .btn-action').forEach(b=>b.disabled=true);
-      document.getElementById('ai-next-btn').style.display='inline-block';document.getElementById('ai-chips').textContent=this.state.myChips;
-      document.getElementById('ai-ai-cards').innerHTML=cardHtml(this.state.aiHand[0])+cardHtml(this.state.aiHand[1]);return;
+  aiAct(){
+    const s=this.state;
+    if(s.roundOver)return;
+    document.getElementById('ai-ai-cards').innerHTML=cardHtml(s.aiHand[0])+cardHtml(s.aiHand[1]);
+    const str=aiStrength(s.aiHand,s.board);
+    const toCall=Math.max(0,s.currentBet-s.aiStreetBet);
+    const aiCall=Math.min(toCall,s.aiChips);
+    if(toCall>0){
+      if(str>0.75&&s.aiChips>toCall+20){
+        const rSize=Math.min(toCall+40,s.aiChips);
+        const addAmt=rSize-s.aiStreetBet;
+        s.aiChips-=addAmt;s.aiStreetBet+=addAmt;s.pot+=addAmt;s.currentBet=s.aiStreetBet;
+        s.aiActed=true;s.myActed=false; // player must respond to raise
+        this.logMsg('AI强牌加注至 '+s.currentBet);this.updateUI();
+        this.setButtons(false);
+      }else if(str>0.35){
+        s.aiChips-=aiCall;s.aiStreetBet+=aiCall;s.pot+=aiCall;
+        s.aiActed=true;
+        this.logMsg('AI跟注 '+aiCall);this.updateUI();
+        if(this.streetDone()){this.setButtons(true);setTimeout(()=>this.advanceStreet(),500);}
+        else{this.setButtons(false);}
+      }else{
+        s.roundOver=true;s.myChips+=s.pot;
+        this.logMsg('AI弃牌！你赢得 '+s.pot+' 筹码','correct');
+        this.setButtons(true);document.getElementById('ai-next-btn').style.display='inline-block';
+        this.updateUI();
+      }
+      return;
     }
-    this.dealStage();
+    if(str>0.65&&s.aiChips>20){
+      const betAmt=Math.min(20,s.aiChips);
+      s.aiChips-=betAmt;s.aiStreetBet+=betAmt;s.pot+=betAmt;s.currentBet=s.aiStreetBet;
+      s.aiActed=true;s.myActed=false; // player must respond to bet
+      this.logMsg('AI下注 '+betAmt);this.updateUI();
+      this.setButtons(false);
+    }else{
+      s.aiActed=true;
+      this.logMsg('AI过牌');this.updateUI();
+      if(this.streetDone()){this.setButtons(true);setTimeout(()=>this.advanceStreet(),500);}
+      else{this.setButtons(false);}
+    }
   },
-  dealStage(){
-    if(this.state.stage==='preflop'){this.state.stage='flop';this.state.board=[this.state.deck.pop(),this.state.deck.pop(),this.state.deck.pop()];}
-    else if(this.state.stage==='flop'){this.state.stage='turn';this.state.board.push(this.state.deck.pop());}
-    else if(this.state.stage==='turn'){this.state.stage='river';this.state.board.push(this.state.deck.pop());}
-    else{this.showdown();return;}
-    document.getElementById('ai-board').innerHTML=this.state.board.map(c=>cardHtml(c)).join('');
-    document.getElementById('ai-result-text').textContent='公共牌：'+this.state.board.map(c=>cardStr(c)).join(' ');
-    document.getElementById('ai-pot').textContent=this.state.pot;
-    document.querySelectorAll('#ai-actions .btn-action').forEach(b=>b.disabled=false);
+  advanceStreet(){
+    const s=this.state;
+    if(s.stage==='preflop'){
+      s.stage='flop';s.board=[s.deck.pop(),s.deck.pop(),s.deck.pop()];
+    }else if(s.stage==='flop'){
+      s.stage='turn';s.board.push(s.deck.pop());
+    }else if(s.stage==='turn'){
+      s.stage='river';s.board.push(s.deck.pop());
+    }else{
+      this.showdown();return;
+    }
+    s.myStreetBet=0;s.aiStreetBet=0;s.currentBet=0;s.myActed=false;s.aiActed=false;
+    document.getElementById('ai-board').innerHTML=s.board.map(c=>cardHtml(c)).join('');
+    const sn={flop:'翻牌',turn:'转牌',river:'河牌'};
+    this.logMsg(sn[s.stage]+'：'+s.board.map(c=>cardStr(c)).join(' '));
+    this.updateUI();
+    // Postflop: AI acts first (BB position)
+    this.setButtons(true);setTimeout(()=>this.aiAct(),500);
   },
   showdown(){
-    this.state.roundOver=true;document.querySelectorAll('#ai-actions .btn-action').forEach(b=>b.disabled=true);
-    document.getElementById('ai-ai-cards').innerHTML=cardHtml(this.state.aiHand[0])+cardHtml(this.state.aiHand[1]);
-    const mr=handRank(this.state.myHand,this.state.board);const ar=handRank(this.state.aiHand,this.state.board);
+    const s=this.state;s.roundOver=true;this.setButtons(true);
+    document.getElementById('ai-ai-cards').innerHTML=cardHtml(s.aiHand[0])+cardHtml(s.aiHand[1]);
+    document.getElementById('ai-board').innerHTML=s.board.map(c=>cardHtml(c)).join('');
+    const mr=handRank(s.myHand,s.board);const ar=handRank(s.aiHand,s.board);
     let t='',win=false;
-    if(mr.score>ar.score){t='🎉 你赢了！';win=true;this.state.wins++;this.state.myChips+=this.state.pot;}
-    else if(mr.score<ar.score){t='😔 AI赢了！';this.state.aiChips+=this.state.pot;}
-    else{t='🤝 平局！';this.state.myChips+=Math.floor(this.state.pot/2);this.state.aiChips+=Math.ceil(this.state.pot/2);}
-    document.getElementById('ai-result-text').textContent=t+' 你：'+mr.name+' AI：'+ar.name;
-    document.getElementById('ai-result').className='result-box show '+(win?'correct':(mr.score===ar.score?'draw':'wrong'));
+    if(mr.score>ar.score){t='🎉 你赢了！';win=true;s.wins++;s.myChips+=s.pot;}
+    else if(mr.score<ar.score){t='😔 AI赢了！';s.aiChips+=s.pot;}
+    else{t='🤝 平局！';s.myChips+=Math.floor(s.pot/2);s.aiChips+=Math.ceil(s.pot/2);}
+    this.logMsg(t+' 你：'+mr.name+' — AI：'+ar.name,win?'correct':(mr.score===ar.score?'draw':'wrong'));
     document.getElementById('ai-next-btn').style.display='inline-block';
-    document.getElementById('ai-chips').textContent=this.state.myChips;document.getElementById('ai-ai-chips').textContent=this.state.aiChips;document.getElementById('ai-my-chips').textContent=this.state.myChips;
+    this.updateUI();
   },
-  next(){if(this.state.round>=this.state.maxRounds)this.gameOver();else this.nextRound();},
+  next(){
+    if(this.state.round>=this.state.maxRounds)this.gameOver();
+    else this.nextRound();
+  },
   gameOver(){
     this.state.playing=false;document.getElementById('ai-game').style.display='none';document.getElementById('ai-gameover').style.display='block';
-    const net=this.state.myChips-1000;document.getElementById('ai-go-chips').textContent=this.state.myChips;document.getElementById('ai-go-wins').textContent=this.state.wins+'/5';
-    document.getElementById('ai-go-desc').textContent=net>0?'盈利'+net+'筹码！战胜AI！':net===0?'不输不赢':'亏损'+Math.abs(net)+'筹码…继续努力！';
+    const net=this.state.myChips-1000;
+    document.getElementById('ai-go-chips').textContent=this.state.myChips;
+    document.getElementById('ai-go-wins').textContent=this.state.wins+'/'+this.state.maxRounds;
+    document.getElementById('ai-go-desc').textContent=net>0?'盈利 '+net+' 筹码！战胜AI！':net===0?'不输不赢':'亏损 '+Math.abs(net)+' 筹码…继续努力！';
     saveTotalScore(Math.max(0,net));
   },
 };
