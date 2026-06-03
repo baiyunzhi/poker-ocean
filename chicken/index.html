@@ -177,6 +177,24 @@ a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
 .invite-box .iv-progress{font-size:0.85rem;color:#a09080;margin-bottom:12px}
 .invite-box .iv-progress strong{color:#f0b90b}
 .invite-box .iv-close{padding:8px 20px;border-radius:8px;border:1px solid rgba(240,185,11,0.2);background:transparent;color:#a09080;cursor:pointer}
+/* Invite enhanced styles */
+.invite-box .iv-pb{width:100%;height:8px;background:rgba(255,255,255,0.08);border-radius:4px;margin:6px 0 12px;overflow:hidden}
+.invite-box .iv-pb-fill{height:100%;background:linear-gradient(90deg,#44cc44,#66ee66);border-radius:4px;transition:width 0.5s}
+.invite-box .iv-link{font-size:0.75rem;color:#8ac4d8;background:rgba(0,0,0,0.3);padding:8px 10px;border-radius:6px;word-break:break-all;cursor:pointer;user-select:all;margin-bottom:8px;line-height:1.4}
+.invite-box .iv-link:hover{background:rgba(0,0,0,0.5)}
+.invite-box .iv-actions{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+.invite-box .iv-action-btn{padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;transition:all 0.2s}
+.invite-box .iv-action-btn:hover{transform:translateY(-1px)}
+.invite-box .iv-input-row{display:flex;gap:6px;margin:8px 0}
+.invite-box .iv-input-row input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(240,185,11,0.2);background:rgba(0,0,0,0.3);color:#e8d5c4;font-size:0.95rem;text-align:center;outline:none;transition:border-color 0.2s}
+.invite-box .iv-input-row input:focus{border-color:#f0b90b}
+.invite-box .iv-input-row button{padding:10px 16px;border-radius:8px;border:none;background:#f0b90b;color:#1a0f0a;font-size:0.9rem;font-weight:600;cursor:pointer}
+.invite-box .iv-confirm-msg{font-size:0.8rem;color:#44cc44;margin:4px 0;min-height:1.2em}
+.iv-poster-box{text-align:center;margin:8px 0}
+.iv-poster-box canvas{width:100%;max-width:300px;border-radius:8px;cursor:pointer}
+.invite-home-btn{display:block;margin:16px auto 0;padding:12px 28px;border-radius:12px;border:2px solid rgba(68,204,68,0.3);background:rgba(68,204,68,0.08);color:#44cc44;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.3s;text-align:center}
+.invite-home-btn:hover{background:rgba(68,204,68,0.15);border-color:#44cc44;transform:translateY(-2px)}
+.invite-home-btn .ih-sub{display:block;font-size:0.7rem;color:rgba(68,204,68,0.5);font-weight:400;margin-top:2px}
 .badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:16px}
 .badge-item{text-align:center;padding:10px 6px;border-radius:10px;background:rgba(42,26,16,0.8);border:1px solid rgba(240,185,11,0.08);transition:all 0.3s}
 .badge-item .bi-icon{font-size:2rem;margin-bottom:4px}
@@ -274,6 +292,9 @@ a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
     <h1 class="hero-title">德州扒鸡</h1>
     <p class="hero-sub">从小鸡到金鹏的德州扑克成长之旅 🐤➜🦅</p>
     <button class="hero-btn" onclick="navigate('preflop-duel')">开始冒险</button>
+    <div id="home-invite-cta" style="display:none">
+      <button class="invite-home-btn" onclick="showInviteDialog(true)">👥 邀请3位好友免费解锁全部游戏 <span class="ih-sub">已有 <strong id="invite-count-home">0</strong> 位好友接受邀请</span></button>
+    </div>
   </div>
   <div class="game-grid">
     <div class="game-card" onclick="navigate('preflop-duel')">
@@ -886,6 +907,7 @@ function navigate(page){
   if(page!=='ai-battle'&&aiBattle.state.playing)aiBattle.state.playing=false;
   if(page==='achievements')renderAchievements();
   if(page==='daily')renderDaily();
+  if(page==='home')renderHome();
 }
 
 document.querySelectorAll('.nav-links a[data-page]').forEach(a=>{
@@ -1047,30 +1069,148 @@ function getReferralCount(){
   const r=JSON.parse(localStorage.getItem('poker_referrals')||'[]');
   return Array.isArray(r)?r.length:0;
 }
-function showInviteDialog(){
-  if(isUnlocked()){alert('你已经解锁全部游戏！分享给好友吧 🎉');return;}
-  const cnt=getReferralCount();const needed=Math.max(0,3-cnt);
+function showInviteDialog(fromGame){
   const ov=document.createElement('div');ov.className='invite-overlay';
-  ov.innerHTML='<div class="invite-box"><div class="iv-title">👥 邀请好友解锁</div><div class="iv-desc">邀请 <strong>3</strong> 位好友，免费解锁全部游戏！</div><div class="iv-code" onclick="navigator.clipboard.writeText(getInviteCode());this.textContent=\'✅ 已复制!\';setTimeout(()=>this.textContent=getInviteCode(),1500)">'+getInviteCode()+'</div><div class="iv-desc" style="font-size:0.75rem">👆 点击复制邀请码发给好友</div><div class="iv-progress">已邀请 <strong>'+cnt+'</strong> / 3 人</div><hr style="border-color:rgba(240,185,11,0.1);margin:12px 0"><div class="iv-desc">好友给了你邀请码？在这里输入：</div><div style="display:flex;gap:8px;margin:8px 0"><input type="text" id="invite-input" placeholder="输入好友邀请码" maxlength="10" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(240,185,11,0.2);background:rgba(0,0,0,0.3);color:#e8d5c4;font-size:1rem;text-align:center;outline:none"><button class="iv-close" onclick="applyInviteCode(document.getElementById(\'invite-input\').value)" style="background:#f0b90b;color:#1a0f0a;padding:10px 16px;font-weight:600">确认</button></div><button class="iv-close" onclick="this.closest(\'.invite-overlay\').remove()" style="margin-top:8px">关闭</button></div>';
+  const cnt=getReferralCount();const pct=Math.min(100,cnt/3*100);
+  const link=getInviteLink();
+  let actions='';
+  if(fromGame||!isUnlocked()){
+    actions='<div class="iv-actions"><button class="iv-action-btn" style="background:#f0b90b;color:#1a0f0a" onclick="copyInviteLink(this)">📋 复制邀请链接</button><button class="iv-action-btn" style="background:rgba(68,204,68,0.2);color:#44cc44" onclick="shareInvite(this)">📱 分享好友</button><button class="iv-action-btn" style="background:rgba(255,68,68,0.15);color:#ff6666" onclick="generateInvitePoster(this)">🖼️ 生成海报</button></div>';
+  }else{
+    actions='<div class="iv-actions"><button class="iv-action-btn" style="background:#f0b90b;color:#1a0f0a" onclick="copyInviteLink(this)">📋 复制邀请链接</button><button class="iv-action-btn" style="background:rgba(68,204,68,0.2);color:#44cc44" onclick="shareInvite(this)">📱 分享给好友</button><button class="iv-action-btn" style="background:rgba(255,68,68,0.15);color:#ff6666" onclick="generateInvitePoster(this)">🖼️ 邀请海报</button></div>';
+  }
+  ov.innerHTML='<div class="invite-box"><div class="iv-title">👥 邀请好友，免费解锁</div><div class="iv-desc">邀请 <strong style="color:#f0b90b">3</strong> 位好友打开链接，全部游戏免费玩！</div>'+
+    '<div class="iv-code" onclick="copyInviteCode(this)">'+getInviteCode()+'</div><div class="iv-desc" style="font-size:0.7rem;margin-top:-6px">👆 点击邀请码复制</div>'+
+    '<div class="iv-link" onclick="copyFullLink(this)" title="点击复制完整链接">🔗 '+link+'</div>'+
+    '<div class="iv-pb"><div class="iv-pb-fill" style="width:'+pct+'%"></div></div>'+
+    '<div class="iv-progress">已邀请 <strong>'+cnt+'</strong> / 3 人'+(cnt>=3?' 🎉':'')+'</div>'+
+    actions+
+    '<div id="iv-poster-area" style="margin:0"></div>'+
+    '<hr style="border-color:rgba(240,185,11,0.1);margin:12px 0">'+
+    '<div class="iv-desc" style="font-size:0.8rem;color:#8a7a6a">好友给了你邀请码？在这里输入：</div>'+
+    '<div class="iv-input-row"><input type="text" id="invite-input" placeholder="输入好友的6位邀请码" maxlength="10"><button onclick="applyInviteCode(document.getElementById(\'invite-input\').value)">确认</button></div>'+
+    '<div id="iv-confirm-msg" class="iv-confirm-msg"></div>'+
+    '<button class="iv-close" onclick="this.closest(\'.invite-overlay\').remove()" style="margin-top:6px">关闭</button></div>';
   document.body.appendChild(ov);
 }
+function copyInviteCode(el){
+  navigator.clipboard.writeText(getInviteCode());
+  const t=el.textContent;el.textContent='✅ 已复制!';setTimeout(()=>el.textContent=t,1500);
+}
+function copyFullLink(el){
+  navigator.clipboard.writeText(getInviteLink());
+  const t=el.textContent;el.textContent='✅ 链接已复制!';setTimeout(()=>el.textContent=t,2000);
+}
+function copyInviteLink(btn){
+  navigator.clipboard.writeText(getInviteLink());
+  const t=btn.textContent;btn.textContent='✅ 已复制!';setTimeout(()=>btn.textContent=t,1500);
+}
+function shareInvite(btn){
+  const link=getInviteLink();
+  if(navigator.share){
+    navigator.share({title:'德州扒鸡',text:'🐤 来玩德州扒鸡！邀请你一起挑战扑克小游戏 ~',url:link}).catch(()=>{});
+  }else{
+    copyInviteLink(btn);
+  }
+}
+function generateInvitePoster(btn){
+  const area=document.getElementById('iv-poster-area');
+  if(area.querySelector('canvas')){area.innerHTML='';return;}
+  const code=getInviteCode();const link=getInviteLink();
+  const c=document.createElement('canvas');c.width=400;c.height=560;
+  const x=c.getContext('2d');
+  // Background
+  const g=x.createLinearGradient(0,0,400,560);
+  g.addColorStop(0,'#1a0f0a');g.addColorStop(0.5,'#2a1a10');g.addColorStop(1,'#0d0805');
+  x.fillStyle=g;x.fillRect(0,0,400,560);
+  // Gold border
+  x.strokeStyle='#f0b90b';x.lineWidth=3;x.strokeRect(12,12,376,536);
+  // Inner border
+  x.strokeStyle='rgba(240,185,11,0.2)';x.lineWidth=1;x.strokeRect(20,20,360,520);
+  // Title
+  x.fillStyle='#f0b90b';x.font='bold 36px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.textAlign='center';x.fillText('🐤 德州扒鸡',200,70);
+  // Subtitle
+  x.fillStyle='#e8d5c4';x.font='16px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.fillText('扑克学习 · 从小鸡到金鹏',200,100);
+  // Divider
+  x.strokeStyle='rgba(240,185,11,0.15)';x.lineWidth=1;
+  x.beginPath();x.moveTo(60,120);x.lineTo(340,120);x.stroke();
+  // Chicken SVG simplified
+  x.fillStyle='#d4a574';x.beginPath();x.arc(200,200,50,0,Math.PI*2);x.fill();
+  x.fillStyle='#e8c8a0';x.beginPath();x.arc(200,192,36,0,Math.PI*2);x.fill();
+  x.fillStyle='#ff4444';x.beginPath();x.moveTo(200,162);x.lineTo(189,178);x.lineTo(211,178);x.closePath();x.fill();
+  x.fillStyle='white';x.beginPath();x.arc(186,190,5,0,Math.PI*2);x.fill();x.beginPath();x.arc(214,190,5,0,Math.PI*2);x.fill();
+  x.fillStyle='#222';x.beginPath();x.arc(186,190,2.5,0,Math.PI*2);x.fill();x.beginPath();x.arc(214,190,2.5,0,Math.PI*2);x.fill();
+  x.fillStyle='#ff8c42';x.beginPath();x.moveTo(175,210);x.lineTo(200,222);x.lineTo(225,210);x.lineTo(216,216);x.lineTo(200,224);x.lineTo(184,216);x.closePath();x.fill();
+  // Invite code label
+  x.fillStyle='#a09080';x.font='14px "PingFang SC","Microsoft YaHei",sans-serif';x.fillText('我的邀请码',200,280);
+  // Invite code big
+  x.fillStyle='#f0b90b';x.font='bold 48px monospace';x.fillText(code,200,335);
+  // Progress text
+  const cnt=getReferralCount();
+  x.fillStyle='#a09080';x.font='16px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.fillText('已邀请 '+cnt+' / 3 人',200,380);
+  // Link
+  x.fillStyle='#6a8a9a';x.font='10px "PingFang SC","Microsoft YaHei",sans-serif';x.fillText('扫码或浏览器打开:',200,420);
+  x.fillStyle='#8ac4d8';x.font='12px "PingFang SC","Microsoft YaHei",sans-serif';x.fillText(link,200,440);
+  // Instruction
+  x.fillStyle='rgba(240,185,11,0.3)';x.font='13px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.fillText('← 好友打开链接或输入此码 →',200,480);
+  // Footer
+  x.fillStyle='rgba(240,185,11,0.15)';x.font='11px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.fillText('baiyunzhi.github.io/poker-ocean/chicken/',200,530);
+  // Click to save
+  const box=document.createElement('div');box.className='iv-poster-box';
+  const postCanvas=c.cloneNode(true);postCanvas.width=400;postCanvas.height=560;
+  postCanvas.getContext('2d').drawImage(c,0,0);
+  box.innerHTML='<p style="font-size:0.75rem;color:#a09080;margin-bottom:6px">长按保存图片分享给好友 👇</p>';
+  box.appendChild(postCanvas);
+  area.innerHTML='';area.appendChild(box);
+  postCanvas.style.cursor='pointer';
+  postCanvas.onclick=function(){
+    c.toBlob(function(b){
+      const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='德州扒鸡_邀请码_'+code+'.png';a.click();
+    },'image/png');
+  };
+  if(btn)btn.textContent='✅ 已生成';setTimeout(()=>{if(btn)btn.textContent='🖼️ 邀请海报'},2000);
+}
 function applyInviteCode(code){
-  if(!code||code.length<4)return false;
-  const myId=getUserId();const theirCode=code.trim().toUpperCase();
-  if(theirCode===getInviteCode())return false;
+  if(!code||code.length<4){document.getElementById('iv-confirm-msg').textContent='⚠️ 邀请码至少4位';return false;}
+  const theirCode=code.trim().toUpperCase();
+  if(theirCode===getInviteCode()){document.getElementById('iv-confirm-msg').textContent='⚠️ 不能输入自己的邀请码';return false;}
   let r=JSON.parse(localStorage.getItem('poker_referrals')||'[]');
   if(!Array.isArray(r))r=[];
-  if(r.includes(theirCode)){alert('你已经邀请过这位好友了！');return true;}
+  if(r.includes(theirCode)){document.getElementById('iv-confirm-msg').textContent='⏳ 你已经邀请过这位好友了';return true;}
   r.push(theirCode);localStorage.setItem('poker_referrals',JSON.stringify(r));
-  if(r.length>=3){localStorage.setItem('poker_unlocked','true');alert('🎉 邀请成功！恭喜你解锁全部游戏！');location.reload();return true;}
-  alert('✅ 邀请成功！已邀请 '+r.length+'/3 人');return true;
+  if(r.length>=3){
+    localStorage.setItem('poker_unlocked','true');
+    document.getElementById('iv-confirm-msg').textContent='🎉 恭喜你解锁全部游戏！页面即将刷新...';
+    setTimeout(()=>{location.reload();},1500);
+    return true;
+  }
+  document.getElementById('iv-confirm-msg').textContent='✅ 邀请成功！已邀请 '+r.length+'/3 人';
+  // Update UI in place
+  const ctr=document.querySelector('.iv-progress strong');if(ctr)ctr.textContent=r.length;
+  const bar=document.querySelector('.iv-pb-fill');if(bar)bar.style.width=Math.min(100,r.length/3*100)+'%';
+  document.getElementById('invite-input').value='';
+  return true;
 }
-// Parse URL invite code
+// Parse URL invite code with auto-notification
 (function(){const p=new URLSearchParams(location.search);const ref=p.get('ref');
   if(ref&&ref.length>=4){
     const myId=getUserId();
     let r=JSON.parse(localStorage.getItem('poker_referrals')||'[]');if(!Array.isArray(r))r=[];
-    if(!r.includes(ref)&&ref!==getInviteCode()){r.push(ref);localStorage.setItem('poker_referrals',JSON.stringify(r));}
+    if(!r.includes(ref)&&ref!==getInviteCode()){
+      r.push(ref);localStorage.setItem('poker_referrals',JSON.stringify(r));
+      // Show a welcome toast
+      setTimeout(function(){
+        const t=document.createElement('div');t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a2a0a;color:#44cc44;padding:12px 24px;border-radius:12px;border:1px solid rgba(68,204,68,0.3);z-index:999;font-size:0.9rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.5);animation:fadeIn 0.3s';
+        t.textContent='🐤 感谢好友的邀请！已为你记录';
+        document.body.appendChild(t);
+        setTimeout(function(){t.style.transition='opacity 0.3s';t.style.opacity='0';setTimeout(function(){t.remove()},300);},3000);
+      },500);
+    }
   }
 })();
 
@@ -2192,6 +2332,19 @@ function renderAchievements(){
   }
   bh+='</div>';
   document.getElementById('ach-grid').innerHTML+=bh;
+}
+
+/* ==============================
+   HOME PAGE
+   ============================== */
+function renderHome(){
+  const cta=document.getElementById('home-invite-cta');
+  if(!cta)return;
+  const unlocked=isUnlocked();
+  cta.style.display=unlocked?'none':'block';
+  const cnt=getReferralCount();
+  const el=document.getElementById('invite-count-home');
+  if(el)el.textContent=cnt;
 }
 
 /* ==============================
