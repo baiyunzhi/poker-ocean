@@ -195,19 +195,39 @@ a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
 .invite-home-btn{display:block;margin:16px auto 0;padding:12px 28px;border-radius:12px;border:2px solid rgba(68,204,68,0.3);background:rgba(68,204,68,0.08);color:#44cc44;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.3s;text-align:center}
 .invite-home-btn:hover{background:rgba(68,204,68,0.15);border-color:#44cc44;transform:translateY(-2px)}
 .invite-home-btn .ih-sub{display:block;font-size:0.7rem;color:rgba(68,204,68,0.5);font-weight:400;margin-top:2px}
-.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:16px}
-.badge-item{text-align:center;padding:10px 6px;border-radius:10px;background:rgba(42,26,16,0.8);border:1px solid rgba(240,185,11,0.08);transition:all 0.3s}
-.badge-item .bi-icon{font-size:2rem;margin-bottom:4px}
-.badge-item .bi-name{font-size:0.65rem;color:#f0b90b}
-.badge-item.locked{opacity:0.3;filter:grayscale(1)}
-.badge-item.locked .bi-icon{filter:grayscale(1)}
-.badge-item.locked .bi-name{color:#666}
-.badge-item.unlocked{border-color:rgba(240,185,11,0.25);background:rgba(240,185,11,0.05)}
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-top:16px}
+.badge-item{text-align:center;padding:12px 6px 8px;border-radius:12px;background:rgba(42,26,16,0.8);border:1px solid rgba(240,185,11,0.08);transition:all 0.3s;cursor:pointer;position:relative;overflow:hidden}
+.badge-item:hover{transform:translateY(-2px);border-color:rgba(240,185,11,0.2)}
+.badge-item .bi-icon{font-size:1.8rem;margin-bottom:2px;display:block}
+.badge-item .bi-name{font-size:0.62rem;color:#f0b90b;display:block;line-height:1.2}
+.badge-item .bi-bar{width:100%;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:6px;overflow:hidden}
+.badge-item .bi-bar-fill{height:100%;border-radius:2px;transition:width 0.5s}
+.badge-item.locked{opacity:0.85;filter:grayscale(0.6)}
+.badge-item.locked .bi-icon{filter:grayscale(0.6)}
+.badge-item.locked .bi-name{color:#8a7a6a}
+.badge-item.locked .bi-bar-fill{background:linear-gradient(90deg,#f0b90b,#ffd700)}
+.badge-item.unlocked{border-color:rgba(240,185,11,0.25);background:rgba(240,185,11,0.06);box-shadow:0 0 12px rgba(240,185,11,0.08)}
+.badge-item.unlocked .bi-bar-fill{background:linear-gradient(90deg,#44cc44,#66ee66)}
 .badge-item.just-unlocked{animation:badgePop 0.6s}
-@keyframes badgePop{0%{transform:scale(1)}30%{transform:scale(1.3)}60%{transform:scale(0.95)}100%{transform:scale(1)}}
+@keyframes badgePop{0%{transform:scale(1)}25%{transform:scale(1.25)}50%{transform:scale(0.9)}75%{transform:scale(1.05)}100%{transform:scale(1)}}
+/* Badge detail popup */
+.badge-popup{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:999;animation:fadeIn 0.2s}
+.badge-popup-box{background:#2a1a10;border-radius:16px;padding:28px;max-width:320px;width:90%;border:1px solid rgba(240,185,11,0.2);text-align:center}
+.badge-popup-box .bp-icon{font-size:3rem;margin-bottom:8px}
+.badge-popup-box .bp-name{font-size:1.2rem;color:#f0b90b;font-weight:700;margin-bottom:4px}
+.badge-popup-box .bp-desc{font-size:0.85rem;color:#a09080;margin-bottom:12px}
+.badge-popup-box .bp-bar{width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;margin:8px 0;overflow:hidden}
+.badge-popup-box .bp-bar-fill{height:100%;border-radius:3px;transition:width 0.5s}
+.badge-popup-box .bp-progress-text{font-size:0.8rem;color:#8a7a6a;margin-bottom:12px}
+.badge-popup-box .bp-close{padding:8px 24px;border-radius:8px;border:1px solid rgba(240,185,11,0.2);background:transparent;color:#a09080;cursor:pointer;font-size:0.9rem}
+.badge-popup-box .bp-close:hover{background:rgba(240,185,11,0.05)}
+/* Celebration confetti */
 .celebration{position:fixed;inset:0;pointer-events:none;z-index:1000;overflow:hidden}
-.celebration-particle{position:absolute;width:10px;height:10px;border-radius:50%;animation:particleFall linear forwards}
-@keyframes particleFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.celebration-particle{position:absolute;border-radius:2px;animation:particleFall linear forwards}
+@keyframes particleFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(1080deg);opacity:0}}
+/* Badge count in nav */
+.nav-badge-count{display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:20px;background:rgba(240,185,11,0.1);border:1px solid rgba(240,185,11,0.15);font-size:0.75rem;color:#f0b90b;cursor:pointer;transition:all 0.2s}
+.nav-badge-count:hover{background:rgba(240,185,11,0.15)}
 .pay-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:999;animation:fadeIn 0.3s}
 .pay-box{background:#2a1a10;border-radius:16px;padding:28px;max-width:360px;width:90%;border:1px solid rgba(240,185,11,0.2);text-align:center}
 .pay-box h3{color:#f0b90b;font-size:1.2rem;margin-bottom:8px}
@@ -259,6 +279,7 @@ a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
     <li><a data-page="ai-battle">AI对战</a></li>
     <li><a data-page="daily">每日挑战</a></li>
     <li><a data-page="achievements">成就</a></li>
+    <li><span id="nav-badge-pill" class="nav-badge-count" onclick="navigate('achievements')" style="display:none">🏅 <span id="nav-badge-num">0</span></span></li>
   </ul>
 </nav>
 
@@ -1218,44 +1239,91 @@ function applyInviteCode(code){
    ACHIEVEMENT BADGES
    ============================== */
 const BADGES=[
-  {id:'first_win',name:'初次胜利',icon:'🏆',desc:'任意游戏获得胜利',check:s=>Object.values(s.highs).some(v=>v>0)},
-  {id:'streak_5',name:'连胜小鸡',icon:'🔥',desc:'连续答对5题',check:s=>s.maxStreak>=5},
-  {id:'pd_master',name:'翻前大师',icon:'⚔️',desc:'翻前斗鸡满分',check:s=>(s.highs.pd||0)>=100},
-  {id:'fs_master',name:'识人慧眼',icon:'👁️',desc:'识鸡辨鸡满分',check:s=>(s.highs.fs||0)>=100},
-  {id:'math_genius',name:'数学天才',icon:'🧮',desc:'赔率速算满分',check:s=>(s.highs.oc||0)>=100},
-  {id:'mind_reader',name:'读心大师',icon:'🔮',desc:'读心术满分',check:s=>(s.highs.mr||0)>=100},
-  {id:'push_master',name:'赌神附体',icon:'🃏',desc:'全压赌命满分',check:s=>(s.highs.ap||0)>=100},
-  {id:'ai_slayer',name:'AI杀手',icon:'🤖',desc:'AI对战盈利500+',check:s=>(s.aiNet||0)>=500},
-  {id:'score_1000',name:'扑克痴迷',icon:'💎',desc:'累计1000总分',check:s=>s.total>=1000},
-  {id:'score_5000',name:'金鹏展翅',icon:'🦅',desc:'累计5000总分',check:s=>s.total>=5000},
+  {id:'first_win',name:'初次胜利',icon:'🏆',desc:'任意游戏获得一次胜利',check:s=>Object.values(s.highs).some(v=>v>0),progress:s=>({cur:Object.values(s.highs).filter(v=>v>0).length?1:0,tar:1})},
+  {id:'streak_3',name:'三连胜',icon:'🔥',desc:'连续答对3题',check:s=>s.maxStreak>=3,progress:s=>({cur:Math.min(s.maxStreak,3),tar:3})},
+  {id:'streak_5',name:'连胜小鸡',icon:'⚡',desc:'连续答对5题',check:s=>s.maxStreak>=5,progress:s=>({cur:Math.min(s.maxStreak,5),tar:5})},
+  {id:'streak_10',name:'十连鸡神',icon:'💥',desc:'连续答对10题',check:s=>s.maxStreak>=10,progress:s=>({cur:Math.min(s.maxStreak,10),tar:10})},
+  {id:'pd_master',name:'翻前大师',icon:'⚔️',desc:'翻前斗鸡满分',check:s=>(s.highs.pd||0)>=100,progress:s=>({cur:Math.min(Math.floor((s.highs.pd||0)/10),10),tar:10})},
+  {id:'fs_master',name:'识人慧眼',icon:'👁️',desc:'识鸡辨鸡满分',check:s=>(s.highs.fs||0)>=100,progress:s=>({cur:Math.min(Math.floor((s.highs.fs||0)/10),10),tar:10})},
+  {id:'math_genius',name:'数学天才',icon:'🧮',desc:'赔率速算满分',check:s=>(s.highs.oc||0)>=100,progress:s=>({cur:Math.min(Math.floor((s.highs.oc||0)/10),10),tar:10})},
+  {id:'mind_reader',name:'读心大师',icon:'🔮',desc:'读心术满分',check:s=>(s.highs.mr||0)>=100,progress:s=>({cur:Math.min(Math.floor((s.highs.mr||0)/10),10),tar:10})},
+  {id:'push_master',name:'赌神附体',icon:'🃏',desc:'全压赌命满分',check:s=>(s.highs.ap||0)>=100,progress:s=>({cur:Math.min(Math.floor((s.highs.ap||0)/10),10),tar:10})},
+  {id:'ai_win',name:'AI初胜',icon:'🎮',desc:'AI对战首次获胜',check:s=>(s.aiWins||0)>=1,progress:s=>({cur:Math.min(s.aiWins||0,1),tar:1})},
+  {id:'ai_slayer',name:'AI杀手',icon:'🤖',desc:'AI对战盈利500+',check:s=>(s.aiNet||0)>=500,progress:s=>({cur:Math.min(Math.floor((s.aiNet||0)/50),10),tar:10})},
+  {id:'daily_3',name:'每日坚持',icon:'📅',desc:'完成3次每日挑战',check:s=>(s.dailyCount||0)>=3,progress:s=>({cur:Math.min(s.dailyCount||0,3),tar:3})},
+  {id:'daily_7',name:'持之以恒',icon:'🌟',desc:'完成7次每日挑战',check:s=>(s.dailyCount||0)>=7,progress:s=>({cur:Math.min(s.dailyCount||0,7),tar:7})},
+  {id:'all_games',name:'全面扑克手',icon:'🎯',desc:'5款小游戏全部玩过',check:s=>(s.gamesPlayed||0)>=5,progress:s=>({cur:Math.min(s.gamesPlayed||0,5),tar:5})},
+  {id:'invite_1',name:'呼朋唤友',icon:'📨',desc:'邀请第1位好友',check:s=>(s.referrals||0)>=1,progress:s=>({cur:Math.min(s.referrals||0,1),tar:1})},
+  {id:'invite_3',name:'人气之星',icon:'👥',desc:'邀请3位好友',check:s=>(s.referrals||0)>=3,progress:s=>({cur:Math.min(s.referrals||0,3),tar:3})},
+  {id:'score_200',name:'积累者',icon:'💎',desc:'累计200总分',check:s=>s.total>=200,progress:s=>({cur:Math.min(s.total,200),tar:200})},
+  {id:'score_500',name:'扑克爱好者',icon:'💠',desc:'累计500总分',check:s=>s.total>=500,progress:s=>({cur:Math.min(s.total,500),tar:500})},
+  {id:'score_1000',name:'扑克痴迷',icon:'🔷',desc:'累计1000总分',check:s=>s.total>=1000,progress:s=>({cur:Math.min(s.total,1000),tar:1000})},
+  {id:'score_5000',name:'金鹏展翅',icon:'🦅',desc:'累计5000总分',check:s=>s.total>=5000,progress:s=>({cur:Math.min(s.total,5000),tar:5000})},
 ];
 function getUnlockedBadges(){return JSON.parse(localStorage.getItem('poker_badges')||'[]');}
 function isBadgeUnlocked(id){return getUnlockedBadges().includes(id);}
+function getBadgeCount(){return getUnlockedBadges().length;}
 function unlockBadge(id){
   const u=getUnlockedBadges();if(u.includes(id))return;
   u.push(id);localStorage.setItem('poker_badges',JSON.stringify(u));
-  // Celebration effect
+  // Celebration — confetti burst
   (function(){const d=document.createElement('div');d.className='celebration';
-    for(let i=0;i<30;i++){const p=document.createElement('div');p.className='celebration-particle';
-      p.style.left=Math.random()*100+'%';p.style.background=['#f0b90b','#ff4444','#44cc44','#4488ff','#ff88cc'][Math.floor(Math.random()*5)];
-      p.style.width=p.style.height=6+Math.random()*8+'px';p.style.animationDuration=1+Math.random()*2+'s';
-      p.style.animationDelay=Math.random()*0.5+'s';d.appendChild(p);}
-    document.body.appendChild(d);setTimeout(()=>d.remove(),3000);
+    const colors=['#f0b90b','#ff4444','#44cc44','#4488ff','#ff88cc','#ff6600','#aa44ff','#44ffcc'];
+    const shapes=['circle','square','star'];
+    for(let i=0;i<50;i++){
+      const p=document.createElement('div');p.className='celebration-particle';
+      const shape=shapes[Math.floor(Math.random()*shapes.length)];
+      const size=4+Math.random()*10;
+      p.style.left=Math.random()*100+'%';
+      p.style.top='-10px';
+      p.style.background=colors[Math.floor(Math.random()*colors.length)];
+      p.style.width=size+'px';p.style.height=size+'px';
+      if(shape==='circle')p.style.borderRadius='50%';
+      else if(shape==='square')p.style.borderRadius='1px';
+      else {p.style.width=size*0.6+'px';p.style.borderRadius='0';p.style.transform='rotate(45deg)';}
+      p.style.animationDuration=1.5+Math.random()*2+'s';
+      p.style.animationDelay=Math.random()*0.8+'s';
+      d.appendChild(p);
+    }
+    document.body.appendChild(d);setTimeout(()=>d.remove(),4000);
   })();
   // Show notification
   const b=BADGES.find(x=>x.id===id);if(!b)return;
-  const n=document.createElement('div');n.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#2a1a10;border:2px solid #f0b90b;border-radius:16px;padding:24px;z-index:1001;text-align:center;animation:fadeIn 0.3s';
-  n.innerHTML='<div style="font-size:3rem;margin-bottom:8px">'+b.icon+'</div><div style="color:#f0b90b;font-weight:700;font-size:1.2rem;margin-bottom:4px">🏅 成就解锁！</div><div style="color:#e8d5c4;font-size:1rem;margin-bottom:8px">'+b.name+'</div><div style="color:#a09080;font-size:0.8rem;margin-bottom:16px">'+b.desc+'</div><button onclick="this.parentElement.remove()" style="padding:8px 24px;border-radius:8px;border:none;background:#f0b90b;color:#1a0f0a;font-weight:600;cursor:pointer">太棒了！</button>';
+  const n=document.createElement('div');n.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#2a1a10,#3a2210);border:2px solid #f0b90b;border-radius:16px;padding:28px;z-index:1001;text-align:center;animation:fadeIn 0.3s;box-shadow:0 0 60px rgba(240,185,11,0.15);min-width:280px';
+  n.innerHTML='<div style="font-size:3.5rem;margin-bottom:8px">'+b.icon+'</div><div style="color:#f0b90b;font-weight:700;font-size:1.3rem;margin-bottom:4px">🏅 成就解锁！</div><div style="color:#e8d5c4;font-size:1.1rem;margin-bottom:6px;font-weight:600">'+b.name+'</div><div style="color:#a09080;font-size:0.8rem;margin-bottom:16px">'+b.desc+'</div><button onclick="this.parentElement.remove();updateBadgeCount()" style="padding:10px 32px;border-radius:8px;border:none;background:linear-gradient(135deg,#f0b90b,#d4a008);color:#1a0f0a;font-weight:700;cursor:pointer;font-size:0.95rem">太棒了！</button>';
   document.body.appendChild(n);
+  n.querySelector('button').onclick=function(){n.remove();updateBadgeCount();};
+  updateBadgeCount();
+}
+function showBadgeDetail(id){
+  const b=BADGES.find(x=>x.id===id);if(!b)return;
+  const unlocked=isBadgeUnlocked(id);
+  const stats=collectBadgeStats();
+  const p=b.progress(stats);
+  const pct=Math.min(100,p.cur/p.tar*100);
+  const ov=document.createElement('div');ov.className='badge-popup';
+  ov.innerHTML='<div class="badge-popup-box"><div class="bp-icon">'+(unlocked?b.icon:'🔒')+'</div><div class="bp-name">'+(unlocked?b.name:'???')+'</div><div class="bp-desc">'+b.desc+'</div>'+
+    '<div class="bp-bar"><div class="bp-bar-fill" style="width:'+pct+'%;background:'+(unlocked?'linear-gradient(90deg,#44cc44,#66ee66)':'linear-gradient(90deg,#f0b90b,#ffd700)')+'"></div></div>'+
+    '<div class="bp-progress-text">'+(unlocked?'✅ 已解锁！':(p.cur+' / '+p.tar))+'</div>'+
+    '<button class="bp-close" onclick="this.closest(\'.badge-popup\').remove()">关闭</button></div>';
+  document.body.appendChild(ov);
 }
 function checkBadges(stats){
-  BADGES.forEach(b=>{if(!isBadgeUnlocked(b.id)&&b.check(stats))unlockBadge(b.id);});
+  let anyNew=false;
+  BADGES.forEach(b=>{if(!isBadgeUnlocked(b.id)&&b.check(stats)){unlockBadge(b.id);anyNew=true;}});
+  return anyNew;
 }
 function collectBadgeStats(){
   const highs=JSON.parse(localStorage.getItem('poker_highs')||'{}');
   const streak=parseInt(localStorage.getItem('poker_streak')||'0');
   const aiNet=parseInt(localStorage.getItem('poker_ai_net')||'0');
-  return {highs, maxStreak: Math.max(streak, parseInt(localStorage.getItem('poker_max_streak')||'0')), total: getTotalScore(), aiNet};
+  const aiWins=parseInt(localStorage.getItem('poker_ai_wins')||'0');
+  const dailyCount=parseInt(localStorage.getItem('poker_daily_count')||'0');
+  const referred=JSON.parse(localStorage.getItem('poker_referrals')||'[]');
+  // gamesPlayed: count of games with non-zero high scores
+  const gameKeys=['pd','fs','oc','mr','ap'];
+  const gamesPlayed=gameKeys.filter(k=>(highs[k]||0)>0).length;
+  return {highs, maxStreak:Math.max(streak,parseInt(localStorage.getItem('poker_max_streak')||'0')), total:getTotalScore(), aiNet, aiWins, dailyCount, gamesPlayed, referrals:Array.isArray(referred)?referred.length:0};
 }
 
 /* ==============================
@@ -1426,7 +1494,7 @@ const preflopDuel={
     const ms=parseInt(localStorage.getItem('poker_max_streak')||'0');
     if(this.state.maxStreak>ms)localStorage.setItem('poker_max_streak',String(this.state.maxStreak));
     // Check badges
-    checkBadges(collectBadgeStats());
+    checkBadges(collectBadgeStats());trackDailyGame();
     // Share and unlock guide
     (function(ctx,rd){
       // Add share button
@@ -1608,7 +1676,7 @@ const fishOrShark={
     saveHighScore('fs',this.state.score);saveTotalScore(this.state.score);
     const ms=parseInt(localStorage.getItem('poker_max_streak')||'0');
     if(this.state.maxStreak>ms)localStorage.setItem('poker_max_streak',String(this.state.maxStreak));
-    checkBadges(collectBadgeStats());
+    checkBadges(collectBadgeStats());trackDailyGame();
     (function(ctx,rd){
       if(!document.getElementById('fs-share-btn')){
         const sb=document.createElement('button');sb.id='fs-share-btn';sb.className='btn-next';sb.style.cssText='margin-top:8px;background:rgba(68,160,255,0.15);color:#44a0ff;border-color:rgba(68,160,255,0.2)';
@@ -1732,7 +1800,7 @@ const oddsCalc = {
     saveHighScore('oc',this.state.score);saveTotalScore(this.state.score);
     const ms=parseInt(localStorage.getItem('poker_max_streak')||'0');
     if(this.state.maxStreak>ms)localStorage.setItem('poker_max_streak',String(this.state.maxStreak));
-    checkBadges(collectBadgeStats());
+    checkBadges(collectBadgeStats());trackDailyGame();
     (function(ctx,rd){
       if(!document.getElementById('oc-share-btn')){
         const sb=document.createElement('button');sb.id='oc-share-btn';sb.className='btn-next';sb.style.cssText='margin:8px auto 0;background:rgba(68,160,255,0.15);color:#44a0ff;border-color:rgba(68,160,255,0.2)';
@@ -1875,7 +1943,7 @@ const mindRead = {
     saveHighScore('mr',this.state.score);saveTotalScore(this.state.score);
     const ms=parseInt(localStorage.getItem('poker_max_streak')||'0');
     if(this.state.maxStreak>ms)localStorage.setItem('poker_max_streak',String(this.state.maxStreak));
-    checkBadges(collectBadgeStats());
+    checkBadges(collectBadgeStats());trackDailyGame();
     (function(ctx,rd){
       if(!document.getElementById('mr-share-btn')){
         const sb=document.createElement('button');sb.id='mr-share-btn';sb.className='btn-next';sb.style.cssText='margin:8px auto 0;background:rgba(68,160,255,0.15);color:#44a0ff;border-color:rgba(68,160,255,0.2)';
@@ -2021,7 +2089,7 @@ const allinPush = {
     saveHighScore('ap',this.state.score);saveTotalScore(this.state.score);
     const ms=parseInt(localStorage.getItem('poker_max_streak')||'0');
     if(this.state.maxStreak>ms)localStorage.setItem('poker_max_streak',String(this.state.maxStreak));
-    checkBadges(collectBadgeStats());
+    checkBadges(collectBadgeStats());trackDailyGame();
     (function(ctx,rd){
       if(!document.getElementById('ap-share-btn')){
         const sb=document.createElement('button');sb.id='ap-share-btn';sb.className='btn-next';sb.style.cssText='margin:8px auto 0;background:rgba(68,160,255,0.15);color:#44a0ff;border-color:rgba(68,160,255,0.2)';
@@ -2279,7 +2347,8 @@ const aiBattle = {
     saveTotalScore(Math.max(0,net));
     // Save AI net for badge tracking
     localStorage.setItem('poker_ai_net',String(net));
-    checkBadges(collectBadgeStats());
+    localStorage.setItem('poker_ai_wins',String(aiBattle.state.wins));
+    checkBadges(collectBadgeStats());trackDailyGame();
     // Add share button
     if(!document.getElementById('ai-share-btn')){
       const sb=document.createElement('button');sb.id='ai-share-btn';sb.className='btn-next';sb.style.cssText='margin:8px auto 0;background:rgba(68,160,255,0.15);color:#44a0ff;border-color:rgba(68,160,255,0.2)';
@@ -2303,7 +2372,7 @@ function renderDaily(){
   const games=[{name:'翻前斗鸡',id:'pd',page:'preflop-duel'},{name:'识鸡辨鸡',id:'fs',page:'fish-or-shark'},{name:'赔率速算',id:'oc',page:'odds-calc'},{name:'读心术',id:'mr',page:'mind-read'},{name:'全压赌命',id:'ap',page:'allin-push'}];
   const gi=Math.floor((seed*9301+49297)%233280/games.length%games.length);
   const g=games[gi];
-  document.getElementById('dc-content').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:3rem;margin-bottom:12px">🌟</div><h3 style="color:#f0b90b;margin-bottom:8px">今日挑战：'+g.name+'</h3><p style="color:#a09080;margin-bottom:16px">完成可获得<span style="color:#f0b90b;font-weight:700">双倍积分</span>！</p><button class="hero-btn" onclick="localStorage.setItem(\'poker_daily_date\',new Date().toISOString().slice(0,10));navigate(\''+g.page+'\');setTimeout(()=>window[\''+g.id+'_start\'](),100)">开始今日挑战</button></div>';
+  document.getElementById('dc-content').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:3rem;margin-bottom:12px">🌟</div><h3 style="color:#f0b90b;margin-bottom:8px">今日挑战：'+g.name+'</h3><p style="color:#a09080;margin-bottom:16px">完成可获得<span style="color:#f0b90b;font-weight:700">双倍积分</span>！</p><button class="hero-btn" onclick="localStorage.setItem(\'poker_daily_date\',new Date().toISOString().slice(0,10));localStorage.removeItem(\'poker_daily_counted\');navigate(\''+g.page+'\');setTimeout(()=>window[\''+g.id+'_start\'](),100)">开始今日挑战</button></div>';
   window[g.id+'_start']=function(){const map={pd:preflopDuel,fs:fishOrShark,oc:oddsCalc,mr:mindRead,ap:allinPush};map[g.id].start();};
 }
 
@@ -2324,14 +2393,25 @@ function renderAchievements(){
   }
   document.getElementById('ach-grid').innerHTML=html;
   // Badges
-  const ub=getUnlockedBadges();
-  let bh='<h3 style="color:#f0b90b;margin:24px 0 8px;font-size:1.1rem">🏅 徽章</h3><div class="badge-grid">';
+  const ub=getUnlockedBadges();const stats=collectBadgeStats();
+  const unlockedCnt=ub.length;const totalCnt=BADGES.length;
+  let bh='<div style="display:flex;justify-content:space-between;align-items:center;margin:24px 0 6px">'+
+    '<h3 style="color:#f0b90b;font-size:1.1rem">🏅 徽章 <span style="color:#a09080;font-size:0.8rem">'+unlockedCnt+'/'+totalCnt+'</span></h3>'+
+    '<span style="font-size:0.75rem;color:#a09080">'+(totalCnt-unlockedCnt)+'枚待解锁</span></div>'+
+    '<div style="width:100%;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-bottom:12px;overflow:hidden">'+
+    '<div style="height:100%;background:linear-gradient(90deg,#f0b90b,#ffd700);border-radius:2px;transition:width 0.5s;width:'+(unlockedCnt/totalCnt*100)+'%"></div></div>'+
+    '<div class="badge-grid">';
   for(const b of BADGES){
     const unlocked=ub.includes(b.id);
-    bh+='<div class="badge-item'+(unlocked?' unlocked':' locked')+'" title="'+b.desc+'"><div class="bi-icon">'+(unlocked?b.icon:'🔒')+'</div><div class="bi-name">'+(unlocked?b.name:'???')+'</div></div>';
+    const p=b.progress(stats);const pct=Math.min(100,p.cur/p.tar*100);
+    bh+='<div class="badge-item'+(unlocked?' unlocked':' locked')+'" onclick="showBadgeDetail(\''+b.id+'\')" title="'+b.desc+'">'+
+      '<span class="bi-icon">'+(unlocked?b.icon:'🔒')+'</span>'+
+      '<span class="bi-name">'+(unlocked?b.name:'???')+'</span>'+
+      '<div class="bi-bar"><div class="bi-bar-fill" style="width:'+pct+'%"></div></div></div>';
   }
   bh+='</div>';
   document.getElementById('ach-grid').innerHTML+=bh;
+  updateBadgeCount();
 }
 
 /* ==============================
@@ -2345,6 +2425,25 @@ function renderHome(){
   const cnt=getReferralCount();
   const el=document.getElementById('invite-count-home');
   if(el)el.textContent=cnt;
+  // Update badge count in nav
+  updateBadgeCount();
+}
+function trackDailyGame(){
+  const today=new Date().toISOString().slice(0,10);
+  if(localStorage.getItem('poker_daily_date')===today&&!localStorage.getItem('poker_daily_counted')){
+    localStorage.setItem('poker_daily_counted','true');
+    const c=parseInt(localStorage.getItem('poker_daily_count')||'0');
+    localStorage.setItem('poker_daily_count',String(c+1));
+  }
+}
+function updateBadgeCount(){
+  const cnt=getBadgeCount();
+  const pill=document.getElementById('nav-badge-pill');
+  const num=document.getElementById('nav-badge-num');
+  if(pill&&num){
+    if(cnt>0){pill.style.display='inline-flex';num.textContent=cnt;}
+    else{pill.style.display='none';}
+  }
 }
 
 /* ==============================
@@ -2356,6 +2455,7 @@ function renderHome(){
     if(c&&await validateRedeemCode(c))localStorage.setItem('poker_unlocked','true');
   })();
   navigate('home');
+  updateBadgeCount();
 </script>
 </body>
 </html>
