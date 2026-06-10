@@ -534,6 +534,8 @@ function showSignalToast(signal) {
 async function resetAccount() {
   if (!confirm('确定要重置账户吗？所有持仓将被清空。')) return;
   await fetch('/api/reset', {method: 'POST'});
+  allSignals = [];
+  renderSignals();
 }
 
 // ─── WebSocket ───────────────────
@@ -541,6 +543,7 @@ let ws = null;
 function connectWS() {
   const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
   ws = new WebSocket(proto + '//' + location.host + '/ws');
+  ws.onopen = function() { loadSignals(); };
   ws.onmessage = function(e) {
     const data = JSON.parse(e.data);
     if (data.type === 'tick') {
@@ -673,7 +676,15 @@ async function loadSignals() {
     const r = await fetch('/api/signals?limit=100');
     const signals = await r.json();
     if (signals && signals.length > 0) {
-      allSignals = signals;
+      // Merge: only add signals not already in allSignals (WS may have delivered newer ones)
+      for (const s of signals) {
+        if (!allSignals.some(function(ex) { return ex.id === s.id; })) {
+          allSignals.push(s);
+        }
+      }
+      // Sort by time descending (newest first)
+      allSignals.sort(function(a, b) { return b.time - a.time; });
+      if (allSignals.length > 100) allSignals.length = 100;
       renderSignals();
     }
   } catch(e) {
