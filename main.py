@@ -656,6 +656,12 @@ def get_kline_api(pid: str = "AU", interval: str = "1h", limit: int = 300):
     }
     return {"candles": candles, "mas": mas}
 
+
+@app.get("/api/signals")
+def get_signals(limit: int = 100):
+    return list(reversed(signal_history[-limit:]))
+
+
 # ─── WebSocket ────────────────────────────────────────────
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
