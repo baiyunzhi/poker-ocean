@@ -347,16 +347,21 @@ def get_ma_values(pid: str) -> tuple:
     return ma20_list[-1]["value"], ma60_list[-1]["value"], ma120_list[-1]["value"]
 
 
-def compute_deviation_zone(deviation: float) -> str:
-    """确定偏离度所在区间"""
+def compute_deviation_zone(deviation: float, prev_zone: str | None = None) -> str:
+    """确定偏离度所在区间，含 0.5% 滞回区避免边界震荡"""
     if deviation <= 3.0:
         return "convergence"        # 聚合
-    elif deviation <= 5.0:
-        return "divergence_start"   # 发散初期
-    elif deviation <= 10.0:
-        return "divergence_mid"     # 发散中期
-    else:
+    elif deviation > 10.0:
         return "divergence_end"     # 发散末期
+    # 滞回逻辑：向上突破需要更大偏离度，向下回落用标准阈值
+    if prev_zone == "convergence" and deviation <= 3.5:
+        return "convergence"
+    if prev_zone == "divergence_end" and deviation > 9.5:
+        return "divergence_end"
+    if deviation <= 5.0:
+        return "divergence_start"   # 发散初期
+    else:
+        return "divergence_mid"     # 发散中期
 
 
 SIGNAL_META = {
@@ -396,13 +401,13 @@ def detect_signals() -> list:
         if ma20 is None:
             continue
 
-        cfg = PRODUCTS[pid]
+        prev_state = signal_state.get(pid, {"cross_state": None, "deviation_zone": None})
         deviation = calc_deviation(ma20, ma60, ma120)
-        zone = compute_deviation_zone(deviation)
+        zone = compute_deviation_zone(deviation, prev_state["deviation_zone"])
 
         # ── 判断金叉/死叉 ──
         # 金叉: MA20 > MA60; 死叉: MA20 < MA60
-        threshold = 0.05  # 5分钱容差避免反复切换
+        threshold = ma60 * 0.001  # 0.1% 相对阈值，避免价格震荡导致的反复切换
         if ma20 > ma60 + threshold:
             new_cross = "golden"
         elif ma20 < ma60 - threshold:
@@ -410,10 +415,8 @@ def detect_signals() -> list:
         else:
             new_cross = signal_state.get(pid, {}).get("cross_state", None)
 
-        prev_state = signal_state.get(pid, {"cross_state": None, "deviation_zone": None})
-
-        # 检测交叉状态变化
-        if prev_state["cross_state"] != new_cross and new_cross in ("golden", "death"):
+        # 检测交叉状态变化（跳过首次初始化，避免启动时误报）
+        if prev_state["cross_state"] is not None and prev_state["cross_state"] != new_cross and new_cross in ("golden", "death"):
             signal_type = "golden_cross" if new_cross == "golden" else "death_cross"
             meta = SIGNAL_META[signal_type]
             sig = {
