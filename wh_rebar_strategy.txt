@@ -1,0 +1,149 @@
+// ==========================================================
+// 螺纹钢 · 均线聚散系统
+// 文华财经 麦语言 (WH8 / 赢智)
+// ==========================================================
+// 信号执行: 次K线开盘价 (尾盘确认→次日开盘成交)
+#PROPERTY SIGNAL_EXECUTE 1
+// 过滤模型 (同时支持多空双向)
+#PROPERTY FILTER 1
+// 使用说明:
+//   加载到 K 线图 → 右键 → 回测/信号加载
+//   适用于日线周期
+//
+// 如果需要实盘信号，请取消注释最后的 #TRADE_OTHER 行
+// ==========================================================
+
+// ─── 参数配置 ─────────────────────────────────────────────
+N1 := 20;          // MA1 周期
+N2 := 60;          // MA2 周期
+N3 := 120;         // MA3 周期
+CONVERGE_DAYS := 3;  // 聚合最低持续天数 (宽松=3, 严格=5)
+CONVERGE_THR := 2.5; // 聚合偏离度阈值 (%)
+DIVERGE_LOW  := 2.0; // 发散区间下限 (%) (宽松=2.0, 严格=2.5)
+DIVERGE_HIGH := 5.0; // 发散区间上限 (%) (宽松=5.0, 严格=4.0)
+VOL_BOOST   := 1.2;  // 放量倍数 (宽松=1.2, 严格=1.5)
+LOOKBACK    := 15;   // 新高/新低回溯周期 (宽松=15, 严格=20)
+
+// ─── 均线 ────────────────────────────────────────────────
+MA1 := MA(CLOSE, N1);
+MA2 := MA(CLOSE, N2);
+MA3 := MA(CLOSE, N3);
+
+// ─── 成交量均线 ──────────────────────────────────────────
+VOL_MA1 := MA(VOLUME, N1);
+
+// ─── 偏离度 (聚散度) |(MA1-MA2)/MA2| × 100% ──────────
+DIVERG := ABS((MA1 - MA2) / MA2 * 100);
+
+// ─── MA120 斜率 (一票否决) ──────────────────────────────
+// 用 MA3 相比 20 天前的变化判断方向
+MA3_UP  := MA3 > REF(MA3, 20);
+MA3_DN := MA3 < REF(MA3, 20);
+
+// ─── 均线排列 ────────────────────────────────────────────
+BULL_ALIGN := MA1 > MA2 AND MA2 > MA3;   // 多头排列
+BEAR_ALIGN := MA1 < MA2 AND MA2 < MA3;   // 空头排列
+
+// ─── 聚合判断 (过去 N 天偏离度始终 ≤ 阈值) ────────────
+// COUNT(条件, N) = N 表示过去 N 天全部满足条件
+CONVERGED := COUNT(DIVERG <= CONVERGE_THR, CONVERGE_DAYS) = CONVERGE_DAYS;
+
+// ─── 发散初期判断 ───────────────────────────────────────
+// 聚合之后偏离��反弹到发散区间
+DIVERGING := CONVERGED AND DIVERG >= DIVERGE_LOW AND DIVERG <= DIVERGE_HIGH;
+
+// ─── 价格新高/新低 ─────────────────────────────────────
+NEW_HIGH := HIGH > REF(HHV(HIGH, LOOKBACK), 1);
+NEW_LOW  := LOW  < REF(LLV(LOW, LOOKBACK), 1);
+
+// ─── 放量确认 ────────────────────────────────────────────
+VOL_SURGE := VOLUME > VOL_MA1 * VOL_BOOST;
+
+// ══════════════════════════════════════════════════════════
+// 入场信号
+// ══════════════════════════════════════════════════════════
+
+// 做多信号
+LONG_SIGNAL := BULL_ALIGN AND MA3_UP
+               AND DIVERGING
+               AND NEW_HIGH AND VOL_SURGE;
+
+// 做空信号
+SHORT_SIGNAL := BEAR_ALIGN AND MA3_DN
+                AND DIVERGING
+                AND NEW_LOW AND VOL_SURGE;
+
+// ─── 画线 ────────────────────────────────────────────────
+MA20_LINE := MA1, COLORRED;
+MA60_LINE := MA2, COLORYELLOW;
+MA120_LINE := MA3, COLORGREEN;
+
+// 信号标记
+DRAWTEXT(LONG_SIGNAL, LOW, '⚡多', COLORRED, 0, AVALONG);
+DRAWTEXT(SHORT_SIGNAL, HIGH, '⚡空', COLORGREEN, 0, AVALONG);
+
+// ══════════════════════════════════════════════════════════
+// 止损 & 离场
+// ══════════════════════════════════════════════════════════
+
+// 硬止损 2%
+HARD_SL_LONG  := BKPRICE * 0.98;
+HARD_SL_SHORT := BKPRICE * 1.02;
+
+// 时间止损 7 日
+TIME_STOP := BARSBK >= 7 AND CLOSE <= BKPRICE;
+
+// 移动止损 (浮盈≥5%后回撤3%)
+TRAIL_ACTIVATE := (HIGH - BKPRICE) / BKPRICE >= 0.05;
+TRAIL_STOP     := TRAIL_ACTIVATE AND (HHV(HIGH, BARSBK+1) - CLOSE) / HHV(HIGH, BARSBK+1) >= 0.03;
+
+// 发散末期离场 (偏离度 > 8%)
+DIVERGE_END := DIVERG > 8.0;
+
+// MA20/60 交叉离场
+MA_CROSS_LONG  := CROSS(MA2, MA1);   // 死叉 → 多单离场
+MA_CROSS_SHORT := CROSS(MA1, MA2);   // 金叉 → 空单离场
+
+// ─── 离场综合 ────────────────────────────────────────────
+LONG_EXIT  := HARD_SL_LONG >= LOW
+              OR TIME_STOP
+              OR TRAIL_STOP
+              OR DIVERGE_END
+              OR MA_CROSS_LONG;
+
+SHORT_EXIT := HARD_SL_SHORT <= HIGH
+              OR TIME_STOP
+              OR TRAIL_STOP
+              OR DIVERGE_END
+              OR MA_CROSS_SHORT;
+
+// ══════════════════════════════════════════════════════════
+// 回测 & 信号输出
+// ══════════════════════════════════════════════════════════
+
+// 做多
+BK(LONG_SIGNAL, 1);    // 开多 1手
+// 空头平仓 & 多头离场
+SP(LONG_EXIT, 1);
+
+// 做空
+SK(SHORT_SIGNAL, 1);   // 开空 1手
+// 多头平仓 & 空头离场
+BP(SHORT_EXIT, 1);
+
+// ─── 资金曲线 ────────────────────────────────────────────
+// ZONE 用于显示权益曲线
+ZONE: MONEYTOTAL, LINETHICK1, COLORWHITE;
+
+// ─── 信号说明 ────────────────────────────────────────────
+// 策略逻辑:
+//   1. MA20/60/120 多头/空头��列��认方向
+//   2. 偏离度 ≤2.5% 持续 3 天 (聚合/震荡)
+//   3. 偏离度反弹到 2-5% 区间 (发散初期)
+//   4. 价格创新高/新低 + 放量确认入场
+//   5. MA120 方向一票否决
+//   6. 多止损方式: 硬止损2%, 时间止损7日, 移动止损, 发散末期, MA交叉
+//
+// 参数调优参考:
+//   宽松: CONVERGE_DAYS=3, DIVERGE_LOW=2.0, DIVERGE_HIGH=5.0, VOL_BOOST=1.2, LOOKBACK=15
+//   严格: CONVERGE_DAYS=5, DIVERGE_LOW=2.5, DIVERGE_HIGH=4.0, VOL_BOOST=1.5, LOOKBACK=20

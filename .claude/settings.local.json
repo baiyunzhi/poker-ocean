@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__filesystem__search_files",
+      "mcp__filesystem__directory_tree"
+    ]
+  }
+}

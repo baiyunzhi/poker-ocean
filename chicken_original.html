@@ -1,0 +1,2440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#1a0f0a">
+<title>德州扒鸡 — 从小鸡到金鹏的扑克之旅</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background:#1a0f0a;color:#e8d5c4;min-height:100vh;overflow-x:hidden;
+  background-image:radial-gradient(ellipse at 50% 0,#2a1a10 0%,#1a0f0a 60%,#0d0805 100%);
+}
+a{color:#f0b90b;text-decoration:none}a:hover{color:#ffd700}
+.container{max-width:1100px;margin:0 auto;padding:0 16px}
+.page{display:none;padding:24px 0 60px}
+.page.active{display:block}
+.page-header{text-align:center;margin-bottom:32px}
+.page-header h1{font-size:1.8rem;color:#f0b90b;margin-bottom:8px}
+.page-header p{font-size:0.95rem;color:#a09080}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:rgba(26,15,10,0.95);backdrop-filter:blur(8px);border-bottom:1px solid rgba(240,185,11,0.15);position:sticky;top:0;z-index:100}
+.nav-logo{display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700;color:#f0b90b}
+.nav-logo svg{width:28px;height:28px}
+.nav-links{display:flex;gap:4px;list-style:none;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;-ms-overflow-style:none;scrollbar-width:none}.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{padding:6px 14px;border-radius:6px;font-size:0.85rem;color:#a09080;transition:all 0.2s;cursor:pointer}
+.nav-links a:hover,.nav-links a.active{color:#f0b90b;background:rgba(240,185,11,0.1)}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 16px 20px}
+.hero-characters{display:flex;align-items:center;justify-content:center;gap:0;width:100%;max-width:500px;margin-bottom:16px}
+.hero-title{font-size:2.5rem;font-weight:800;color:#f0b90b;margin-bottom:8px;text-shadow:0 0 40px rgba(240,185,11,0.2);letter-spacing:2px}
+.hero-sub{font-size:1rem;color:#a09080;margin-bottom:24px}
+.hero-btn{display:inline-block;padding:14px 48px;border-radius:12px;background:linear-gradient(135deg,#f0b90b,#d4a008);color:#1a0f0a;font-size:1.1rem;font-weight:700;border:none;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;box-shadow:0 4px 24px rgba(240,185,11,0.3)}
+.hero-btn:hover{transform:translateY(-2px);box-shadow:0 6px 32px rgba(240,185,11,0.4)}
+.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:32px}
+.game-card{background:linear-gradient(135deg,#2a1a10,#1f120a);border-radius:12px;padding:20px;border:1px solid rgba(240,185,11,0.08);cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden}
+.game-card:hover{transform:translateY(-3px);border-color:rgba(240,185,11,0.2);box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+.game-card .gc-icon{font-size:2rem;margin-bottom:10px}
+.game-card h3{font-size:1.05rem;color:#f0e8d0;margin-bottom:6px}
+.game-card p{font-size:0.85rem;color:#a09080;line-height:1.5}
+.game-card .gc-badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:0.7rem;font-weight:600;margin-top:10px}
+.badge-new{background:rgba(240,185,11,0.15);color:#f0b90b}
+.game-area{max-width:800px;margin:0 auto;background:linear-gradient(180deg,#2a1a10,#1a0f0a);border-radius:16px;border:1px solid rgba(240,185,11,0.1);padding:20px;position:relative;min-height:500px}
+.game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(240,185,11,0.1)}
+.game-header h2{font-size:1.1rem;color:#f0b90b}
+.game-stats{display:flex;gap:16px;font-size:0.85rem}
+.game-stat{display:flex;align-items:center;gap:4px}
+.gs-icon{font-size:1rem}
+.gs-val{color:#f0e8d0;font-weight:600}
+.table-scene{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 16px;position:relative;min-height:140px}
+.character-box{flex:0 0 120px;text-align:center;position:relative;z-index:2}
+.character-box svg{width:110px;height:110px;display:block;margin:0 auto}
+.char-name{font-size:0.75rem;margin-top:2px;font-weight:600}
+.char-name.chick{color:#ff8c42}
+.char-name.hawk{color:#8b4513}
+.char-speech{position:absolute;top:-10px;font-size:0.75rem;color:#a09080;background:rgba(0,0,0,0.6);padding:3px 10px;border-radius:8px;white-space:nowrap;opacity:0;transition:opacity 0.3s}
+.char-speech.show{opacity:1}
+.chick .char-speech,.hawk .char-speech{left:50%;transform:translateX(-50%)}
+.vs-divider{font-size:1.5rem;font-weight:800;color:rgba(240,185,11,0.2);flex:0 0 40px;text-align:center;z-index:1}
+.table-felt{flex:1;max-width:280px;background:radial-gradient(ellipse,#3a2a1a,#1f120a);border-radius:40px;border:3px solid #5a3a1a;padding:16px;text-align:center;position:relative;z-index:2;box-shadow:inset 0 0 30px rgba(0,0,0,0.3),0 4px 20px rgba(0,0,0,0.4)}
+.table-felt .round-label{font-size:0.7rem;color:#8a7a6a;margin-bottom:6px}
+.table-felt .hand-cards{display:flex;justify-content:center;gap:8px;margin-bottom:6px}
+.card{width:50px;height:70px;background:#fff;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.3);position:relative;overflow:hidden}
+.card .cr{font-size:1.1rem;line-height:1}
+.card .cs{font-size:0.85rem;line-height:1;margin-top:-2px}
+.card.red{color:#d32f2f}
+.card.black{color:#222}
+.card.card-back{background:linear-gradient(135deg,#5a3a1a,#8b6914);border:2px solid #f0b90b}
+.card.card-back::after{content:'🐤';font-size:1.5rem}
+.scenario-box{text-align:center;margin:12px 0 16px;padding:12px;background:rgba(0,0,0,0.2);border-radius:10px}
+.scenario-pos{font-size:0.8rem;color:#a09080;margin-bottom:4px}
+.scenario-text{font-size:0.95rem;color:#e8d5c4;line-height:1.5}
+.scenario-text strong{color:#f0b90b}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.btn-action{padding:12px 28px;border-radius:10px;border:2px solid transparent;font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.2s;min-width:100px;text-transform:uppercase;letter-spacing:1px}
+.btn-fold{background:rgba(200,50,50,0.15);border-color:rgba(200,50,50,0.3);color:#e06060}
+.btn-fold:hover{background:rgba(200,50,50,0.25);border-color:#c83232}
+.btn-call{background:rgba(50,150,200,0.15);border-color:rgba(50,150,200,0.3);color:#60b0e0}
+.btn-call:hover{background:rgba(50,150,200,0.25);border-color:#3296c8}
+.btn-raise{background:rgba(240,185,11,0.15);border-color:rgba(240,185,11,0.3);color:#f0b90b}
+.btn-raise:hover{background:rgba(240,185,11,0.25);border-color:#f0b90b}
+.btn-action:disabled{opacity:0.4;cursor:not-allowed;transform:none!important}
+.btn-action:not(:disabled):hover{transform:translateY(-2px)}
+.result-box{display:none;text-align:center;padding:16px;margin-top:12px;border-radius:12px;animation:fadeIn 0.3s}
+.result-box.show{display:block}
+.result-box.correct{background:rgba(68,204,68,0.1);border:1px solid rgba(68,204,68,0.2)}
+.result-box.wrong{background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.2)}
+.result-box .rb-icon{font-size:2rem;margin-bottom:6px}
+.result-box .rb-text{font-size:0.95rem;margin-bottom:4px}
+.result-box .rb-detail{font-size:0.8rem;color:#a09080}
+.btn-next{margin-top:12px;padding:8px 24px;border-radius:8px;background:rgba(240,185,11,0.15);color:#f0b90b;border:1px solid rgba(240,185,11,0.2);cursor:pointer;font-size:0.9rem;transition:all 0.2s}
+.btn-next:hover{background:rgba(240,185,11,0.25)}
+.start-screen{text-align:center;padding:30px 16px}
+.start-screen .ss-icon{font-size:4rem;margin-bottom:12px}
+.start-screen h3{font-size:1.4rem;color:#f0b90b;margin-bottom:8px}
+.start-screen p{font-size:0.9rem;color:#a09080;margin-bottom:20px;line-height:1.6}
+.start-screen .ss-rules{text-align:left;display:inline-block;margin-bottom:20px}
+.start-screen .ss-rules li{margin:6px 0;font-size:0.85rem;color:#a09080;list-style:none}
+.start-screen .ss-rules li::before{content:'🐤 ';color:#f0b90b}
+.gameover-screen{text-align:center;padding:30px 16px}
+.gameover-screen .go-title{font-size:1.6rem;font-weight:800;margin-bottom:8px}
+.gameover-screen .go-rank{font-size:3rem;margin-bottom:8px}
+.gameover-screen .go-desc{font-size:0.95rem;color:#a09080;margin-bottom:16px;line-height:1.6}
+.gameover-screen .go-stats{display:flex;justify-content:center;gap:24px;margin-bottom:20px}
+.gameover-screen .go-stat{text-align:center}
+.gameover-screen .go-stat .num{font-size:1.5rem;font-weight:700;color:#f0b90b}
+.gameover-screen .go-stat .lbl{font-size:0.75rem;color:#a09080}
+.character-box .expr-mouth,.character-box .expr-eye{transition:all 0.3s}
+.chick-happy .expr-mouth{transform:translateY(-3px)}
+.chick-scared .expr-eye{transform:scale(1.3)}
+.chick-scared .expr-mouth{transform:scaleY(1.5)}
+.hawk-angry .expr-mouth{transform:translateY(2px)}
+.hawk-amused .expr-mouth{transform:scaleY(1.3)}
+.mystery-box{width:110px;height:110px;margin:0 auto;display:flex;align-items:center;justify-content:center;background:#2a1a10;border-radius:50%;border:3px solid #f0b90b;font-size:4rem;transition:all 0.5s}
+.mystery-box.reveal-fish{background:#ff8c42;border-color:#e07b3a}
+.mystery-box.reveal-shark{background:#8b4513;border-color:#6b3010}
+@keyframes mysteryReveal{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+.mystery-reveal{animation:mysteryReveal 0.5s}
+.odds-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.btn-odds{padding:14px 10px;border-radius:10px;border:2px solid rgba(240,185,11,0.2);background:rgba(240,185,11,0.08);color:#f0e8d0;font-size:0.95rem;cursor:pointer;transition:all 0.2s;font-weight:600;text-align:center}
+.btn-odds:hover{background:rgba(240,185,11,0.15);border-color:rgba(240,185,11,0.3);transform:translateY(-1px)}
+.btn-odds:disabled{opacity:0.4;cursor:not-allowed;transform:none!important}
+.btn-odds.selected{background:rgba(68,204,68,0.15);border-color:#44cc44;color:#44cc44}
+.btn-odds.wrong{background:rgba(255,68,68,0.15);border-color:#ff4444;color:#ff4444}
+.odds-felt{max-width:300px!important}
+@media(max-width:640px){.odds-felt{max-width:220px!important}.odds-actions{gap:6px}.btn-odds{padding:10px 6px;font-size:0.85rem}}
+@media(max-width:420px){.odds-felt{max-width:180px!important}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-10px)}60%{transform:translateY(-4px)}}
+.shake{animation:shake 0.5s}
+.bounce{animation:bounce 0.4s}
+@media(max-width:640px){
+  .nav{padding:10px 12px}.nav-logo{font-size:1rem}.nav-links a{padding:5px 10px;font-size:0.78rem}
+  .hero-title{font-size:1.8rem}.hero-sub{font-size:0.85rem}
+  .character-box{flex:0 0 80px}.character-box svg{width:80px;height:80px}
+  .vs-divider{font-size:1rem;flex:0 0 24px}.table-felt{max-width:200px;padding:12px}
+  .card{width:42px;height:60px}.card .cr{font-size:0.95rem}.card .cs{font-size:0.7rem}
+  .btn-action{padding:10px 20px;min-width:80px;font-size:0.9rem}
+  .game-area{padding:12px;border-radius:12px}.game-stats{font-size:0.75rem;gap:8px}
+  .game-grid{grid-template-columns:1fr}.scenario-text{font-size:0.88rem}
+}
+@media(max-width:420px){
+  .character-box{flex:0 0 64px}.character-box svg{width:64px;height:64px}
+  .table-felt{max-width:160px;padding:8px}.table-felt .round-label{font-size:0.6rem}
+  .card{width:36px;height:52px}.card .cr{font-size:0.8rem}.card .cs{font-size:0.6rem}
+  .vs-divider{flex:0 0 16px;font-size:0.85rem}.game-header h2{font-size:0.95rem}
+  .hero-title{font-size:1.5rem}.char-name{font-size:0.65rem}
+  .char-speech{font-size:0.65rem;white-space:normal;max-width:80px}
+}
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:20px}
+.ach-card{background:linear-gradient(135deg,#2a1a10,#1f120a);border-radius:12px;padding:16px;border:1px solid rgba(240,185,11,0.08);text-align:center}
+.ach-card .ach-rank{font-size:2.5rem;margin-bottom:6px}
+.ach-card .ach-name{font-size:1rem;color:#f0b90b;font-weight:600;margin-bottom:4px}
+.ach-card .ach-score{font-size:0.85rem;color:#a09080}
+.ach-card .ach-high{font-size:0.8rem;color:#6a8a9a;margin-top:4px}
+/* Share, Unlock, Invite, Badge styles */
+.share-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:999;animation:fadeIn 0.3s}
+.share-box{text-align:center;max-width:380px;width:90%}
+.share-box canvas{width:100%;border-radius:12px;margin-bottom:12px}
+.share-actions{display:flex;gap:8px;justify-content:center}
+.share-actions button{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-size:0.9rem;font-weight:600}
+.share-dl{background:#f0b90b;color:#1a0f0a}
+.share-close{background:rgba(240,185,11,0.15);color:#f0b90b}
+.unlock-guide{display:none;margin:16px auto 0;max-width:400px;padding:20px;background:linear-gradient(135deg,rgba(240,185,11,0.08),rgba(240,185,11,0.02));border-radius:12px;border:1px solid rgba(240,185,11,0.15);text-align:center;animation:fadeIn 0.5s}
+.unlock-guide.show{display:block}
+.unlock-guide .ug-title{font-size:1.1rem;color:#f0b90b;font-weight:700;margin-bottom:6px}
+.unlock-guide .ug-desc{font-size:0.85rem;color:#a09080;margin-bottom:12px}
+.unlock-guide .ug-btn{display:inline-block;padding:10px 24px;border-radius:8px;border:none;cursor:pointer;font-size:0.9rem;font-weight:600;margin:4px}
+.unlock-guide .ug-btn-primary{background:linear-gradient(135deg,#f0b90b,#d4a008);color:#1a0f0a}
+.unlock-guide .ug-btn-invite{background:rgba(68,204,68,0.2);color:#44cc44;border:1px solid rgba(68,204,68,0.3)}
+.invite-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:999;animation:fadeIn 0.3s}
+.invite-box{background:#2a1a10;border-radius:16px;padding:24px;max-width:380px;width:90%;border:1px solid rgba(240,185,11,0.2);text-align:center}
+.invite-box .iv-title{font-size:1.2rem;color:#f0b90b;font-weight:700;margin-bottom:6px}
+.invite-box .iv-desc{font-size:0.85rem;color:#a09080;margin-bottom:12px}
+.invite-box .iv-code{font-size:1.4rem;color:#fff;background:rgba(0,0,0,0.3);padding:12px;border-radius:8px;letter-spacing:4px;margin-bottom:12px;font-weight:700;user-select:all}
+.invite-box .iv-progress{font-size:0.85rem;color:#a09080;margin-bottom:12px}
+.invite-box .iv-progress strong{color:#f0b90b}
+.invite-box .iv-close{padding:8px 20px;border-radius:8px;border:1px solid rgba(240,185,11,0.2);background:transparent;color:#a09080;cursor:pointer}
+/* Invite enhanced styles */
+.invite-box .iv-pb{width:100%;height:8px;background:rgba(255,255,255,0.08);border-radius:4px;margin:6px 0 12px;overflow:hidden}
+.invite-box .iv-pb-fill{height:100%;background:linear-gradient(90deg,#44cc44,#66ee66);border-radius:4px;transition:width 0.5s}
+.invite-box .iv-link{font-size:0.75rem;color:#8ac4d8;background:rgba(0,0,0,0.3);padding:8px 10px;border-radius:6px;word-break:break-all;cursor:pointer;user-select:all;margin-bottom:8px;line-height:1.4}
+.invite-box .iv-link:hover{background:rgba(0,0,0,0.5)}
+.invite-box .iv-actions{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+.invite-box .iv-action-btn{padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font-size:0.8rem;font-weight:600;transition:all 0.2s}
+.invite-box .iv-action-btn:hover{transform:translateY(-1px)}
+.invite-box .iv-input-row{display:flex;gap:6px;margin:8px 0}
+.invite-box .iv-input-row input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(240,185,11,0.2);background:rgba(0,0,0,0.3);color:#e8d5c4;font-size:0.95rem;text-align:center;outline:none;transition:border-color 0.2s}
+.invite-box .iv-input-row input:focus{border-color:#f0b90b}
+.invite-box .iv-input-row button{padding:10px 16px;border-radius:8px;border:none;background:#f0b90b;color:#1a0f0a;font-size:0.9rem;font-weight:600;cursor:pointer}
+.invite-box .iv-confirm-msg{font-size:0.8rem;color:#44cc44;margin:4px 0;min-height:1.2em}
+.iv-poster-box{text-align:center;margin:8px 0}
+.iv-poster-box canvas{width:100%;max-width:300px;border-radius:8px;cursor:pointer}
+.invite-home-btn{display:block;margin:16px auto 0;padding:12px 28px;border-radius:12px;border:2px solid rgba(68,204,68,0.3);background:rgba(68,204,68,0.08);color:#44cc44;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.3s;text-align:center}
+.invite-home-btn:hover{background:rgba(68,204,68,0.15);border-color:#44cc44;transform:translateY(-2px)}
+.invite-home-btn .ih-sub{display:block;font-size:0.7rem;color:rgba(68,204,68,0.5);font-weight:400;margin-top:2px}
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-top:16px}
+.badge-item{text-align:center;padding:12px 6px 8px;border-radius:12px;background:rgba(42,26,16,0.8);border:1px solid rgba(240,185,11,0.08);transition:all 0.3s;cursor:pointer;position:relative;overflow:hidden}
+.badge-item:hover{transform:translateY(-2px);border-color:rgba(240,185,11,0.2)}
+.badge-item .bi-icon{font-size:1.8rem;margin-bottom:2px;display:block}
+.badge-item .bi-name{font-size:0.62rem;color:#f0b90b;display:block;line-height:1.2}
+.badge-item .bi-bar{width:100%;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:6px;overflow:hidden}
+.badge-item .bi-bar-fill{height:100%;border-radius:2px;transition:width 0.5s}
+.badge-item.locked{opacity:0.85;filter:grayscale(0.6)}
+.badge-item.locked .bi-icon{filter:grayscale(0.6)}
+.badge-item.locked .bi-name{color:#8a7a6a}
+.badge-item.locked .bi-bar-fill{background:linear-gradient(90deg,#f0b90b,#ffd700)}
+.badge-item.unlocked{border-color:rgba(240,185,11,0.25);background:rgba(240,185,11,0.06);box-shadow:0 0 12px rgba(240,185,11,0.08)}
+.badge-item.unlocked .bi-bar-fill{background:linear-gradient(90deg,#44cc44,#66ee66)}
+.badge-item.just-unlocked{animation:badgePop 0.6s}
+@keyframes badgePop{0%{transform:scale(1)}25%{transform:scale(1.25)}50%{transform:scale(0.9)}75%{transform:scale(1.05)}100%{transform:scale(1)}}
+/* Badge detail popup */
+.badge-popup{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:999;animation:fadeIn 0.2s}
+.badge-popup-box{background:#2a1a10;border-radius:16px;padding:28px;max-width:320px;width:90%;border:1px solid rgba(240,185,11,0.2);text-align:center}
+.badge-popup-box .bp-icon{font-size:3rem;margin-bottom:8px}
+.badge-popup-box .bp-name{font-size:1.2rem;color:#f0b90b;font-weight:700;margin-bottom:4px}
+.badge-popup-box .bp-desc{font-size:0.85rem;color:#a09080;margin-bottom:12px}
+.badge-popup-box .bp-bar{width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;margin:8px 0;overflow:hidden}
+.badge-popup-box .bp-bar-fill{height:100%;border-radius:3px;transition:width 0.5s}
+.badge-popup-box .bp-progress-text{font-size:0.8rem;color:#8a7a6a;margin-bottom:12px}
+.badge-popup-box .bp-close{padding:8px 24px;border-radius:8px;border:1px solid rgba(240,185,11,0.2);background:transparent;color:#a09080;cursor:pointer;font-size:0.9rem}
+.badge-popup-box .bp-close:hover{background:rgba(240,185,11,0.05)}
+/* Celebration confetti */
+.celebration{position:fixed;inset:0;pointer-events:none;z-index:1000;overflow:hidden;contain:strict}
+.celebration-particle{position:absolute;opacity:0;animation:particleFall linear forwards}
+@keyframes particleFall{0%{transform:translateY(-20px) rotate(0deg) scale(0.5);opacity:1}50%{opacity:1}100%{transform:translateY(calc(100vh + 20px)) rotate(720deg) scale(1);opacity:0}}
+/* Badge count in nav */
+.nav-badge-count{display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:20px;background:rgba(240,185,11,0.1);border:1px solid rgba(240,185,11,0.15);font-size:0.75rem;color:#f0b90b;cursor:pointer;transition:all 0.2s}
+.nav-badge-count:hover{background:rgba(240,185,11,0.15)}
+.pay-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:999;animation:fadeIn 0.3s}
+.pay-box{background:#2a1a10;border-radius:16px;padding:28px;max-width:360px;width:90%;border:1px solid rgba(240,185,11,0.2);text-align:center}
+.pay-box h3{color:#f0b90b;font-size:1.2rem;margin-bottom:8px}
+.pay-box .pay-price{font-size:2rem;color:#f0b90b;font-weight:800;margin:8px 0}
+.pay-box .pay-desc{color:#a09080;font-size:0.85rem;margin-bottom:16px}
+.pay-box .pay-btn{display:block;width:100%;padding:12px;border-radius:10px;border:none;cursor:pointer;font-size:1rem;font-weight:700;margin-bottom:8px}
+.pay-btn-primary{background:linear-gradient(135deg,#f0b90b,#d4a008);color:#1a0f0a}
+.pay-btn-secondary{background:rgba(100,120,140,0.15);color:#a09080;border:1px solid rgba(100,120,140,0.2)!important}
+.pay-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(240,185,11,0.2)}
+.pay-msg{margin-top:10px;font-size:0.85rem;min-height:20px}
+
+.dc-header{text-align:center;padding:20px}
+.dc-header .dc-date{font-size:0.9rem;color:#a09080;margin-bottom:4px}
+.dc-header .dc-title{font-size:1.3rem;color:#f0b90b;font-weight:700}
+.dc-completed{text-align:center;padding:40px;color:#44cc44;font-size:1.1rem}
+.ai-table{max-width:600px;margin:0 auto}
+.ai-info{display:flex;justify-content:space-between;margin-bottom:12px;font-size:0.85rem;color:#a09080}
+.ai-board{display:flex;justify-content:center;gap:6px;margin:12px 0;min-height:80px;flex-wrap:wrap}
+.ai-hand{text-align:center;margin:8px 0}
+.ai-hand-label{font-size:0.75rem;color:#a09080;margin-bottom:4px}
+.ai-chips{text-align:center;font-size:1.2rem;color:#f0b90b;margin:8px 0}
+.ai-result{text-align:center;padding:12px;border-radius:10px;margin-top:10px;font-size:0.95rem}
+.ai-result.win{background:rgba(68,204,68,0.1);border:1px solid rgba(68,204,68,0.2);color:#44cc44}
+.ai-result.lose{background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.2);color:#ff4444}
+.ai-result.draw{background:rgba(240,185,11,0.1);border:1px solid rgba(240,185,11,0.2);color:#f0b90b}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">
+    <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="80" fill="#8b4513"/>
+    <circle cx="100" cy="90" r="50" fill="#d4a574"/>
+    <circle cx="100" cy="90" r="45" fill="#e8c8a0"/>
+    <polygon points="100,45 85,70 115,70" fill="#ff4444"/>
+    <circle cx="80" cy="82" r="8" fill="white"/><circle cx="80" cy="82" r="4" fill="#222"/>
+    <circle cx="120" cy="82" r="8" fill="white"/><circle cx="120" cy="82" r="4" fill="#222"/>
+    <polygon points="70,112 100,130 130,112 120,120 100,132 80,120" fill="#ff8c42"/>
+    <ellipse cx="100" cy="140" rx="30" ry="8" fill="#8b4513"/></svg>
+    德州扒鸡
+  </div>
+  <ul class="nav-links">
+    <li><a class="active" data-page="home">首页</a></li>
+    <li><a data-page="preflop-duel">翻前斗鸡</a></li>
+    <li><a data-page="fish-or-shark">识鸡辨鸡</a></li>
+    <li><a data-page="odds-calc">赔率速算</a></li>
+    <li><a data-page="mind-read">读心术</a></li>
+    <li><a data-page="allin-push">全压赌命</a></li>
+    <li><a data-page="ai-battle">AI对战</a></li>
+    <li><a data-page="daily">每日挑战</a></li>
+    <li><a data-page="achievements">成就</a></li>
+    <li><span id="nav-badge-pill" class="nav-badge-count" onclick="navigate('achievements')" style="display:none">🏅 <span id="nav-badge-num">0</span></span></li>
+  </ul>
+</nav>
+
+<div class="container">
+
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-characters">
+      <svg viewBox="0 0 200 200" width="130" height="130">
+        <circle cx="100" cy="100" r="70" fill="#d4a574"/>
+        <circle cx="100" cy="90" r="45" fill="#e8c8a0"/>
+        <polygon points="100,50 88,72 112,72" fill="#ff4444"/>
+        <circle cx="78" cy="82" r="7" fill="white"/><circle cx="78" cy="82" r="3.5" fill="#222"/>
+        <circle cx="122" cy="82" r="7" fill="white"/><circle cx="122" cy="82" r="3.5" fill="#222"/>
+        <polygon points="68,112 100,132 132,112 120,122 100,136 80,122" fill="#ff8c42"/>
+        <ellipse cx="100" cy="144" rx="35" ry="10" fill="#c4945a"/>
+        <path d="M 80,155 Q 100,175 120,155" stroke="#ff8c42" stroke-width="3" fill="none"/>
+      </svg>
+      <div style="font-size:2rem;font-weight:800;color:rgba(240,185,11,0.15);margin:0 4px">VS</div>
+      <svg viewBox="0 0 200 200" width="140" height="140">
+        <ellipse cx="110" cy="100" rx="60" ry="40" fill="#5a3010"/>
+        <circle cx="90" cy="90" r="45" fill="#7a4a1a"/>
+        <circle cx="90" cy="88" r="35" fill="#9a6a3a"/>
+        <polygon points="92,52 82,70 102,70" fill="#ff4444"/>
+        <circle cx="72" cy="78" r="6" fill="white"/><circle cx="72" cy="78" r="3" fill="#111"/>
+        <circle cx="108" cy="78" r="6" fill="white"/><circle cx="108" cy="78" r="3" fill="#111"/>
+        <polygon points="58,108 90,128 122,108 110,118 90,132 70,118" fill="#d4a574"/>
+        <path d="M 170,100 L 195,75 L 195,125 Z" fill="#7a4a1a"/>
+      </svg>
+    </div>
+    <h1 class="hero-title">德州扒鸡</h1>
+    <p class="hero-sub">从小鸡到金鹏的德州扑克成长之旅 🐤➜🦅</p>
+    <button class="hero-btn" onclick="navigate('preflop-duel')">开始冒险</button>
+    <div id="home-invite-cta" style="display:none">
+      <button class="invite-home-btn" onclick="showInviteDialog(true)">👥 邀请3位好友免费解锁全部游戏 <span class="ih-sub">已有 <strong id="invite-count-home">0</strong> 位好友接受邀请</span></button>
+    </div>
+  </div>
+  <div class="game-grid">
+    <div class="game-card" onclick="navigate('preflop-duel')">
+      <div class="gc-icon">⚔️</div>
+      <h3>翻前斗鸡</h3>
+      <p>小鸡 vs 老鹰！面对不同翻前局面，做出正确的选择。</p>
+      <span class="gc-badge badge-free" style="background:#22c55e;color:white">🆓免费</span>
+    </div>
+    <div class="game-card" onclick="navigate('fish-or-shark')">
+      <div class="gc-icon">🐟</div>
+      <h3>识鸡辨鸡</h3>
+      <p>看打牌风格猜身份——这个玩家是小鸡还是老鹰？</p>
+      <span class="gc-badge badge-free" style="background:#22c55e;color:white">🆓免费</span>
+    </div>
+    <div class="game-card" onclick="navigate('odds-calc')">
+      <div class="gc-icon">🧮</div>
+      <h3>赔率速算</h3>
+      <p>听牌形势中，你的中奖概率是多少？快速心算挑战！</p>
+      <span class="gc-badge badge-new">新游戏</span>
+    </div>
+    <div class="game-card" onclick="navigate('mind-read')">
+      <div class="gc-icon">👀</div>
+      <h3>读心术</h3>
+      <p>从对手的行动中读出他的牌——你能看穿老鹰的心思吗？</p>
+      <span class="gc-badge badge-new">立即挑战</span>
+    </div>
+    <div class="game-card" onclick="navigate('allin-push')">
+      <div class="gc-icon">🃏</div>
+      <h3>全压赌命</h3>
+      <p>最后一手牌，ALL-IN or FOLD？老鹰就在对面盯着你！</p>
+      <span class="gc-badge badge-new">立即挑战</span>
+    </div>
+    <div class="game-card" onclick="navigate('ai-battle')">
+      <div class="gc-icon">🤖</div>
+      <h3>AI对战</h3>
+      <p>与AI进行单挑德州扑克！5回合对战，看你能赢多少筹码！</p>
+      <span class="gc-badge badge-new">热门</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PREFLOP DUEL ===== -->
+<div id="page-preflop-duel" class="page">
+  <div id="pd-start" class="start-screen">
+    <div class="ss-icon">⚔️</div>
+    <h3>翻前斗鸡</h3>
+    <p>你是一只小鸡，面对经验丰富的老鹰……<br>每回合给你一手牌+一个翻前局面，选对动作才能生存！</p>
+    <ul class="ss-rules">
+      <li>共10回合，每回合从3个动作中选择</li>
+      <li>答对+10分，连对额外加分</li>
+      <li>答错失去一条命（共3条命）</li>
+    </ul>
+    <button class="hero-btn" onclick="preflopDuel.start()">开始游戏</button>
+  </div>
+  <div id="pd-game" style="display:none">
+    <div class="game-area">
+      <div class="game-header">
+        <h2>⚔️ 翻前斗鸡</h2>
+        <div class="game-stats">
+          <span><span class="gs-icon">🏆</span><span class="gs-val" id="pd-score">0</span></span>
+          <span><span class="gs-icon">❤️</span><span class="gs-val" id="pd-lives">3</span></span>
+          <span><span class="gs-icon">🎯</span><span class="gs-val" id="pd-round">1/10</span></span>
+        </div>
+      </div>
+      <div class="table-scene">
+        <div id="pd-fish" class="character-box chick">
+          <svg viewBox="0 0 200 200" id="pd-fish-svg" width="110" height="110">
+            <circle cx="100" cy="100" r="65" fill="#d4a574"/>
+            <circle cx="100" cy="90" r="45" fill="#e8c8a0"/>
+            <polygon points="100,52 90,72 110,72" fill="#ff4444"/>
+            <g class="expr-eye"><circle cx="78" cy="82" r="7" fill="white"/><circle cx="78" cy="82" r="3.5" fill="#222"/></g>
+            <g class="expr-eye"><circle cx="122" cy="82" r="7" fill="white"/><circle cx="122" cy="82" r="3.5" fill="#222"/></g>
+            <path class="expr-mouth" d="M 68,112 100,132 132,112 120,122 100,136 80,122" fill="#ff8c42"/>
+            <ellipse cx="100" cy="144" rx="30" ry="8" fill="#c4945a"/>
+          </svg>
+          <div class="char-name chick">🐤小鸡</div>
+          <div id="pd-fish-speech" class="char-speech">嗯…让我想想</div>
+        </div>
+        <div class="vs-divider">⚔️</div>
+        <div id="pd-shark" class="character-box hawk">
+          <svg viewBox="0 0 200 200" id="pd-shark-svg" width="110" height="110">
+            <ellipse cx="110" cy="100" rx="55" ry="38" fill="#5a3010"/>
+            <circle cx="90" cy="90" r="42" fill="#7a4a1a"/>
+            <g class="expr-eye"><circle cx="72" cy="78" r="6" fill="white"/><circle cx="72" cy="78" r="3" fill="#111"/></g>
+            <g class="expr-eye"><circle cx="108" cy="78" r="6" fill="white"/><circle cx="108" cy="78" r="3" fill="#111"/></g>
+            <path class="expr-mouth" d="M 58,108 90,128 122,108 110,118 90,132 70,118" fill="#d4a574"/>
+            <path d="M 165,100 L 190,80 L 190,120 Z" fill="#7a4a1a"/>
+          </svg>
+          <div class="char-name hawk">🦅老鹰</div>
+          <div id="pd-shark-speech" class="char-speech">来吧，小鸡仔！</div>
+        </div>
+      </div>
+      <div class="table-felt">
+        <div class="round-label">你的手牌</div>
+        <div id="pd-cards" class="hand-cards"></div>
+      </div>
+      <div class="scenario-box">
+        <div id="pd-position" class="scenario-pos"></div>
+        <div id="pd-scenario" class="scenario-text"></div>
+      </div>
+      <div id="pd-actions" class="actions">
+        <button class="btn-action btn-fold" onclick="preflopDuel.act('fold')">弃牌</button>
+        <button class="btn-action btn-call" onclick="preflopDuel.act('call')">跟注</button>
+        <button class="btn-action btn-raise" onclick="preflopDuel.act('raise')">加注</button>
+      </div>
+      <div id="pd-result" class="result-box">
+        <div id="pd-result-icon" class="rb-icon"></div>
+        <div id="pd-result-text" class="rb-text"></div>
+        <div id="pd-result-detail" class="rb-detail"></div>
+        <button id="pd-next-btn" class="btn-next" onclick="preflopDuel.next()">下一回合</button>
+      </div>
+    </div>
+  </div>
+  <div id="pd-gameover" class="gameover-screen" style="display:none">
+    <div class="game-area" style="text-align:center;padding:30px">
+      <div id="pd-go-rank" class="go-rank">🐤</div>
+      <div id="pd-go-title" class="go-title">小鸡</div>
+      <div id="pd-go-desc" class="go-desc"></div>
+      <div class="go-stats">
+        <div class="go-stat"><div id="pd-go-score" class="num">0</div><div class="lbl">得分</div></div>
+        <div class="go-stat"><div id="pd-go-correct" class="num">0/0</div><div class="lbl">正确率</div></div>
+        <div class="go-stat"><div id="pd-go-streak" class="num">0</div><div class="lbl">连对</div></div>
+      </div>
+      <div id="pd-revive" style="display:none;margin-bottom:12px">
+        <button class="hero-btn" style="background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 4px 24px rgba(34,197,94,0.3);font-size:1rem;padding:12px 32px" onclick="restoreLives(preflopDuel,'pd')">🎯比欢迎来战</button>
+      </div>
+      <button id="pd-restart-btn" class="hero-btn" style="font-size:1rem;padding:10px 24px" onclick="preflopDuel.start()">再来一局</button>
+      <button class="btn-next" style="margin-top:10px;display:inline-block" onclick="navigate('home')">返回首页</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FISH OR SHARK ===== -->
+<div id="page-fish-or-shark" class="page">
+  <div id="fs-start" class="start-screen">
+    <div class="ss-icon">🐟</div>
+    <h3>识鸡辨鸡</h3>
+    <p>看打牌风格猜身份——这个玩家是小鸡还是老鹰？<br>学会识别对手类型，是成为高手的第一步！</p>
+    <ul class="ss-rules">
+      <li>共10回合，显示玩家的打牌风格</li>
+      <li>判断他是小鸡（鱼）还是老鹰（鲨鱼）</li>
+      <li>答对+10分，连对额外加分</li>
+    </ul>
+    <button class="hero-btn" onclick="fishOrShark.start()">开始游戏</button>
+  </div>
+  <div id="fs-game" style="display:none">
+    <div class="game-area">
+      <div class="game-header">
+        <h2>🐟识鸡辨鸡</h2>
+        <div class="game-stats">
+          <span><span class="gs-icon">🏆</span><span class="gs-val" id="fs-score">0</span></span>
+          <span><span class="gs-icon">❤️</span><span class="gs-val" id="fs-lives">3</span></span>
+          <span><span class="gs-icon">🎯</span><span class="gs-val" id="fs-round">1/10</span></span>
+        </div>
+      </div>
+      <div class="table-scene">
+        <div id="fs-fish" class="character-box chick">
+          <svg viewBox="0 0 200 200" id="fs-fish-svg" width="110" height="110">
+            <circle cx="100" cy="100" r="65" fill="#d4a574"/>
+            <circle cx="100" cy="90" r="45" fill="#e8c8a0"/>
+            <polygon points="100,52 90,72 110,72" fill="#ff4444"/>
+            <g class="expr-eye"><circle cx="78" cy="82" r="7" fill="white"/><circle cx="78" cy="82" r="3.5" fill="#222"/></g>
+            <g class="expr-eye"><circle cx="122" cy="82" r="7" fill="white"/><circle cx="122" cy="82" r="3.5" fill="#222"/></g>
+            <path class="expr-mouth" d="M 68,112 100,132 132,112 120,122 100,136 80,122" fill="#ff8c42"/>
+            <ellipse cx="100" cy="144" rx="30" ry="8" fill="#c4945a"/>
+          </svg>
+          <div class="char-name chick">🐤小鸡</div>
+          <div id="fs-fish-speech" class="char-speech">让我看看这人的水平...</div>
+        </div>
+        <div class="vs-divider">❓</div>
+        <div class="character-box">
+          <div id="fs-mystery-figure" class="mystery-box">❓</div>
+          <div class="char-name" style="color:#a09080">神秘玩家</div>
+        </div>
+      </div>
+      <div class="scenario-box">
+        <div id="fs-scenario" class="scenario-text"></div>
+      </div>
+      <div id="fs-actions" class="actions">
+        <button class="btn-action btn-fold" onclick="fishOrShark.act(true)">🐤是小鸡</button>
+        <button class="btn-action btn-raise" onclick="fishOrShark.act(false)">🦅是老鹰</button>
+      </div>
+      <div id="fs-result" class="result-box">
+        <div id="fs-result-icon" class="rb-icon"></div>
+        <div id="fs-result-text" class="rb-text"></div>
+        <div id="fs-result-detail" class="rb-detail"></div>
+        <button id="fs-next-btn" class="btn-next" onclick="fishOrShark.next()">下一回合</button>
+      </div>
+    </div>
+  </div>
+  <div id="fs-gameover" class="gameover-screen" style="display:none">
+    <div class="game-area" style="text-align:center;padding:30px">
+      <div id="fs-go-rank" class="go-rank">🐤</div>
+      <div id="fs-go-title" class="go-title">小鸡（识人）</div>
+      <div id="fs-go-desc" class="go-desc"></div>
+      <div class="go-stats">
+        <div class="go-stat"><div id="fs-go-score" class="num">0</div><div class="lbl">得分</div></div>
+        <div class="go-stat"><div id="fs-go-correct" class="num">0/0</div><div class="lbl">正确率</div></div>
+        <div class="go-stat"><div id="fs-go-streak" class="num">0</div><div class="lbl">连对</div></div>
+      </div>
+      <div id="fs-revive" style="display:none;margin-bottom:12px">
+        <button class="hero-btn" style="background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 4px 24px rgba(34,197,94,0.3);font-size:1rem;padding:12px 32px" onclick="restoreLives(fishOrShark,'fs')">🎯比欢迎来战</button>
+      </div>
+      <button id="fs-restart-btn" class="hero-btn" style="font-size:1rem;padding:10px 24px" onclick="fishOrShark.start()">再来一局</button>
+      <button class="btn-next" style="margin-top:10px;display:inline-block" onclick="navigate('home')">返回首页</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ODDS CALC ===== -->
+<div id="page-odds-calc" class="page">
+  <div id="oc-start" class="start-screen">
+    <div class="ss-icon">🧮</div>
+    <h3>赔率速算</h3>
+    <p>扑克是数学的游戏！快速计算概率和赔率，让老鹰刮目相看！</p>
+    <ul class="ss-rules">
+      <li>共10道概率/赔率计算题</li>
+      <li>听牌概率、四二法则、底池赔率</li>
+      <li>答对+10分，连对额外加分</li>
+    </ul>
+    <button class="hero-btn" onclick="oddsCalc.start()">开始游戏</button>
+  </div>
+  <div id="oc-game" style="display:none">
+    <div class="game-area">
+      <div class="game-header">
+        <h2>🧮赔率速算</h2>
+        <div class="game-stats">
+          <span><span class="gs-icon">🏆</span><span class="gs-val" id="oc-score">0</span></span>
+          <span><span class="gs-icon">❤️</span><span class="gs-val" id="oc-lives">3</span></span>
+          <span><span class="gs-icon">🎯</span><span class="gs-val" id="oc-round">1/10</span></span>
+        </div>
+      </div>
+      <div class="table-scene">
+        <div id="oc-fish" class="character-box chick">
+          <svg viewBox="0 0 200 200" id="oc-fish-svg" width="110" height="110">
+            <circle cx="100" cy="100" r="65" fill="#d4a574"/>
+            <circle cx="100" cy="90" r="45" fill="#e8c8a0"/>
+            <polygon points="100,52 90,72 110,72" fill="#ff4444"/>
+            <g class="expr-eye"><circle cx="78" cy="82" r="7" fill="white"/><circle cx="78" cy="82" r="3.5" fill="#222"/></g>
+            <g class="expr-eye"><circle cx="122" cy="82" r="7" fill="white"/><circle cx="122" cy="82" r="3.5" fill="#222"/></g>
+            <path class="expr-mouth" d="M 68,112 100,132 132,112 120,122 100,136 80,122" fill="#ff8c42"/>
+            <ellipse cx="100" cy="144" rx="30" ry="8" fill="#c4945a"/>
+          </svg>
+          <div class="char-name chick">🐤小鸡</div>
+          <div id="oc-fish-speech" class="char-speech">让我算算概率...</div>
+        </div>
+        <div class="vs-divider">🧮</div>
+        <div id="oc-shark" class="character-box hawk">
+          <svg viewBox="0 0 200 200" id="oc-shark-svg" width="110" height="110">
+            <ellipse cx="110" cy="100" rx="55" ry="38" fill="#5a3010"/>
+            <circle cx="90" cy="90" r="42" fill="#7a4a1a"/>
+            <g class="expr-eye"><circle cx="72" cy="78" r="6" fill="white"/><circle cx="72" cy="78" r="3" fill="#111"/></g>
+            <g class="expr-eye"><circle cx="108" cy="78" r="6" fill="white"/><circle cx="108" cy="78" r="3" fill="#111"/></g>
+            <path class="expr-mouth" d="M 58,108 90,128 122,108 110,118 90,132 70,118" fill="#d4a574"/>
+            <path d="M 165,100 L 190,80 L 190,120 Z" fill="#7a4a1a"/>
+          </svg>
+          <div class="char-name hawk">🦅老鹰</div>
+          <div id="oc-shark-speech" class="char-speech">计算时间！</div>
+        </div>
+      </div>
+      <div class="table-felt odds-felt">
+        <div id="oc-hand-display" style="display:none"></div>
+        <div id="oc-no-cards" style="display:block;padding:8px"></div>
+      </div>
+      <div class="scenario-box">
+        <div id="oc-question" class="scenario-text"></div>
+      </div>
+      <div class="odds-actions">
+        <button id="oc-opt-0" class="btn-odds" onclick="oddsCalc.act(0)">A</button>
+        <button id="oc-opt-1" class="btn-odds" onclick="oddsCalc.act(1)">B</button>
+        <button id="oc-opt-2" class="btn-odds" onclick="oddsCalc.act(2)">C</button>
+        <button id="oc-opt-3" class="btn-odds" onclick="oddsCalc.act(3)">D</button>
+      </div>
+      <div id="oc-result" class="result-box">
+        <div id="oc-result-icon" class="rb-icon"></div>
+        <div id="oc-result-text" class="rb-text"></div>
+        <div id="oc-result-detail" class="rb-detail"></div>
+        <button id="oc-next-btn" class="btn-next" onclick="oddsCalc.next()">下一回合</button>
+      </div>
+    </div>
+  </div>
+  <div id="oc-gameover" class="gameover-screen" style="display:none">
+    <div class="game-area" style="text-align:center;padding:30px">
+      <div id="oc-go-rank" class="go-rank">🐤</div>
+      <div id="oc-go-title" class="go-title">小鸡（数学）</div>
+      <div id="oc-go-desc" class="go-desc"></div>
+      <div class="go-stats">
+        <div class="go-stat"><div id="oc-go-score" class="num">0</div><div class="lbl">得分</div></div>
+        <div class="go-stat"><div id="oc-go-correct" class="num">0/0</div><div class="lbl">正确率</div></div>
+        <div class="go-stat"><div id="oc-go-streak" class="num">0</div><div class="lbl">连对</div></div>
+      </div>
+      <div id="oc-revive" style="display:none;margin-bottom:12px">
+        <button class="hero-btn" style="background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 4px 24px rgba(34,197,94,0.3);font-size:1rem;padding:12px 32px" onclick="showReviveDialog(oddsCalc,'oc')">🎯比欢迎来战</button>
+      </div>
+      <button id="oc-restart-btn" class="hero-btn" style="font-size:1rem;padding:10px 24px" onclick="oddsCalc.start()">再来一局</button>
+      <button class="btn-next" style="margin-top:10px;display:inline-block" onclick="navigate('home')">返回首页</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MIND READ ===== -->
+<div id="page-mind-read" class="page">
+  <div id="mr-start" class="start-screen">
+    <div class="ss-icon">👀</div>
+    <h3>读心术</h3>
+    <p>从对手的行动中读出他的牌——你能看穿老鹰的心思吗？</p>
+    <ul class="ss-rules">
+      <li>共10回合，看翻牌面和对手行动</li>
+      <li>猜对手是什么牌型</li>
+      <li>答对+10分，连对额外加分</li>
+    </ul>
+    <button class="hero-btn" onclick="mindRead.start()">开始游戏</button>
+  </div>
+  <div id="mr-game" style="display:none">
+    <div class="game-area">
+      <div class="game-header">
+        <h2>👀读心术</h2>
+        <div class="game-stats">
+          <span><span class="gs-icon">🏆</span><span class="gs-val" id="mr-score">0</span></span>
+          <span><span class="gs-icon">❤️</span><span class="gs-val" id="mr-lives">3</span></span>
+          <span><span class="gs-icon">🎯</span><span class="gs-val" id="mr-round">1/10</span></span>
+        </div>
+      </div>
+      <div class="table-scene">
+        <div id="mr-fish" class="character-box chick">
+          <svg viewBox="0 0 200 200" id="mr-fish-svg" width="110" height="110">
+            <circle cx="100" cy="100" r="65" fill="#d4a574"/>
+            <circle cx="100" cy="90" r="45" fill="#e8c8a0"/>
+            <polygon points="100,52 90,72 110,72" fill="#ff4444"/>
+            <g class="expr-eye"><circle cx="78" cy="82" r="7" fill="white"/><circle cx="78" cy="82" r="3.5" fill="#222"/></g>
+            <g class="expr-eye"><circle cx="122" cy="82" r="7" fill="white"/><circle cx="122" cy="82" r="3.5" fill="#222"/></g>
+            <path class="expr-mouth" d="M 68,112 100,132 132,112 120,122 100,136 80,122" fill="#ff8c42"/>
+          </svg>
+          <div class="char-name chick">🐤小鸡</div>
+          <div id="mr-fish-speech" class="char-speech">让我看穿你的心思！</div>
+        </div>
+        <div class="vs-divider">👀</div>
+        <div id="mr-shark" class="character-box hawk">
+          <svg viewBox="0 0 200 200" id="mr-shark-svg" width="110" height="110">
+            <ellipse cx="110" cy="100" rx="55" ry="38" fill="#5a3010"/>
+            <circle cx="90" cy="90" r="42" fill="#7a4a1a"/>
+            <g class="expr-eye"><circle cx="72" cy="78" r="6" fill="white"/><circle cx="72" cy="78" r="3" fill="#111"/></g>
+            <g class="expr-eye"><circle cx="108" cy="78" r="6" fill="white"/><circle cx="108" cy="78" r="3" fill="#111"/></g>
+            <path d="M 58,108 90,128 122,108 110,118 90,132 70,118" fill="#d4a574"/>
+            <path d="M 165,100 L 190,80 L 190,120 Z" fill="#7a4a1a"/>
+          </svg>
+          <div class="char-name hawk">🦅老鹰</div>
+          <div id="mr-shark-speech" class="char-speech">你猜不到我在想什么...</div>
+        </div>
+      </div>
+      <div id="mr-board" class="ai-board" style="margin:8px 0"></div>
+      <div class="scenario-box">
+        <div id="mr-action-line" class="scenario-pos"></div>
+        <div id="mr-question" class="scenario-text"></div>
+      </div>
+      <div class="odds-actions">
+        <button id="mr-opt-0" class="btn-odds" onclick="mindRead.act(0)">A</button>
+        <button id="mr-opt-1" class="btn-odds" onclick="mindRead.act(1)">B</button>
+        <button id="mr-opt-2" class="btn-odds" onclick="mindRead.act(2)">C</button>
+        <button id="mr-opt-3" class="btn-odds" onclick="mindRead.act(3)">D</button>
+      </div>
+      <div id="mr-result" class="result-box">
+        <div id="mr-result-icon" class="rb-icon"></div>
+        <div id="mr-result-text" class="rb-text"></div>
+        <div id="mr-result-detail" class="rb-detail"></div>
+        <button id="mr-next-btn" class="btn-next" onclick="mindRead.next()">下一回合</button>
+      </div>
+    </div>
+  </div>
+  <div id="mr-gameover" class="gameover-screen" style="display:none">
+    <div class="game-area" style="text-align:center;padding:30px">
+      <div id="mr-go-rank" class="go-rank">🐤</div>
+      <div id="mr-go-title" class="go-title">小鸡（读心）</div>
+      <div id="mr-go-desc" class="go-desc"></div>
+      <div class="go-stats">
+        <div class="go-stat"><div id="mr-go-score" class="num">0</div><div class="lbl">得分</div></div>
+        <div class="go-stat"><div id="mr-go-correct" class="num">0/0</div><div class="lbl">正确率</div></div>
+        <div class="go-stat"><div id="mr-go-streak" class="num">0</div><div class="lbl">连对</div></div>
+      </div>
+      <div id="mr-revive" style="display:none;margin-bottom:12px">
+        <button class="hero-btn" style="background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 4px 24px rgba(34,197,94,0.3);font-size:1rem;padding:12px 32px" onclick="showReviveDialog(mindRead,'mr')">🎯比欢迎来战</button>
+      </div>
+      <button id="mr-restart-btn" class="hero-btn" style="font-size:1rem;padding:10px 24px" onclick="mindRead.start()">再来一局</button>
+      <button class="btn-next" style="margin-top:10px;display:inline-block" onclick="navigate('home')">返回首页</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ALL-IN PUSH ===== -->
+<div id="page-allin-push" class="page">
+  <div id="ap-start" class="start-screen">
+    <div class="ss-icon">🃏</div>
+    <h3>全压赌命</h3>
+    <p>最后关头ALL-IN还是弃牌？学会短码全压策略！<br>每一手牌都是一次生死抉择！</p>
+    <ul class="ss-rules">
+      <li>共10回合，每回合看手牌和筹码量</li>
+      <li>判断应该ALL-IN还是弃牌</li>
+      <li>答对+10分，连对额外加分</li>
+    </ul>
+    <button class="hero-btn" onclick="allinPush.start()">开始游戏</button>
+  </div>
+  <div id="ap-game" style="display:none">
+    <div class="game-area">
+      <div class="game-header">
+        <h2>🃏全压赌命</h2>
+        <div class="game-stats">
+          <span><span class="gs-icon">🏆</span><span class="gs-val" id="ap-score">0</span></span>
+          <span><span class="gs-icon">❤️</span><span class="gs-val" id="ap-lives">3</span></span>
+          <span><span class="gs-icon">🎯</span><span class="gs-val" id="ap-round">1/10</span></span>
+        </div>
+      </div>
+      <div class="table-scene">
+        <div id="ap-fish" class="character-box chick">
+          <svg viewBox="0 0 200 200" id="ap-fish-svg" width="110" height="110">
+            <circle cx="100" cy="100" r="65" fill="#d4a574"/>
+            <circle cx="100" cy="90" r="45" fill="#e8c8a0"/>
+            <polygon points="100,52 90,72 110,72" fill="#ff4444"/>
+            <g class="expr-eye"><circle cx="78" cy="82" r="7" fill="white"/><circle cx="78" cy="82" r="3.5" fill="#222"/></g>
+            <g class="expr-eye"><circle cx="122" cy="82" r="7" fill="white"/><circle cx="122" cy="82" r="3.5" fill="#222"/></g>
+            <path class="expr-mouth" d="M 68,112 100,132 132,112 120,122 100,136 80,122" fill="#ff8c42"/>
+          </svg>
+          <div class="char-name chick">🐤小鸡</div>
+          <div id="ap-fish-speech" class="char-speech">这把拼了！</div>
+        </div>
+        <div class="vs-divider">🃏</div>
+        <div id="ap-shark" class="character-box hawk">
+          <svg viewBox="0 0 200 200" id="ap-shark-svg" width="110" height="110">
+            <ellipse cx="110" cy="100" rx="55" ry="38" fill="#5a3010"/>
+            <circle cx="90" cy="90" r="42" fill="#7a4a1a"/>
+            <g class="expr-eye"><circle cx="72" cy="78" r="6" fill="white"/><circle cx="72" cy="78" r="3" fill="#111"/></g>
+            <g class="expr-eye"><circle cx="108" cy="78" r="6" fill="white"/><circle cx="108" cy="78" r="3" fill="#111"/></g>
+            <path class="expr-mouth" d="M 58,108 90,128 122,108 110,118 90,132 70,118" fill="#d4a574"/>
+            <path d="M 165,100 L 190,80 L 190,120 Z" fill="#7a4a1a"/>
+          </svg>
+          <div class="char-name hawk">🦅老鹰</div>
+          <div id="ap-shark-speech" class="char-speech">敢推吗？</div>
+        </div>
+      </div>
+      <div class="table-felt">
+        <div class="round-label">你的手牌<span id="ap-blind-label"> · 盲注:10/20</span></div>
+        <div id="ap-cards" class="hand-cards"></div>
+        <div style="font-size:0.85rem;color:#a09080;margin-top:4px">
+          <span id="ap-stack-display"></span> · <span id="ap-pos-display"></span>
+        </div>
+      </div>
+      <div class="scenario-box">
+        <div id="ap-question" class="scenario-text"></div>
+      </div>
+      <div id="ap-actions" class="actions">
+        <button class="btn-action btn-fold" onclick="allinPush.act(false)">弃牌</button>
+        <button class="btn-action btn-raise" onclick="allinPush.act(true)">ALL-IN</button>
+      </div>
+      <div id="ap-result" class="result-box">
+        <div id="ap-result-icon" class="rb-icon"></div>
+        <div id="ap-result-text" class="rb-text"></div>
+        <div id="ap-result-detail" class="rb-detail"></div>
+        <button id="ap-next-btn" class="btn-next" onclick="allinPush.next()">下一回合</button>
+      </div>
+    </div>
+  </div>
+  <div id="ap-gameover" class="gameover-screen" style="display:none">
+    <div class="game-area" style="text-align:center;padding:30px">
+      <div id="ap-go-rank" class="go-rank">🐤</div>
+      <div id="ap-go-title" class="go-title">小鸡（决策）</div>
+      <div id="ap-go-desc" class="go-desc"></div>
+      <div class="go-stats">
+        <div class="go-stat"><div id="ap-go-score" class="num">0</div><div class="lbl">得分</div></div>
+        <div class="go-stat"><div id="ap-go-correct" class="num">0/0</div><div class="lbl">正确率</div></div>
+        <div class="go-stat"><div id="ap-go-streak" class="num">0</div><div class="lbl">连对</div></div>
+      </div>
+      <div id="ap-revive" style="display:none;margin-bottom:12px">
+        <button class="hero-btn" style="background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 4px 24px rgba(34,197,94,0.3);font-size:1rem;padding:12px 32px" onclick="showReviveDialog(allinPush,'ap')">🎯比欢迎来战</button>
+      </div>
+      <button id="ap-restart-btn" class="hero-btn" style="font-size:1rem;padding:10px 24px" onclick="allinPush.start()">再来一局</button>
+      <button class="btn-next" style="margin-top:10px;display:inline-block" onclick="navigate('home')">返回首页</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== AI BATTLE PAGE ===== -->
+<div id="page-ai-battle" class="page">
+  <div id="ai-start" class="start-screen">
+    <div class="ss-icon">🤖</div>
+    <h3>AI对战</h3>
+    <p>与AI进行单挑德州扑克！5回合对战，展示你的扑克技巧！</p>
+    <ul class="ss-rules">
+      <li>共5回合，你和AI各拿2张底牌</li>
+      <li>每回合有翻牌、转牌、河牌</li>
+      <li>可以选择过牌、跟注、加注、弃牌</li>
+      <li>AI会根据牌力和底池赔率决策</li>
+    </ul>
+    <button class="hero-btn" onclick="aiBattle.start()">开始对战</button>
+  </div>
+  <div id="ai-game" style="display:none">
+    <div class="game-area ai-table">
+      <div class="game-header">
+        <h2>🤖 AI对战</h2>
+        <div class="game-stats">
+          <span><span class="gs-icon">🏆</span><span class="gs-val" id="ai-chips">1000</span></span>
+          <span><span class="gs-icon">🎯</span><span class="gs-val" id="ai-round-display">1/5</span></span>
+        </div>
+      </div>
+      <div class="ai-info">
+        <span>🤖 AI筹码: <strong id="ai-ai-chips">1000</strong></span>
+        <span id="ai-position-label" style="color:#f0b90b;font-weight:600"></span>
+        <span>🧑 你的筹码: <strong id="ai-my-chips">1000</strong></span>
+      </div>
+      <div class="ai-info" style="justify-content:center;gap:20px">
+        <span>底池: <strong id="ai-pot">0</strong></span>
+        <span id="ai-stage-label" style="color:#ff8c42"></span>
+        <span>下注: <strong id="ai-bet-display">0</strong></span>
+      </div>
+      <div style="text-align:center;margin-bottom:8px">
+        <div id="ai-ai-hand" class="ai-hand">
+          <div class="ai-hand-label">🤖 AI手牌</div>
+          <div id="ai-ai-cards" class="hand-cards"></div>
+        </div>
+      </div>
+      <div class="table-felt" style="max-width:400px;margin:0 auto">
+        <div class="round-label">公共牌</div>
+        <div id="ai-board" class="ai-board"></div>
+      </div>
+      <div style="text-align:center;margin-top:8px">
+        <div id="ai-my-hand" class="ai-hand">
+          <div class="ai-hand-label">🧑 你的手牌</div>
+          <div id="ai-my-cards" class="hand-cards"></div>
+        </div>
+      </div>
+      <div id="ai-actions" class="actions">
+        <button class="btn-action btn-fold" onclick="aiBattle.act('fold')">弃牌</button>
+        <button class="btn-action btn-call" onclick="aiBattle.act('check')">过牌/跟注</button>
+        <button class="btn-action btn-raise" onclick="aiBattle.act('raise')">加注</button>
+      </div>
+      <div id="ai-result" class="result-box">
+        <div class="rb-icon">🤖</div>
+        <div id="ai-result-text" class="rb-text"></div>
+        <div id="ai-result-detail" class="rb-detail"></div>
+        <button id="ai-next-btn" class="btn-next" onclick="aiBattle.next()">下一回合</button>
+      </div>
+    </div>
+  </div>
+  <div id="ai-gameover" class="gameover-screen" style="display:none">
+    <div class="game-area" style="text-align:center;padding:30px">
+      <div id="ai-go-rank" class="go-rank" style="font-size:4rem">🤖</div>
+      <div id="ai-go-title" class="go-title">AI对战结果</div>
+      <div id="ai-go-desc" class="go-desc"></div>
+      <div class="go-stats">
+        <div class="go-stat"><div id="ai-go-chips" class="num">0</div><div class="lbl">最终筹码</div></div>
+        <div class="go-stat"><div id="ai-go-wins" class="num">0</div><div class="lbl">赢回合</div></div>
+      </div>
+      <button class="hero-btn" style="font-size:1rem;padding:10px 24px;margin-top:16px" onclick="aiBattle.start()">再来一局</button>
+      <button class="btn-next" style="margin-top:10px;display:inline-block" onclick="navigate('home')">返回首页</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DAILY CHALLENGE PAGE ===== -->
+<div id="page-daily" class="page">
+  <div class="dc-header">
+    <div class="dc-date" id="dc-date"></div>
+    <div class="dc-title">🐤 每日挑战</div>
+    <p style="color:#a09080;font-size:0.9rem;margin-top:8px">每天一道扑克挑战，完成获得双倍积分！</p>
+  </div>
+  <div id="dc-content" style="padding:0 16px"></div>
+</div>
+
+<!-- ===== ACHIEVEMENTS PAGE ===== -->
+<div id="page-achievements" class="page">
+  <div class="page-header">
+    <h1>🏆 成就殿堂</h1>
+    <p>累计各游戏最高段位和总得分</p>
+  </div>
+  <div style="text-align:center;margin-bottom:20px">
+    <div style="font-size:3rem" id="ach-total-rank">🐤</div>
+    <div style="font-size:1.3rem;color:#f0b90b;font-weight:700" id="ach-total-title">小鸡</div>
+    <div style="font-size:0.9rem;color:#a09080" id="ach-total-score">总得分: 0</div>
+  </div>
+  <div id="ach-grid" class="ach-grid"></div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+/* ==============================
+   NAVIGATION
+   ============================== */
+const POSITION_NAMES = {UTG:'UTG(枪口)',MP:'MP(中间)',HJ:'HJ(中高)',CO:'CO(切菜)',BTN:'BTN(按钮)',SB:'SB(小盲)',BB:'BB(大盲)'};
+const RANK_TIERS = {
+  '小鸡':{score:0,icon:'🐤',desc:'扑克鸡舍里最底层的存在，连老鹰都懒得吃你。'},
+  '公鸡':{score:30,icon:'🐓',desc:'有点进步的小鸡，开始懂得看牌了。但老鹰已经开始注意到你了...'},
+  '火鸡':{score:50,icon:'🦃',desc:'遇到危险会跑！学到了一些基本知识，偶尔能做出正确打法了。'},
+  '鸵鸟':{score:70,icon:'',desc:'聪明的鸵鸟！已经有了不错的判断力，regular水平了。'},
+  '凤凰':{score:90,icon:'🔥',desc:'浴火凤凰！你的扑克决策已经相当扎实，令人敬畏的存在。'},
+  '金鹏':{score:100,icon:'🦅',desc:'你已经是扑克鸡舍的顶级存在！决策犀利精准，小鸡们看到你就瑟瑟发抖。'}
+};
+const GAME_NAMES = {pd:'翻前斗鸡',fs:'识鸡辨鸡',oc:'赔率速算',mr:'读心术',ap:'全压赌命'};
+
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  const nl=document.querySelector('.nav-links a[data-page="'+page+'"]');
+  if(nl)nl.classList.add('active');
+  window.scrollTo(0,0);
+  if(page!=='preflop-duel'&&preflopDuel.state.playing)preflopDuel.state.playing=false;
+  if(page!=='fish-or-shark'&&fishOrShark.state.playing)fishOrShark.state.playing=false;
+  if(page!=='odds-calc'&&oddsCalc.state.playing)oddsCalc.state.playing=false;
+  if(page!=='mind-read'&&mindRead.state.playing)mindRead.state.playing=false;
+  if(page!=='allin-push'&&allinPush.state.playing)allinPush.state.playing=false;
+  if(page!=='ai-battle'&&aiBattle.state.playing)aiBattle.state.playing=false;
+  if(page==='achievements')renderAchievements();
+  if(page==='daily')renderDaily();
+  if(page==='home')renderHome();
+}
+
+document.querySelectorAll('.nav-links a[data-page]').forEach(a=>{
+  a.addEventListener('click',()=>navigate(a.dataset.page));
+});
+
+/* ==============================
+   PAYMENT / REVIVE SYSTEM
+   ============================== */
+function isUnlocked(){
+  return localStorage.getItem('poker_unlocked')==='true';
+}
+
+function showReviveDialog(game,prefix){
+  if(isUnlocked()){
+    game.state.lives=3;
+    game.state.playing=true;
+    game.state.answered=false;
+    document.getElementById(prefix+'-gameover').style.display='none';
+    document.getElementById(prefix+'-game').style.display='block';
+    document.getElementById(prefix+'-lives').textContent=3;
+    game.nextRound();
+    return;
+  }
+  const overlay=document.createElement('div');
+  overlay.className='pay-overlay';
+  overlay.innerHTML='<div class="pay-box"><div style="font-size:2.5rem;margin-bottom:8px">🔓</div><h3>永久解锁</h3><div class="pay-desc" style="margin-bottom:16px">通过平台下单购买后，联系卖家获取兑换码<br>输入兑换码即可永久解锁全部游戏！</div><div id="pay-redeem"><input type="text" id="code-input" placeholder="输入兑换码" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(240,185,11,0.2);background:rgba(0,0,0,0.3);color:#e8d5c4;font-size:1rem;text-align:center;outline:none;box-sizing:border-box;margin-bottom:8px"><button class="pay-btn pay-btn-primary" onclick="redeemCode(document.getElementById(\'code-input\').value.trim())">🚀 立即解锁</button></div><button class="pay-btn pay-btn-secondary" onclick="this.closest(\'.pay-overlay\').remove()">取消</button><div class="pay-msg" id="pay-msg"></div></div>'
+  document.body.appendChild(overlay);
+}
+
+const REDEEM_SECRET = 'poker-chkn-2026-ryj2225';
+const CODE_PREFIX = 'CHKN';
+
+async function hmacSign(msg, secret) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(String(msg)));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
+async function generateCode(counter) {
+  const hex = await hmacSign(counter, REDEEM_SECRET);
+  return CODE_PREFIX + '-' + String(counter).padStart(4, '0') + '-' + hex.substring(0, 8);
+}
+
+async function validateRedeemCode(code) {
+  if (!code || typeof code !== 'string') return false;
+  code = code.trim().toUpperCase();
+  const parts = code.split('-');
+  if (parts.length !== 3 || parts[0] !== CODE_PREFIX) return false;
+  const counter = parseInt(parts[1], 10);
+  if (isNaN(counter) || counter < 0) return false;
+  const expected = await generateCode(counter);
+  return expected === code;
+}
+
+async function redeemCode(code) {
+  const msg = document.getElementById('pay-msg');
+  if (!code) { msg.textContent = '请输入兑换码'; return; }
+  msg.textContent = '验证中...';
+  const valid = await validateRedeemCode(code);
+  if (valid) {
+    localStorage.setItem('poker_unlocked', 'true');
+    msg.textContent = '🎉 解锁成功！正在刷新...';
+    setTimeout(function(){ document.querySelector('.pay-overlay').remove(); location.reload(); }, 800);
+  } else {
+    msg.textContent = '❌ 兑换码无效，请在平台联系卖家获取正确兑换码';
+  }
+}
+
+function showRedeemTab(){}
+function showWechatTab(){}
+
+function restoreLives(game,prefix){
+  game.state.lives=3;game.state.playing=true;game.state.answered=false;
+  document.getElementById(prefix+'-gameover').style.display='none';
+  document.getElementById(prefix+'-game').style.display='block';
+  document.getElementById(prefix+'-lives').textContent=3;
+  game.nextRound();
+}
+
+/* ==============================
+   SCORE PERSISTENCE
+   ============================== */
+function saveHighScore(gameKey,score){
+  const scores=JSON.parse(localStorage.getItem('poker_highs')||'{}');
+  if(!scores[gameKey]||score>scores[gameKey]){scores[gameKey]=score;localStorage.setItem('poker_highs',JSON.stringify(scores));}
+}
+function getHighScore(gameKey){
+  const scores=JSON.parse(localStorage.getItem('poker_highs')||'{}');
+  return scores[gameKey]||0;
+}
+function saveTotalScore(score){
+  const total=parseInt(localStorage.getItem('poker_total')||'0');
+  localStorage.setItem('poker_total',String(total+score));
+}
+function getTotalScore(){return parseInt(localStorage.getItem('poker_total')||'0');}
+function getRankForScore(score){
+  let r='小鸡';for(const[n,d]of Object.entries(RANK_TIERS)){if(score>=d.score)r=n;}return r;
+}
+
+/* ==============================
+   SHARE SCORE — Canvas share card
+   ============================== */
+function shareScore(gameName,score,rank,icon,detail){
+  const c=document.createElement('canvas');c.width=600;c.height=380;
+  const x=c.getContext('2d');
+  // Dark background with gradient
+  const g=x.createLinearGradient(0,0,600,380);
+  g.addColorStop(0,'#1a0f0a');g.addColorStop(1,'#0d0805');
+  x.fillStyle=g;x.fillRect(0,0,600,380);
+  // Decorative border
+  x.strokeStyle='#f0b90b';x.lineWidth=2;x.strokeRect(10,10,580,360);
+  // Title
+  x.fillStyle='#f0b90b';x.font='bold 32px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.textAlign='center';x.fillText('🐤 德州扒鸡',300,55);
+  // Game name
+  x.fillStyle='#e8d5c4';x.font='20px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.fillText(gameName,300,95);
+  // Score
+  x.fillStyle='#f0b90b';x.font='bold 56px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.fillText(String(score),300,165);
+  x.fillStyle='#a09080';x.font='14px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.fillText('得分',300,190);
+  // Rank
+  x.font='40px sans-serif';x.fillText(icon,300,250);
+  x.fillStyle='#a09080';x.font='16px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.fillText(rank,300,285);
+  // Detail
+  if(detail){x.fillStyle='#6a8a9a';x.font='14px sans-serif';x.fillText(detail,300,320);}
+  // Footer
+  x.fillStyle='rgba(240,185,11,0.4)';x.font='13px sans-serif';
+  x.fillText('扫码挑战德州扒鸡 → baiyunzhi.github.io/poker-ocean/chicken/',300,360);
+  // Show in overlay
+  const dataUrl=c.toDataURL('image/png');
+  const ov=document.createElement('div');ov.className='share-overlay';
+  ov.innerHTML='<div class="share-box"><img src="'+dataUrl+'" style="width:100%;border-radius:12px;margin-bottom:12px"><div class="share-actions"><button class="share-dl" onclick="saveShareImage(\''+dataUrl+'\')">💾 保存图片</button><button class="share-close" onclick="this.parentElement.closest(\'.share-overlay\').remove()">关闭</button></div></div>';
+  document.body.appendChild(ov);
+}
+function saveShareImage(dataUrl){
+  const a=document.createElement('a');a.download='德州扒鸡_成绩.png';a.href=dataUrl;a.click();
+}
+
+/* ==============================
+   USER ID / INVITE SYSTEM
+   ============================== */
+function getUserId(){
+  let id=localStorage.getItem('poker_user_id');
+  if(!id){id='U'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem('poker_user_id',id);}
+  return id;
+}
+function getInviteCode(){const id=getUserId();return id.slice(-6).toUpperCase();}
+function getInviteLink(){return location.origin+location.pathname+'?ref='+getInviteCode();}
+function getReferralCount(){
+  const r=JSON.parse(localStorage.getItem('poker_referrals')||'[]');
+  return Array.isArray(r)?r.length:0;
+}
+function showInviteDialog(fromGame){
+  const ov=document.createElement('div');ov.className='invite-overlay';
+  const cnt=getReferralCount();const pct=Math.min(100,cnt/3*100);
+  const link=getInviteLink();
+  let actions='';
+  if(fromGame||!isUnlocked()){
+    actions='<div class="iv-actions"><button class="iv-action-btn" style="background:#f0b90b;color:#1a0f0a" onclick="copyInviteLink(this)">📋 复制邀请链接</button><button class="iv-action-btn" style="background:rgba(68,204,68,0.2);color:#44cc44" onclick="shareInvite(this)">📱 分享好友</button><button class="iv-action-btn" style="background:rgba(255,68,68,0.15);color:#ff6666" onclick="generateInvitePoster(this)">🖼️ 生成海报</button></div>';
+  }else{
+    actions='<div class="iv-actions"><button class="iv-action-btn" style="background:#f0b90b;color:#1a0f0a" onclick="copyInviteLink(this)">📋 复制邀请链接</button><button class="iv-action-btn" style="background:rgba(68,204,68,0.2);color:#44cc44" onclick="shareInvite(this)">📱 分享给好友</button><button class="iv-action-btn" style="background:rgba(255,68,68,0.15);color:#ff6666" onclick="generateInvitePoster(this)">🖼️ 邀请海报</button></div>';
+  }
+  ov.innerHTML='<div class="invite-box"><div class="iv-title">👥 邀请好友，免费解锁</div><div class="iv-desc">邀请 <strong style="color:#f0b90b">3</strong> 位好友打开链接，全部游戏免费玩！</div>'+
+    '<div class="iv-code" onclick="copyInviteCode(this)">'+getInviteCode()+'</div><div class="iv-desc" style="font-size:0.7rem;margin-top:-6px">👆 点击邀请码复制</div>'+
+    '<div class="iv-link" onclick="copyFullLink(this)" title="点击复制完整链接">🔗 '+link+'</div>'+
+    '<div class="iv-pb"><div class="iv-pb-fill" style="width:'+pct+'%"></div></div>'+
+    '<div class="iv-progress">已邀请 <strong>'+cnt+'</strong> / 3 人'+(cnt>=3?' 🎉':'')+'</div>'+
+    actions+
+    '<div id="iv-poster-area" style="margin:0"></div>'+
+    '<hr style="border-color:rgba(240,185,11,0.1);margin:12px 0">'+
+    '<div class="iv-desc" style="font-size:0.8rem;color:#8a7a6a">好友给了你邀请码？在这里输入：</div>'+
+    '<div class="iv-input-row"><input type="text" id="invite-input" placeholder="输入好友的6位邀请码" maxlength="10"><button onclick="applyInviteCode(document.getElementById(\'invite-input\').value)">确认</button></div>'+
+    '<div id="iv-confirm-msg" class="iv-confirm-msg"></div>'+
+    '<button class="iv-close" onclick="this.closest(\'.invite-overlay\').remove()" style="margin-top:6px">关闭</button></div>';
+  document.body.appendChild(ov);
+}
+function copyInviteCode(el){
+  navigator.clipboard.writeText(getInviteCode());
+  const t=el.textContent;el.textContent='✅ 已复制!';setTimeout(()=>el.textContent=t,1500);
+}
+function copyFullLink(el){
+  navigator.clipboard.writeText(getInviteLink());
+  const t=el.textContent;el.textContent='✅ 链接已复制!';setTimeout(()=>el.textContent=t,2000);
+}
+function copyInviteLink(btn){
+  navigator.clipboard.writeText(getInviteLink());
+  const t=btn.textContent;btn.textContent='✅ 已复制!';setTimeout(()=>btn.textContent=t,1500);
+}
+function shareInvite(btn){
+  const link=getInviteLink();
+  if(navigator.share){
+    navigator.share({title:'德州扒鸡',text:'🐤 来玩德州扒鸡！邀请你一起挑战扑克小游戏 ~',url:link}).catch(()=>{});
+  }else{
+    copyInviteLink(btn);
+  }
+}
+function generateInvitePoster(btn){
+  const area=document.getElementById('iv-poster-area');
+  if(area.querySelector('canvas')){area.innerHTML='';return;}
+  const code=getInviteCode();const link=getInviteLink();
+  const c=document.createElement('canvas');c.width=400;c.height=560;
+  const x=c.getContext('2d');
+  // Background
+  const g=x.createLinearGradient(0,0,400,560);
+  g.addColorStop(0,'#1a0f0a');g.addColorStop(0.5,'#2a1a10');g.addColorStop(1,'#0d0805');
+  x.fillStyle=g;x.fillRect(0,0,400,560);
+  // Gold border
+  x.strokeStyle='#f0b90b';x.lineWidth=3;x.strokeRect(12,12,376,536);
+  // Inner border
+  x.strokeStyle='rgba(240,185,11,0.2)';x.lineWidth=1;x.strokeRect(20,20,360,520);
+  // Title
+  x.fillStyle='#f0b90b';x.font='bold 36px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.textAlign='center';x.fillText('🐤 德州扒鸡',200,70);
+  // Subtitle
+  x.fillStyle='#e8d5c4';x.font='16px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.fillText('扑克学习 · 从小鸡到金鹏',200,100);
+  // Divider
+  x.strokeStyle='rgba(240,185,11,0.15)';x.lineWidth=1;
+  x.beginPath();x.moveTo(60,120);x.lineTo(340,120);x.stroke();
+  // Chicken SVG simplified
+  x.fillStyle='#d4a574';x.beginPath();x.arc(200,200,50,0,Math.PI*2);x.fill();
+  x.fillStyle='#e8c8a0';x.beginPath();x.arc(200,192,36,0,Math.PI*2);x.fill();
+  x.fillStyle='#ff4444';x.beginPath();x.moveTo(200,162);x.lineTo(189,178);x.lineTo(211,178);x.closePath();x.fill();
+  x.fillStyle='white';x.beginPath();x.arc(186,190,5,0,Math.PI*2);x.fill();x.beginPath();x.arc(214,190,5,0,Math.PI*2);x.fill();
+  x.fillStyle='#222';x.beginPath();x.arc(186,190,2.5,0,Math.PI*2);x.fill();x.beginPath();x.arc(214,190,2.5,0,Math.PI*2);x.fill();
+  x.fillStyle='#ff8c42';x.beginPath();x.moveTo(175,210);x.lineTo(200,222);x.lineTo(225,210);x.lineTo(216,216);x.lineTo(200,224);x.lineTo(184,216);x.closePath();x.fill();
+  // Invite code label
+  x.fillStyle='#a09080';x.font='14px "PingFang SC","Microsoft YaHei",sans-serif';x.fillText('我的邀请码',200,280);
+  // Invite code big
+  x.fillStyle='#f0b90b';x.font='bold 48px monospace';x.fillText(code,200,335);
+  // Progress text
+  const cnt=getReferralCount();
+  x.fillStyle='#a09080';x.font='16px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.fillText('已邀请 '+cnt+' / 3 人',200,380);
+  // Link
+  x.fillStyle='#6a8a9a';x.font='10px "PingFang SC","Microsoft YaHei",sans-serif';x.fillText('扫码或浏览器打开:',200,420);
+  x.fillStyle='#8ac4d8';x.font='12px "PingFang SC","Microsoft YaHei",sans-serif';x.fillText(link,200,440);
+  // Instruction
+  x.fillStyle='rgba(240,185,11,0.3)';x.font='13px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.fillText('← 好友打开链接或输入此码 →',200,480);
+  // Footer
+  x.fillStyle='rgba(240,185,11,0.15)';x.font='11px "PingFang SC","Microsoft YaHei",sans-serif';
+  x.fillText('baiyunzhi.github.io/poker-ocean/chicken/',200,530);
+  // Click to save
+  const box=document.createElement('div');box.className='iv-poster-box';
+  box.innerHTML='<p style="font-size:0.75rem;color:#a09080;margin-bottom:6px">👆 点击图片保存分享</p>';
+  const img=document.createElement('img');img.style.cssText='width:100%;max-width:280px;border-radius:8px;cursor:pointer';
+  img.src=c.toDataURL('image/png');
+  img.onclick=function(){c.toBlob(function(b){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='德州扒鸡_邀请码_'+code+'.png';a.click();},'image/png');};
+  box.appendChild(img);area.innerHTML='';area.appendChild(box);
+}
+function applyInviteCode(code){
+  if(!code||code.length<4){document.getElementById('iv-confirm-msg').textContent='⚠️ 邀请码至少4位';return false;}
+  const theirCode=code.trim().toUpperCase();
+  if(theirCode===getInviteCode()){document.getElementById('iv-confirm-msg').textContent='⚠️ 不能输入自己的邀请码';return false;}
+  let r=JSON.parse(localStorage.getItem('poker_referrals')||'[]');
+  if(!Array.isArray(r))r=[];
+  if(r.includes(theirCode)){document.getElementById('iv-confirm-msg').textContent='⏳ 你已经邀请过这位好友了';return true;}
+  r.push(theirCode);localStorage.setItem('poker_referrals',JSON.stringify(r));
+  if(r.length>=3){
+    localStorage.setItem('poker_unlocked','true');
+    document.getElementById('iv-confirm-msg').textContent='🎉 恭喜你解锁全部游戏！页面即将刷新...';
+    setTimeout(()=>{location.reload();},1500);
+    return true;
+  }
+  document.getElementById('iv-confirm-msg').textContent='✅ 邀请成功！已邀请 '+r.length+'/3 人';
+  // Update UI in place
+  const ctr=document.querySelector('.iv-progress strong');if(ctr)ctr.textContent=r.length;
+  const bar=document.querySelector('.iv-pb-fill');if(bar)bar.style.width=Math.min(100,r.length/3*100)+'%';
+  document.getElementById('invite-input').value='';
+  return true;
+}
+// Parse URL invite code with auto-notification
+(function(){const p=new URLSearchParams(location.search);const ref=p.get('ref');
+  if(ref&&ref.length>=4){
+    const myId=getUserId();
+    let r=JSON.parse(localStorage.getItem('poker_referrals')||'[]');if(!Array.isArray(r))r=[];
+    if(!r.includes(ref)&&ref!==getInviteCode()){
+      r.push(ref);localStorage.setItem('poker_referrals',JSON.stringify(r));
+      // Show a welcome toast
+      setTimeout(function(){
+        const t=document.createElement('div');t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a2a0a;color:#44cc44;padding:12px 24px;border-radius:12px;border:1px solid rgba(68,204,68,0.3);z-index:999;font-size:0.9rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.5);animation:fadeIn 0.3s';
+        t.textContent='🐤 感谢好友的邀请！已为你记录';
+        document.body.appendChild(t);
+        setTimeout(function(){t.style.transition='opacity 0.3s';t.style.opacity='0';setTimeout(function(){t.remove()},300);},3000);
+      },500);
+    }
+  }
+})();
+
+/* ==============================
+   ACHIEVEMENT BADGES
+   ============================== */
+const BADGES=[
+  {id:'first_win',name:'初次胜利',icon:'🏆',desc:'任意游戏获得一次胜利',check:s=>Object.values(s.highs).some(v=>v>0),progress:s=>({cur:Object.values(s.highs).filter(v=>v>0).length?1:0,tar:1})},
+  {id:'streak_3',name:'三连胜',icon:'🔥',desc:'连续答对3题',check:s=>s.maxStreak>=3,progress:s=>({cur:Math.min(s.maxStreak,3),tar:3})},
+  {id:'streak_5',name:'连胜小鸡',icon:'⚡',desc:'连续答对5题',check:s=>s.maxStreak>=5,progress:s=>({cur:Math.min(s.maxStreak,5),tar:5})},
+  {id:'streak_10',name:'十连鸡神',icon:'💥',desc:'连续答对10题',check:s=>s.maxStreak>=10,progress:s=>({cur:Math.min(s.maxStreak,10),tar:10})},
+  {id:'pd_master',name:'翻前大师',icon:'⚔️',desc:'翻前斗鸡满分',check:s=>(s.highs.pd||0)>=100,progress:s=>({cur:Math.min(Math.floor((s.highs.pd||0)/10),10),tar:10})},
+  {id:'fs_master',name:'识人慧眼',icon:'👁️',desc:'识鸡辨鸡满分',check:s=>(s.highs.fs||0)>=100,progress:s=>({cur:Math.min(Math.floor((s.highs.fs||0)/10),10),tar:10})},
+  {id:'math_genius',name:'数学天才',icon:'🧮',desc:'赔率速算满分',check:s=>(s.highs.oc||0)>=100,progress:s=>({cur:Math.min(Math.floor((s.highs.oc||0)/10),10),tar:10})},
+  {id:'mind_reader',name:'读心大师',icon:'🔮',desc:'读心术满分',check:s=>(s.highs.mr||0)>=100,progress:s=>({cur:Math.min(Math.floor((s.highs.mr||0)/10),10),tar:10})},
+  {id:'push_master',name:'赌神附体',icon:'🃏',desc:'全压赌命满分',check:s=>(s.highs.ap||0)>=100,progress:s=>({cur:Math.min(Math.floor((s.highs.ap||0)/10),10),tar:10})},
+  {id:'ai_win',name:'AI初胜',icon:'🎮',desc:'AI对战首次获胜',check:s=>(s.aiWins||0)>=1,progress:s=>({cur:Math.min(s.aiWins||0,1),tar:1})},
+  {id:'ai_slayer',name:'AI杀手',icon:'🤖',desc:'AI对战盈利500+',check:s=>(s.aiNet||0)>=500,progress:s=>({cur:Math.min(Math.floor((s.aiNet||0)/50),10),tar:10})},
+  {id:'daily_3',name:'每日坚持',icon:'📅',desc:'完成3次每日挑战',check:s=>(s.dailyCount||0)>=3,progress:s=>({cur:Math.min(s.dailyCount||0,3),tar:3})},
+  {id:'daily_7',name:'持之以恒',icon:'🌟',desc:'完成7次每日挑战',check:s=>(s.dailyCount||0)>=7,progress:s=>({cur:Math.min(s.dailyCount||0,7),tar:7})},
+  {id:'all_games',name:'全面扑克手',icon:'🎯',desc:'5款小游戏全部玩过',check:s=>(s.gamesPlayed||0)>=5,progress:s=>({cur:Math.min(s.gamesPlayed||0,5),tar:5})},
+  {id:'invite_1',name:'呼朋唤友',icon:'📨',desc:'邀请第1位好友',check:s=>(s.referrals||0)>=1,progress:s=>({cur:Math.min(s.referrals||0,1),tar:1})},
+  {id:'invite_3',name:'人气之星',icon:'👥',desc:'邀请3位好友',check:s=>(s.referrals||0)>=3,progress:s=>({cur:Math.min(s.referrals||0,3),tar:3})},
+  {id:'score_200',name:'积累者',icon:'💎',desc:'累计200总分',check:s=>s.total>=200,progress:s=>({cur:Math.min(s.total,200),tar:200})},
+  {id:'score_500',name:'扑克爱好者',icon:'💠',desc:'累计500总分',check:s=>s.total>=500,progress:s=>({cur:Math.min(s.total,500),tar:500})},
+  {id:'score_1000',name:'扑克痴迷',icon:'🔷',desc:'累计1000总分',check:s=>s.total>=1000,progress:s=>({cur:Math.min(s.total,1000),tar:1000})},
+  {id:'score_5000',name:'金鹏展翅',icon:'🦅',desc:'累计5000总分',check:s=>s.total>=5000,progress:s=>({cur:Math.min(s.total,5000),tar:5000})},
+];
+function getUnlockedBadges(){return JSON.parse(localStorage.getItem('poker_badges')||'[]');}
+function isBadgeUnlocked(id){return getUnlockedBadges().includes(id);}
+function getBadgeCount(){return getUnlockedBadges().length;}
+function unlockBadge(id){
+  const u=getUnlockedBadges();if(u.includes(id))return;
+  u.push(id);localStorage.setItem('poker_badges',JSON.stringify(u));
+  // Celebration — confetti burst
+  (function(){const d=document.createElement('div');d.className='celebration';d.style.cssText='contain:strict;will-change:transform';
+    const colors=['#f0b90b','#ff4444','#44cc44','#4488ff','#ff88cc'];
+    for(let i=0;i<20;i++){
+      const p=document.createElement('div');p.className='celebration-particle';
+      const size=5+Math.random()*6;
+      p.style.cssText='left:'+Math.random()*100+'%;top:-10px;background:'+colors[i%5]+';width:'+size+'px;height:'+size+'px;border-radius:'+(Math.random()>0.5?'50%':'1px')+';animation-duration:'+(1+Math.random()*1.5)+'s;animation-delay:'+(Math.random()*0.3)+'s;will-change:transform';
+      d.appendChild(p);
+    }
+    document.body.appendChild(d);setTimeout(()=>{if(d.parentNode)d.remove()},3500);
+  })();
+  // Show notification
+  const b=BADGES.find(x=>x.id===id);if(!b)return;
+  const n=document.createElement('div');n.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#2a1a10,#3a2210);border:2px solid #f0b90b;border-radius:16px;padding:28px;z-index:1001;text-align:center;animation:fadeIn 0.3s;box-shadow:0 0 60px rgba(240,185,11,0.15);min-width:280px';
+  n.innerHTML='<div style="font-size:3.5rem;margin-bottom:8px">'+b.icon+'</div><div style="color:#f0b90b;font-weight:700;font-size:1.3rem;margin-bottom:4px">🏅 成就解锁！</div><div style="color:#e8d5c4;font-size:1.1rem;margin-bottom:6px;font-weight:600">'+b.name+'</div><div style="color:#a09080;font-size:0.8rem;margin-bottom:16px">'+b.desc+'</div><button onclick="this.parentElement.remove();updateBadgeCount()" style="padding:10px 32px;border-radius:8px;border:none;background:linear-gradient(135deg,#f0b90b,#d4a008);color:#1a0f0a;font-weight:700;cursor:pointer;font-size:0.95rem">太棒了！</button>';
+  document.body.appendChild(n);
+  n.querySelector('button').onclick=function(){n.remove();updateBadgeCount();};
+  updateBadgeCount();
+}
+function showBadgeDetail(id){
+  const b=BADGES.find(x=>x.id===id);if(!b)return;
+  const unlocked=isBadgeUnlocked(id);
+  const stats=collectBadgeStats();
+  const p=b.progress(stats);
+  const pct=Math.min(100,p.cur/p.tar*100);
+  const ov=document.createElement('div');ov.className='badge-popup';
+  ov.innerHTML='<div class="badge-popup-box"><div class="bp-icon">'+(unlocked?b.icon:'🔒')+'</div><div class="bp-name">'+(unlocked?b.name:'???')+'</div><div class="bp-desc">'+b.desc+'</div>'+
+    '<div class="bp-bar"><div class="bp-bar-fill" style="width:'+pct+'%;background:'+(unlocked?'linear-gradient(90deg,#44cc44,#66ee66)':'linear-gradient(90deg,#f0b90b,#ffd700)')+'"></div></div>'+
+    '<div class="bp-progress-text">'+(unlocked?'✅ 已解锁！':(p.cur+' / '+p.tar))+'</div>'+
+    '<button class="bp-close" onclick="this.closest(\'.badge-popup\').remove()">关闭</button></div>';
+  document.body.appendChild(ov);
+}
+function checkBadges(stats){
+  let anyNew=false;
+  BADGES.forEach(b=>{if(!isBadgeUnlocked(b.id)&&b.check(stats)){unlockBadge(b.id);anyNew=true;}});
+  return anyNew;
+}
+function collectBadgeStats(){
+  const highs=JSON.parse(localStorage.getItem('poker_highs')||'{}');
+  const streak=parseInt(localStorage.getItem('poker_streak')||'0');
+  const aiNet=parseInt(localStorage.getItem('poker_ai_net')||'0');
+  const aiWins=parseInt(localStorage.getItem('poker_ai_wins')||'0');
+  const dailyCount=parseInt(localStorage.getItem('poker_daily_count')||'0');
+  const referred=JSON.parse(localStorage.getItem('poker_referrals')||'[]');
+  // gamesPlayed: count of games with non-zero high scores
+  const gameKeys=['pd','fs','oc','mr','ap'];
+  const gamesPlayed=gameKeys.filter(k=>(highs[k]||0)>0).length;
+  return {highs, maxStreak:Math.max(streak,parseInt(localStorage.getItem('poker_max_streak')||'0')), total:getTotalScore(), aiNet, aiWins, dailyCount, gamesPlayed, referrals:Array.isArray(referred)?referred.length:0};
+}
+
+/* ==============================
+   PREFLOP DUEL
+   ============================== */
+const SCENARIOS=[
+  {hand:['A','♠'],hand2:['A','♥'],pos:'UTG',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'AA是顶级起手牌，任何位置都值得加注造池。'},
+  {hand:['K','♠'],hand2:['K','♥'],pos:'UTG',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'KK仅次于AA，翻前绝对强牌，必须加注。'},
+  {hand:['A','♠'],hand2:['K','♠'],pos:'BTN',action:'vs-open',correct:'raise',scenario:'UTG位开池加注，CO弃牌，你在BTN。',reason:'BTN位置用AKs 3bet，既有位置优势又有牌力。'},
+  {hand:['Q','♠'],hand2:['Q','♥'],pos:'MP',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'QQ是强对子，翻前加注建立底池控制权。'},
+  {hand:['J','♠'],hand2:['J','♥'],pos:'MP',action:'vs-open',correct:'call',scenario:'UTG开池加注，你在MP位手持JJ。',reason:'JJ在MP面对UTG加注，跟注为主，避免被高张压制。'},
+  {hand:['A','♠'],hand2:['Q','♥'],pos:'UTG',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'AQo在UTG属于可开池范围，直接加注。'},
+  {hand:['A','♥'],hand2:['Q','♦'],pos:'CO',action:'vs-3bet',correct:'fold',scenario:'BTN位3bet了你的CO位开池，你手持AQo。',reason:'AQo面对3bet容易被AK/AA/QQ统治，弃牌是长期+EV。'},
+  {hand:['7','♠'],hand2:['7','♥'],pos:'BTN',action:'vs-open',correct:'call',scenario:'MP位开池加注，全部弃牌到你在BTN。',reason:'小对子BTN位跟注，有位置优势，中三条可赢大池。'},
+  {hand:['9','♠'],hand2:['8','♠'],pos:'CO',action:'vs-open',correct:'call',scenario:'MP位开池加注，你在CO位手持同花连张。',reason:'同花连张在CO位适合跟注，有位置且翻后潜力大。'},
+  {hand:['K','♠'],hand2:['Q','♠'],pos:'BTN',action:'vs-open',correct:'raise',scenario:'CO位开池加注，你在BTN手持KQs。',reason:'BTN位用KQs 3bet CO位，有位置有牌力。'},
+  {hand:['A','♥'],hand2:['4','♠'],pos:'BB',action:'vs-steal',correct:'call',scenario:'BTN位偷盲加注，SB弃牌，你在BB手持A4o。',reason:'A4o在盲注位对抗偷盲，跟注防守合理。'},
+  {hand:['K','♠'],hand2:['3','♦'],pos:'BB',action:'vs-steal',correct:'fold',scenario:'BTN位偷盲加注到3BB，你在BB手持K3o。',reason:'K3o太弱，不值得防守，弃牌。'},
+  {hand:['A','♠'],hand2:['K','♥'],pos:'CO',action:'facing-3bet',correct:'raise',scenario:'你CO位开池，BTN位3bet，你手持AKo。',reason:'AK是强牌，面对3bet可以4bet反击。'},
+  {hand:['J','♠'],hand2:['10','♠'],pos:'MP',action:'facing-3bet',correct:'fold',scenario:'你MP位开池，CO位3bet，你手持JTs。',reason:'JTs面对3bet没有足够胜率，弃牌等待更好机会。'},
+  {hand:['A','♠'],hand2:['2','♠'],pos:'SB',action:'open',correct:'call',scenario:'前面全部弃牌，你在SB位。',reason:'A2s在SB位可以补齐盲注，同花A有潜力。'},
+  {hand:['6','♠'],hand2:['5','♠'],pos:'SB',action:'open',correct:'call',scenario:'前面全部弃牌，你在SB位。',reason:'65s在SB位补齐盲注即可，便宜看翻牌。'},
+  {hand:['7','♠'],hand2:['2','♥'],pos:'UTG',action:'open',correct:'fold',scenario:'翻前第一次行动，前面无人加注。',reason:'72o是最差起手牌，任何位置都应该直接弃牌。'},
+  {hand:['9','♠'],hand2:['3','♦'],pos:'CO',action:'open',correct:'fold',scenario:'前面全部弃牌到CO位，你手持93o。',reason:'93o太弱，即使在CO位也不值得玩。'},
+  {hand:['K','♠'],hand2:['J','♠'],pos:'HJ',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'KJs在HJ位是标准开池牌。'},
+  {hand:['A','♥'],hand2:['10','♠'],pos:'UTG+1',action:'open',correct:'fold',scenario:'UTG弃牌，你在+1位。',reason:'ATo在UTG+1太弱，属于紧的弃牌范围。'},
+  {hand:['Q','♠'],hand2:['9','♥'],pos:'BTN',action:'open',correct:'raise',scenario:'前面全部弃牌到BTN位。',reason:'BTN位可以用较宽范围开池。'},
+  {hand:['5','♠'],hand2:['5','♥'],pos:'MP',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'55在MP位可以开池加注，中三条价值巨大。'},
+  {hand:['A','♠'],hand2:['J','♠'],pos:'UTG',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'AJs在UTG位是标准开池牌。'},
+  {hand:['8','♠'],hand2:['2','♥'],pos:'MP',action:'open',correct:'fold',scenario:'翻前第一次行动，前面无人加注。',reason:'82o是垃圾牌，MP位置更不应该玩。'},
+  {hand:['Q','♠'],hand2:['J','♠'],pos:'MP',action:'vs-open',correct:'call',scenario:'UTG开池加注，你在MP手持QJs。',reason:'QJs在MP面对UTG加注，跟注看翻牌有潜力。'},
+
+  {hand:['K','♠'],hand2:['10','♦'],pos:'MP',action:'open',correct:'fold',scenario:'翻前第一次行动，前面无人加注。',reason:'KTo在MP位太弱，紧凶打法弃牌。'},
+  {hand:['6','♥'],hand2:['6','♣'],pos:'CO',action:'open',correct:'raise',scenario:'前面全部弃牌到CO位。',reason:'66在CO位可以开池加注，中三条价值巨大。'},
+  {hand:['A','♠'],hand2:['4','♠'],pos:'BTN',action:'vs-open',correct:'call',scenario:'MP位开池加注，CO弃牌，你在BTN。',reason:'A4s在BTN位跟注，有同花和反超潜力。'},
+  {hand:['K','♥'],hand2:['9','♦'],pos:'SB',action:'vs-steal',correct:'fold',scenario:'BTN位偷盲加注，你在SB位。',reason:'K9o在SB位对抗偷盲太弱。'},
+  {hand:['A','♠'],hand2:['Q','♦'],pos:'BB',action:'vs-steal',correct:'raise',scenario:'BTN位偷盲加注，SB弃牌，你在BB。',reason:'AQo在BB位可以3bet反偷盲。'},
+  {hand:['J','♦'],hand2:['9','♠'],pos:'BTN',action:'open',correct:'raise',scenario:'前面全部弃牌到BTN位。',reason:'J9s在BTN位可以开池，范围较宽。'},
+  {hand:['8','♣'],hand2:['8','♥'],pos:'UTG+1',action:'open',correct:'raise',scenario:'UTG弃牌，你在+1位。',reason:'88在UTG+1可以开池加注。'},
+  {hand:['A','♥'],hand2:['2','♠'],pos:'MP',action:'vs-open',correct:'call',scenario:'UTG开池加注，你在MP位。',reason:'A2s在MP面对UTG开池可以跟注。'},
+  {hand:['K','♦'],hand2:['J','♥'],pos:'CO',action:'vs-open',correct:'fold',scenario:'UTG开池加注，MP跟注，你在CO位。',reason:'KJo面对UTG加注和MP跟注太弱。'},
+  {hand:['Q','♠'],hand2:['8','♠'],pos:'BTN',action:'open',correct:'raise',scenario:'前面全部弃牌到BTN位。',reason:'Q8s在BTN位可以开池。'},
+  {hand:['3','♠'],hand2:['3','♥'],pos:'SB',action:'open',correct:'call',scenario:'前面全部弃牌，你在SB位。',reason:'33在SB位补齐盲注看翻牌。'},
+  {hand:['A','♠'],hand2:['10','♦'],pos:'UTG',action:'facing-3bet',correct:'fold',scenario:'你UTG开池，MP位3bet，你手持ATo。',reason:'ATo面对3bet容易被统治，弃牌为妙。'},
+  {hand:['K','♠'],hand2:['Q','♠'],pos:'MP',action:'facing-3bet',correct:'raise',scenario:'你MP开池，CO位3bet，你手持KQs。',reason:'KQs是强牌可以4bet反击。'},
+  {hand:['9','♥'],hand2:['9','♣'],pos:'CO',action:'facing-3bet',correct:'call',scenario:'你CO开池，BTN位3bet，你手持99。',reason:'99面对3bet可以跟注看翻牌。'},
+  {hand:['J','♠'],hand2:['10','♥'],pos:'BTN',action:'facing-3bet',correct:'call',scenario:'你BTN开池，SB位3bet，你手持JTo。',reason:'JTo面对3bet有位置可以跟注。'},
+  {hand:['A','♥'],hand2:['5','♥'],pos:'SB',action:'vs-steal',correct:'raise',scenario:'BTN位偷盲加注，你在SB位。',reason:'A5s在SB位可以3bet反偷。'},
+  {hand:['7','♣'],hand2:['6','♣'],pos:'BB',action:'vs-steal',correct:'call',scenario:'BTN位偷盲加注，SB弃牌，你在BB。',reason:'76s在BB位跟注防守有潜力。'},
+  {hand:['K','♠'],hand2:['J','♦'],pos:'UTG',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'KJo在UTG位是标准开池。'},
+  {hand:['A','♠'],hand2:['7','♠'],pos:'MP',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'A7s在MP位可以开池加注。'},
+  {hand:['Q','♥'],hand2:['9','♥'],pos:'CO',action:'open',correct:'fold',scenario:'前面全部弃牌到CO位。',reason:'Q9o在CO位太弱，建议弃牌。'},
+  {hand:['10','♠'],hand2:['8','♠'],pos:'BTN',action:'vs-open',correct:'call',scenario:'CO位开池加注，你在BTN位。',reason:'T8s在BTN有位置跟注看翻牌。'},
+  {hand:['5','♠'],hand2:['4','♠'],pos:'SB',action:'open',correct:'call',scenario:'前面全部弃牌，你在SB位。',reason:'54s在SB位补齐盲注即可。'},
+  {hand:['A','♠'],hand2:['K','♦'],pos:'BB',action:'vs-steal',correct:'raise',scenario:'CO位偷盲加注，SB弃牌，你在BB。',reason:'AK在BB位必须3bet反击。'},
+  {hand:['J','♠'],hand2:['J','♥'],pos:'MP',action:'facing-3bet',correct:'raise',scenario:'你MP开池，BTN位3bet，你手持JJ。',reason:'JJ是强对子可以4bet。'},
+  {hand:['A','♠'],hand2:['3','♠'],pos:'BTN',action:'vs-open',correct:'raise',scenario:'CO位溜入，你在BTN手持A3s。',reason:'CO溜入时BTN可以用A3s加注隔离。'},
+  {hand:['K','♠'],hand2:['2','♣'],pos:'BB',action:'vs-steal',correct:'fold',scenario:'BTN位偷盲加注，SB弃牌，你在BB。',reason:'K2o太弱不值得防守。'},
+  {hand:['10','♥'],hand2:['9','♥'],pos:'MP',action:'open',correct:'raise',scenario:'UTG弃牌，你在MP位。',reason:'T9s在MP位可以开池。'},
+  {hand:['A','♠'],hand2:['Q','♠'],pos:'BTN',action:'vs-3bet',correct:'raise',scenario:'CO位开池你加注，BB位3bet，你在BTN。',reason:'AQs是强牌可以4bet。'},
+  {hand:['6','♥'],hand2:['5','♠'],pos:'SB',action:'vs-steal',correct:'fold',scenario:'BTN位偷盲加注，你在SB位。',reason:'65o太弱，SB位直接弃牌。'},
+  {hand:['K','♠'],hand2:['9','♠'],pos:'CO',action:'vs-open',correct:'call',scenario:'MP位开池加注，你在CO位手持K9s。',reason:'K9s在CO位可以跟注。'},
+  {hand:['Q','♠'],hand2:['J','♦'],pos:'UTG',action:'open',correct:'fold',scenario:'翻前第一次行动，前面无人加注。',reason:'QJo在UTG位太弱，紧凶打法弃牌。'},
+  {hand:['A','♠'],hand2:['8','♥'],pos:'BB',action:'vs-steal',correct:'call',scenario:'BTN位偷盲加注，SB弃牌，你在BB。',reason:'A8o在BB位可以跟注防守。'},
+  {hand:['7','♥'],hand2:['7','♣'],pos:'CO',action:'vs-open',correct:'call',scenario:'MP位开池加注，你在CO位手持77。',reason:'77在CO位面对MP开池跟注，中三条赢大池。'},
+  {hand:['K','♠'],hand2:['Q','♥'],pos:'BTN',action:'facing-3bet',correct:'call',scenario:'你BTN开池，SB位3bet，BB位弃牌。',reason:'KQo面对SB的3bet有位置可跟注。'},
+  {hand:['A','♠'],hand2:['J','♣'],pos:'CO',action:'open',correct:'raise',scenario:'前面全部弃牌到CO位。',reason:'AJo在CO位标准开池加注。'},
+  {hand:['10','♠'],hand2:['7','♠'],pos:'BTN',action:'vs-open',correct:'call',scenario:'CO位开池，你在BTN手持T7s。',reason:'T7s在BTN有位置跟注看翻牌。'},
+  {hand:['K','♠'],hand2:['4','♠'],pos:'SB',action:'open',correct:'call',scenario:'前面全部弃牌，你在SB位。',reason:'K4s在SB位补齐盲注即可。'},
+  {hand:['Q','♠'],hand2:['Q','♥'],pos:'BTN',action:'vs-3bet',correct:'raise',scenario:'CO位开池你加注，SB位3bet，你在BTN。',reason:'QQ是强牌面对3bet可以4bet。'},
+  {hand:['8','♠'],hand2:['3','♣'],pos:'BB',action:'vs-steal',correct:'fold',scenario:'BTN位偷盲加注，SB弃牌，你在BB。',reason:'83o是垃圾牌不值得防守。'},
+  {hand:['A','♠'],hand2:['K','♠'],pos:'MP',action:'open',correct:'raise',scenario:'翻前第一次行动，前面无人加注。',reason:'AKs在MP位是顶级强牌必须加注。'},
+  {hand:['J','♠'],hand2:['9','♥'],pos:'CO',action:'vs-open',correct:'fold',scenario:'UTG开池加注，MP跟注，你在CO位。',reason:'J9o面对UTG开池太弱，弃牌。'},
+  {hand:['K','♠'],hand2:['10','♣'],pos:'SB',action:'vs-steal',correct:'call',scenario:'CO位偷盲加注，你在SB位手持KTo。',reason:'KTo在SB位对抗CO偷盲可以跟注。'},
+  {hand:['A','♠'],hand2:['6','♥'],pos:'CO',action:'open',correct:'raise',scenario:'前面全部弃牌到CO位。',reason:'A6o在CO位可以开池加注。'},
+  {hand:['Q','♠'],hand2:['10','♥'],pos:'MP',action:'open',correct:'raise',scenario:'UTG弃牌，你在MP位。',reason:'QTo在MP位可以开池加注。'},
+  {hand:['9','♠'],hand2:['8','♥'],pos:'BTN',action:'facing-3bet',correct:'fold',scenario:'你BTN开池，SB位3bet，BB位跟注3bet。',reason:'98o面对3bet和跟注太弱。'},
+  {hand:['K','♠'],hand2:['J','♣'],pos:'SB',action:'vs-steal',correct:'raise',scenario:'CO位偷盲加注，你在SB手持KJo。',reason:'KJo在SB位可以3bet反偷。'},
+  {hand:['4','♠'],hand2:['4','♥'],pos:'BTN',action:'vs-open',correct:'call',scenario:'CO位开池加注，你在BTN手持44。',reason:'小对子BTN位跟注，中三条赢大池。'},
+  {hand:['A','♠'],hand2:['2','♦'],pos:'BB',action:'vs-steal',correct:'fold',scenario:'BTN位偷盲加注到3BB，SB弃牌。',reason:'A2o在BB位对抗满池偷盲太弱。'},
+  {hand:['K','♠'],hand2:['Q','♣'],pos:'UTG+1',action:'open',correct:'raise',scenario:'UTG弃牌，你在+1位。',reason:'KQo在UTG+1可以开池。'},
+  {hand:['J','♠'],hand2:['J','♣'],pos:'SB',action:'vs-steal',correct:'raise',scenario:'BTN位偷盲加注，你在SB位手持JJ。',reason:'JJ在SB位可以3bet反击偷盲。'}
+];
+
+const preflopDuel={
+  state:{playing:false,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null,usedScenarios:[]},
+  start(){
+    this.state={playing:true,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null,usedScenarios:[]};
+    document.getElementById('pd-start').style.display='none';
+    document.getElementById('pd-game').style.display='block';
+    document.getElementById('pd-gameover').style.display='none';
+    this.nextRound();
+  },
+  nextRound(){
+    if(this.state.lives<=0||this.state.round>=10){this.gameOver();return}
+    this.state.round++;this.state.answered=false;
+    document.getElementById('pd-round').textContent=this.state.round+'/10';
+    document.getElementById('pd-lives').textContent=this.state.lives;
+    const rb=document.getElementById('pd-result');rb.classList.remove('show','correct','wrong');
+    document.querySelectorAll('#pd-actions .btn-action').forEach(b=>b.disabled=false);
+    this.setFishExpr('normal');this.setSharkExpr('normal');
+    this.say('pd-fish-speech','嗯…让我想想');
+    this.say('pd-shark-speech','来吧，小鸡仔！');
+    let available=SCENARIOS.filter((_,i)=>!this.state.usedScenarios.includes(i));
+    if(available.length===0)this.state.usedScenarios=[];
+    available=SCENARIOS.filter((_,i)=>!this.state.usedScenarios.includes(i));
+    const idx=Math.floor(Math.random()*available.length);
+    const s=available[idx];const origIdx=SCENARIOS.indexOf(s);
+    this.state.usedScenarios.push(origIdx);this.state.scenario=s;
+    this.renderCards(s.hand,s.hand2);
+    document.getElementById('pd-position').textContent='📍位置：'+(POSITION_NAMES[s.pos]||s.pos);
+    document.getElementById('pd-scenario').innerHTML='<strong>'+s.hand[0]+s.hand[1]+' '+s.hand2[0]+s.hand2[1]+'</strong> · '+s.scenario;
+  },
+  renderCards(c1,c2){
+    const r1=(c1[1]==='♥'||c1[1]==='♦'),r2=(c2[1]==='♥'||c2[1]==='♦');
+    document.getElementById('pd-cards').innerHTML='<div class="card '+(r1?'red':'black')+'"><div class="cr">'+c1[0]+'</div><div class="cs">'+c1[1]+'</div></div><div class="card '+(r2?'red':'black')+'"><div class="cr">'+c2[0]+'</div><div class="cs">'+c2[1]+'</div></div>';
+  },
+  act(action){
+    if(this.state.answered||!this.state.playing)return;
+    this.state.answered=true;this.state.total++;
+    const s=this.state.scenario;const correct=action===s.correct;
+    document.querySelectorAll('#pd-actions .btn-action').forEach(b=>b.disabled=true);
+    const rb=document.getElementById('pd-result');rb.className='result-box show';
+    if(correct){
+      this.state.score+=10;this.state.streak++;this.state.correct++;
+      if(this.state.streak>this.state.maxStreak)this.state.maxStreak=this.state.streak;
+      let bonus='';if(this.state.streak>=3){const b=this.state.streak*2;this.state.score+=b;bonus=' 🔥 '+this.state.streak+'连对+'+b+'分！';}
+      rb.classList.add('correct');
+      document.getElementById('pd-result-icon').textContent='✅';
+      document.getElementById('pd-result-text').textContent='正确！'+bonus;
+      document.getElementById('pd-result-detail').textContent=s.reason;
+      this.setFishExpr('happy');this.setSharkExpr('angry');
+      this.say('pd-fish-speech','嘿嘿，答对了！');this.say('pd-shark-speech','哼…运气不错');
+      document.getElementById('pd-fish').classList.add('bounce');setTimeout(()=>document.getElementById('pd-fish').classList.remove('bounce'),500);
+    }else{
+      this.state.lives--;this.state.streak=0;
+      rb.classList.add('wrong');
+      document.getElementById('pd-result-icon').textContent='❌';
+      document.getElementById('pd-result-text').textContent='不对！正确是「'+{fold:'弃牌',call:'跟注',raise:'加注'}[s.correct]+'」';
+      document.getElementById('pd-result-detail').textContent=s.reason;
+      this.setFishExpr('scared');this.setSharkExpr('amused');
+      this.say('pd-fish-speech','哎呀被啄了！');this.say('pd-shark-speech','哈哈，小鸡就是小鸡');
+      document.getElementById('pd-fish').classList.add('shake');setTimeout(()=>document.getElementById('pd-fish').classList.remove('shake'),500);
+    }
+    document.getElementById('pd-score').textContent=this.state.score;
+    document.getElementById('pd-lives').textContent=this.state.lives;
+    document.getElementById('pd-next-btn').textContent=(this.state.round>=10||this.state.lives<=0)?'查看结果':'下一回合';
+  },
+  next(){if(this.state.lives<=0||this.state.round>=10)this.gameOver();else this.nextRound();},
+  gameOver(){
+    this.state.playing=false;
+    document.getElementById('pd-game').style.display='none';
+    document.getElementById('pd-gameover').style.display='block';
+    const pct=this.state.total>0?(this.state.correct/this.state.total*100):0;
+    const ws=this.state.score+(pct>=80?20:pct>=60?10:0);
+    let r='小鸡';for(const[n,d]of Object.entries(RANK_TIERS)){if(ws>=d.score)r=n;}
+    const rd=RANK_TIERS[r];
+    document.getElementById('pd-go-rank').textContent=rd.icon;
+    document.getElementById('pd-go-title').textContent=r;
+    document.getElementById('pd-go-desc').textContent=rd.desc;
+    document.getElementById('pd-go-score').textContent=this.state.score;
+    document.getElementById('pd-go-correct').textContent=this.state.correct+'/'+this.state.total+' ('+Math.round(pct)+'%)';
+    document.getElementById('pd-go-streak').textContent=this.state.maxStreak;
+    const rEl=document.getElementById('pd-revive');if(rEl)rEl.style.display=this.state.lives<=0?'block':'none';
+    const re=document.getElementById('pd-restart-btn');if(re)re.style.display=this.state.lives<=0?'none':'';
+    saveHighScore('pd',this.state.score);saveTotalScore(this.state.score);
+    // Save max streak
+    const ms=parseInt(localStorage.getItem('poker_max_streak')||'0');
+    if(this.state.maxStreak>ms)localStorage.setItem('poker_max_streak',String(this.state.maxStreak));
+    // Check badges
+    checkBadges(collectBadgeStats());trackDailyGame();
+    // Share and unlock guide
+    (function(ctx,rd){
+      // Add share button
+      if(!document.getElementById('pd-share-btn')){
+        const sb=document.createElement('button');sb.id='pd-share-btn';sb.className='btn-next';sb.style.cssText='margin-top:8px;background:rgba(68,160,255,0.15);color:#44a0ff;border-color:rgba(68,160,255,0.2)';
+        sb.textContent='📸 分享成绩';sb.onclick=function(){shareScore('翻前斗鸡',ctx.state.score,rd.name,rd.icon,'正确率 '+Math.round(ctx.state.correct/ctx.state.total*100)+'%')};
+        document.querySelector('#pd-gameover .btn-next').before(sb);
+      }
+      // Unlock guide for free games
+      if(!isUnlocked()){
+        let ug=document.getElementById('pd-unlock-guide');
+        if(!ug){
+          ug=document.createElement('div');ug.id='pd-unlock-guide';ug.className='unlock-guide';
+          ug.innerHTML='<div class="ug-title">🎯 欢迎来战！</div><div class="ug-desc">想挑战 🧮赔率速算 👀读心术 🧨全压赌命 🤖AI对战 吗？</div><button class="ug-btn ug-btn-invite" onclick="showInviteDialog()">👥 邀请3位好友免费解锁</button><button class="ug-btn ug-btn-primary" onclick="showReviveDialog(preflopDuel,\'pd\')">🔥 立即解锁全部游戏</button>';
+          document.querySelector('#pd-gameover .game-area').appendChild(ug);
+        }
+        ug.classList.add('show');
+      }
+    })(this,rd);
+  },
+  setFishExpr(e){
+    const el=document.getElementById('pd-fish');el.classList.remove('chick-happy','chick-scared');
+    if(e==='happy')el.classList.add('chick-happy');if(e==='scared')el.classList.add('chick-scared');
+    const svg=document.getElementById('pd-fish-svg');const mouth=svg.querySelector('.expr-mouth'),eye=svg.querySelector('.expr-eye circle:first-child');
+    if(!mouth||!eye)return;
+    if(e==='happy'){mouth.setAttribute('d','M 64,114 100,136 136,114 122,124 100,140 78,124');eye.setAttribute('r','8');}
+    else if(e==='scared'){mouth.setAttribute('d','M 66,116 100,132 134,116 122,124 100,140 78,124');eye.setAttribute('r','12');}
+    else{mouth.setAttribute('d','M 68,112 100,132 132,112 120,122 100,136 80,122');eye.setAttribute('r','7');}
+  },
+  setSharkExpr(e){
+    const el=document.getElementById('pd-shark');el.classList.remove('hawk-angry','hawk-amused');
+    if(e==='angry')el.classList.add('hawk-angry');if(e==='amused')el.classList.add('hawk-amused');
+    const svg=document.getElementById('pd-shark-svg');const mouth=svg.querySelector('.expr-mouth'),eye=svg.querySelector('.expr-eye circle:first-child');
+    if(!mouth||!eye)return;
+    if(e==='angry'){mouth.setAttribute('d','M 54,110 90,126 124,108 112,118 90,132 68,118');eye.setAttribute('r','5');}
+    else if(e==='amused'){mouth.setAttribute('d','M 52,108 90,134 126,110 114,122 90,138 68,122');eye.setAttribute('r','7');}
+    else{mouth.setAttribute('d','M 58,108 90,128 122,108 110,118 90,132 70,118');eye.setAttribute('r','6');}
+  },
+  say(elId,text){const el=document.getElementById(elId);el.textContent=text;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2000);}
+};
+
+/* ==============================
+   FISH OR SHARK
+   ============================== */
+const IDENTITY_SCENARIOS=[
+  {desc:'UTG位置用AA只是溜入平跟，翻牌后有人下注就弃牌了。',isFish:true,reason:'AA在任何位置都值得加注造池。溜入AA让底池变小翻后难打。'},
+  {desc:'MP位加注CO位3bet，BB位置用72o跟注3bet，说"看看翻牌又不贵"。',isFish:true,reason:'72o是最烂起手牌，面对3bet胜率极低，跟注就是送钱。'},
+  {desc:'翻牌有同花听牌，手持nuts同花听牌在翻牌直接全压100BB。',isFish:true,reason:'听牌不是成牌，没有弃牌率的超池全压是-EV。'},
+  {desc:'BTN位置用AK只是溜入，想"诱捕"盲注玩家。',isFish:true,reason:'AK需要加注造池减少对手。溜入AK让太多人便宜看翻牌。'},
+  {desc:'翻牌A72彩虹，手持22一路跟注三条街，对手亮出AK。',isFish:true,reason:'底对在A高翻牌不值一条街价值，跟注三条街送筹码。'},
+  {desc:'UTG位置用AKo最小加注到2BB开池。',isFish:true,reason:'最小加注是示弱信号，标准开池应是2.5-3BB。'},
+  {desc:'连续10手牌全部入池，72o、J2o都玩，说"今天运气好挡不住"。',isFish:true,reason:'VPIP 100%是鱼标志特征。鲨鱼选择性入池。'},
+  {desc:'翻前拿到KK，"感觉不对"直接弃牌，说AA肯定在对面。',isFish:true,reason:'KK是第二好起手牌，凭感觉弃掉是典型鱼行为。'},
+  {desc:'UTG加注3BB，BTN位置用93o跟注，说"翻牌什么都有可能"。',isFish:true,reason:'93o是垃圾牌，面对UTG加注胜率极低。'},
+  {desc:'河牌面有4张同花，手持22跟注对手2倍底池重注，对手亮出同花。',isFish:true,reason:'底对在四花面面对重注几乎不可能赢。'},
+  {desc:'翻牌啥也没中，向底池下注2倍底池，被加注后秒弃白白损失。',isFish:true,reason:'没牌时的超池下注没有意义。'},
+  {desc:'翻牌击中底对，转牌河牌对手连续下注，分析后弃牌，对手亮出顶对顶踢脚。',isFish:false,reason:'底对面对连续下注没有摊牌价值，鲨鱼懂得适时放弃。'},
+  {desc:'CO位开池，BTN用A5s 3bet，成功迫使对手弃牌。',isFish:false,reason:'A5s是完美3bet诈唬牌，有高牌补牌和同花潜力。'},
+  {desc:'翻牌击中顶对但牌面湿润有顺花可能，选择过牌控制底池。',isFish:false,reason:'顶对在湿润面需控制底池，避免被加注。'},
+  {desc:'MP开池，BTN用87s跟注3bet，有位置看翻牌。',isFish:false,reason:'同花连张在位置优势下跟注3bet很有潜力。'},
+  {desc:'面对从不开池加注的紧手玩家的4bet，弃掉了AK。',isFish:false,reason:'面对nit的4bet，AK不再是好牌，鲨鱼能根据对手范围做出大弃牌。'},
+  {desc:'河牌击中第二对，下注被差牌跟注，成功拿到薄价值。',isFish:false,reason:'薄价值下注是区分鲨鱼和鱼的重要标志。'},
+  {desc:'翻牌和转牌都过牌，河牌对手下注，用A高牌跟注，对手只是K高。',isFish:false,reason:'读准对手范围后的抓诈唬是高级技术。'},
+  {desc:'UTG溜入，CO位用KQo加注隔离，成功拿下底池。',isFish:false,reason:'隔离溜入者是标准鲨鱼打法。'},
+  {desc:'翻牌对手下注，用后门同花听牌跟注(float)，转牌对手过牌后下注拿下。',isFish:false,reason:'浮板(float)技巧——利用位置和后续牌面变化偷池。'},
+  {desc:'河牌面有4张顺子，对手下重注，弃掉了手中的三条，对手亮出顺子。',isFish:false,reason:'读牌精准的大弃牌！鲨鱼能做正确弃牌。'},
+  {desc:'CO位开池BTN3bet，CO用A5s 4bet诈唬，迫使对手弃牌。',isFish:false,reason:'高级4bet诈唬！A5s有阻断牌效果。'},
+  {desc:'翻前AK加注，翻牌三张小牌，持续下注被跟注，转牌过牌，河牌放弃。',isFish:false,reason:'AK没中时控制底池，适时放弃避免损失。'},
+  {desc:'翻前用72o跟注3bet，翻牌中了两对赢了底池，嘲笑3bet的人。',isFish:true,reason:'72o跟注3bet是严重-EV行为，赢了一次下次会输十次。'},
+  {desc:'翻牌击中顶对顶踢脚，湿润面有人check-raise，立即全压。',isFish:true,reason:'顶对在湿润面被check-raise时全压太冒进，应该考虑弃牌。'},
+  {desc:'BTN位置用同花连张跟注UTG加注，翻牌听顺转牌听花，对手下注时加注半诈唬。',isFish:false,reason:'听牌加注是标准半诈唬，有位置优势。'},
+  {desc:'翻前拿到AA慢打到河牌，对手成顺后输了大池。',isFish:true,reason:'AA必须翻前加注造池，慢打AA经常让对手反超。'},
+  {desc:'河牌发现自己输定了，但仍然下注诈唬试图让对手弃牌，对手有坚果跟注。',isFish:true,reason:'明知对手范围强还诈唬是自取灭亡。'},
+  {desc:'翻牌击中三条，过牌让对手继续诈唬，转牌加注拿下底池。',isFish:false,reason:'埋伏三条是经典鲨鱼打法，诱骗对手继续诈唬。'},
+  {desc:'面对紧手玩家的3bet，在小盲位用AJo跟注，翻牌没中弃牌。',isFish:true,reason:'面对紧手3bet AJo不够强，不该跟注。'},
+  {desc:'CO位用KJo开池，BTN位3bet后直接弃牌，没有浪费筹码。',isFish:false,reason:'KJo面对3bet弃牌是正确决定，不被缠打。'},
+  {desc:'翻牌中了底对+卡顺听牌，在有利位置跟注对手下注，转牌没中放弃。',isFish:false,reason:'有听牌时便宜跟注看转牌，没中及时放弃。'},
+  {desc:'每次输了大池后马上买入继续玩，连续三手牌全压送光。',isFish:true,reason:'tilt后连续全压是典型鱼行为，情绪失控。'},
+  {desc:'MP位用ATo开池，CO位3bet，跟注后翻牌没中，对手下注时弃牌。',isFish:true,reason:'ATo面对3bet太弱不该跟注，翻后更难打。'},
+  {desc:'翻牌KQJ两同花，手持AT已经成顺，过牌加注拿下大池。',isFish:false,reason:'成坚果顺子后过牌加注最大化价值。'},
+  {desc:'翻前用A5s做3bet诈唬，翻牌继续下注迫使对手弃牌。',isFish:false,reason:'A5s是优质3bet诈唬牌，有阻断效果和高牌补牌。'},
+  {desc:'翻牌击中两对后慢打，转牌让对手反超后全压支付。',isFish:true,reason:'两对是强牌但需要保护，慢打可能被反超。'},
+  {desc:'SB位用32o补齐盲注，翻牌击中底对，跟注三条街支付对手价值。',isFish:true,reason:'32o在SB位都不该玩，中了底对还支付三条街。'},
+  {desc:'翻前UTG用KK加注，翻牌A高面下注被跟注，转牌对手反加后弃牌。',isFish:false,reason:'KK在A高面面对反加可以弃牌，读准对手范围。'},
+  {desc:'河牌面有同花可能，用中等牌下注三分之二底池获取薄价值。',isFish:false,reason:'薄价值下注是鲨鱼获利的重要手段。'},
+  {desc:'翻前用QJo在UTG位溜入，翻牌中了Q，跟注三条街输给AQ。',isFish:true,reason:'QJo在UTG位不该玩，中了顶对还输给更好的Q。'},
+  {desc:'翻牌同花听牌+两头顺听牌，直接全压诈唬，对手顶对弃牌。',isFish:false,reason:'强听牌全压有极高的弃牌率和胜率。'},
+  {desc:'翻前加注翻牌持续下注，转牌没中直接放弃，没有盲目诈唬。',isFish:false,reason:'c-bet后没中就放弃，避免无效诈唬。'},
+  {desc:'拿到AA后过度兴奋，翻前全压100BB，只赢下盲注。',isFish:true,reason:'AA全压100BB赶走了所有对手，损失价值。'},
+  {desc:'翻牌中了两头顺听牌，计算赔率后弃牌因为跟注赔率不够。',isFish:false,reason:'赔率不合适时放弃听牌是正确选择。'},
+  {desc:'翻前用K5s跟注3bet，翻牌K-high下注三条街被顶对Q跟注。',isFish:true,reason:'K5s跟注3bet太松，中K还是踢脚问题。'},
+  {desc:'大盲位用A8o防守偷盲，翻牌A高面，转牌对手下注时加注拿下。',isFish:false,reason:'A8o防守偷盲合理，中A后加注拿回底池。'},
+  {desc:'翻前用同花连张跟注加注，翻牌听顺转牌成顺，价值下注三条街。',isFish:false,reason:'成顺后价值下注三条街最大化收益。'},
+  {desc:'翻前弃牌后看到翻牌中了四条，后悔拍桌子影响其他人。',isFish:true,reason:'弃牌后抱怨是鱼的表现，鲨鱼关注下一手牌。'},
+  {desc:'翻牌用顶对下注被加注，读准对手是两对后果断弃牌。',isFish:false,reason:'顶对面对加注读懂牌面后弃牌，避免损失。'},
+  {desc:'BTN位用92o跟注CO位加注，翻牌中了9，支付对手三条街。',isFish:true,reason:'92o在任何位置都不该跟注加注。'},
+  {desc:'翻前加注翻牌全没中，但持续下注迫使对手弃牌成功偷池。',isFish:false,reason:'c-bet偷池是标准鲨鱼战术。'},
+  {desc:'翻前用QQ加注，翻牌AKQ中了三条，慢打到河牌只赢了一点。',isFish:true,reason:'三条在湿润面应该快速造池，慢打损失价值。'},
+  {desc:'翻前小对子跟注加注，翻牌中了三条，过牌加注拿下大池。',isFish:false,reason:'中三条后过牌加注是最佳打法。'},
+  {desc:'翻前用A9o跟注3bet，翻牌A高面跟注三条街输给AK。',isFish:true,reason:'A9o跟注3bet踢脚问题严重，中A也是送钱。'},
+  {desc:'连续输了3手牌后深呼吸调整心态，收紧范围等待好牌。',isFish:false,reason:'情绪管理是鲨鱼必备素质，连败后收紧范围。'},
+  {desc:'翻前加注翻牌中了两对，快速下注造池。',isFish:false,reason:'两对是强牌需要保护，快速造池拿价值。'},
+  {desc:'翻牌有顺面，手持对子跟注对手下注，认为对手在诈唬，河牌对手再下注才弃牌。',isFish:true,reason:'有顺面时对子面对下注应直接弃牌。'},
+  {desc:'SB位补齐盲注，翻牌中了卡顺，赔率不合适还跟注，转牌没中弃牌。',isFish:true,reason:'卡顺听牌赔率极差，不应跟注。'},
+  {desc:'翻前用TT加注翻牌中了三条，对手下注时直接加注全压拿下。',isFish:false,reason:'三条要快速造池，拿最大价值。'},
+  {desc:'翻前不加注溜入，翻牌中了两对，对手下注时加注拿下底池。',isFish:true,reason:'翻前溜入是弱打法，应该加注造池。'},
+  {desc:'翻牌同花听牌，计算赔率后发现跟注正EV，跟注后转牌中花拿下。',isFish:false,reason:'计算赔率后的正确跟注是鲨鱼基本功。'},
+  {desc:'翻前用AJs在UTG位溜入，翻牌中了A，对手下注时弃牌。',isFish:true,reason:'AJs在UTG必须加注，溜入浪费了牌力。'},
+  {desc:'翻牌全是小牌，手持AK持续下注被跟注，转牌过牌弃牌。',isFish:false,reason:'AK不中时及时止损，避免无效诈唬。'},
+  {desc:'翻前用KQs在BTN位3bet SB位，翻牌不中但持续下注拿下底池。',isFish:false,reason:'有位置3bet后c-bet是标准操作。'},
+  {desc:'翻前加注翻牌中中对，对手下注时弃牌因为牌面有顺子可能。',isFish:false,reason:'中对在湿润面弃牌是正确选择。'},
+  {desc:'翻前用AA加注，翻牌三张同花没有A花色，对手下注时弃牌。',isFish:true,reason:'AA翻前加注后不该在翻牌弃牌，只有一张牌威胁。'},
+  {desc:'UTG位用KK加注被4bet，直接5bet全压100BB。',isFish:true,reason:'KK被4bet时可以跟注看翻牌，直接全压赶走了所有诈唬。'},
+  {desc:'翻前用56s跟注加注，翻牌中了卡顺+后门花，float跟注后转牌价值下注。',isFish:false,reason:'float听牌利用位置优势偷池，高级技巧。'},
+  {desc:'翻前AK加注翻牌QJx面，持续下注被跟注转牌放弃。',isFish:false,reason:'AK没中时只打一枪就放弃，避免损失。'},
+  {desc:'翻牌用顶对下注，转牌牌面变湿润，过牌控制底池，河牌对手下注后弃牌。',isFish:false,reason:'湿润面控制底池避免损失，鲨鱼打法。'},
+  {desc:'翻前用KJo在UTG加注，翻牌没中但持续下注，被加注后弃牌。',isFish:true,reason:'KJo在UTG开池太松，翻后难打。'}
+];
+
+const fishOrShark={
+  state:{playing:false,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null,usedScenarios:[]},
+  start(){
+    this.state={playing:true,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null,usedScenarios:[]};
+    document.getElementById('fs-start').style.display='none';document.getElementById('fs-game').style.display='block';
+    document.getElementById('fs-gameover').style.display='none';
+    document.getElementById('fs-mystery-figure').textContent='❓';document.getElementById('fs-mystery-figure').className='mystery-box';this.nextRound();
+  },
+  nextRound(){
+    if(this.state.lives<=0||this.state.round>=10){this.gameOver();return}
+    this.state.round++;this.state.answered=false;
+    document.getElementById('fs-round').textContent=this.state.round+'/10';document.getElementById('fs-lives').textContent=this.state.lives;
+    const rb=document.getElementById('fs-result');rb.classList.remove('show','correct','wrong');
+    document.querySelectorAll('#fs-actions .btn-action').forEach(b=>b.disabled=false);
+    this.setFishExpr('normal');document.getElementById('fs-fish-speech').textContent='让我看看这人的水平...';
+    const mb=document.getElementById('fs-mystery-figure');mb.textContent='❓';mb.className='mystery-box';
+    let available=IDENTITY_SCENARIOS.filter((_,i)=>!this.state.usedScenarios.includes(i));
+    if(available.length===0)this.state.usedScenarios=[];available=IDENTITY_SCENARIOS.filter((_,i)=>!this.state.usedScenarios.includes(i));
+    const idx=Math.floor(Math.random()*available.length);
+    const s=available[idx];this.state.usedScenarios.push(IDENTITY_SCENARIOS.indexOf(s));this.state.scenario=s;
+    document.getElementById('fs-scenario').textContent=s.desc;
+  },
+  act(guessFish){
+    if(this.state.answered||!this.state.playing)return;
+    this.state.answered=true;this.state.total++;
+    const s=this.state.scenario;const correct=guessFish===s.isFish;
+    document.querySelectorAll('#fs-actions .btn-action').forEach(b=>b.disabled=true);
+    const rb=document.getElementById('fs-result');rb.className='result-box show';
+    const mb=document.getElementById('fs-mystery-figure');mb.className='mystery-box mystery-reveal';
+    if(correct){
+      this.state.score+=10;this.state.streak++;this.state.correct++;
+      if(this.state.streak>this.state.maxStreak)this.state.maxStreak=this.state.streak;
+      let bonus='';if(this.state.streak>=3){const b=this.state.streak*2;this.state.score+=b;bonus=' 🔥 '+this.state.streak+'连对+'+b+'分！';}
+      rb.classList.add('correct');
+      if(s.isFish){document.getElementById('fs-result-icon').textContent='✅';document.getElementById('fs-result-text').textContent='没错！他是小鸡！'+bonus;mb.textContent='🐤';mb.classList.add('reveal-fish');document.getElementById('fs-fish-speech').textContent='哈哈，我就知道是小鸡！';}
+      else{document.getElementById('fs-result-icon').textContent='✅';document.getElementById('fs-result-text').textContent='果然！他是老鹰！'+bonus;mb.textContent='🦅';mb.classList.add('reveal-shark');document.getElementById('fs-fish-speech').textContent='好险，还好我看穿了！';}
+      document.getElementById('fs-result-detail').textContent=s.reason;
+      this.setFishExpr('happy');document.getElementById('fs-fish').classList.add('bounce');setTimeout(()=>document.getElementById('fs-fish').classList.remove('bounce'),500);
+    }else{
+      this.state.lives--;this.state.streak=0;
+      rb.classList.add('wrong');
+      if(s.isFish){document.getElementById('fs-result-icon').textContent='❌';document.getElementById('fs-result-text').textContent='不对！他是小鸡啊！';mb.textContent='🐤';mb.classList.add('reveal-fish');}
+      else{document.getElementById('fs-result-icon').textContent='❌';document.getElementById('fs-result-text').textContent='你被骗了！他是老鹰！';mb.textContent='🦅';mb.classList.add('reveal-shark');}
+      document.getElementById('fs-result-detail').textContent=s.reason;
+      this.setFishExpr('scared');document.getElementById('fs-fish-speech').textContent='啊？我看错了...';
+      document.getElementById('fs-fish').classList.add('shake');setTimeout(()=>document.getElementById('fs-fish').classList.remove('shake'),500);
+    }
+    document.getElementById('fs-score').textContent=this.state.score;document.getElementById('fs-lives').textContent=this.state.lives;
+    document.getElementById('fs-next-btn').textContent=(this.state.round>=10||this.state.lives<=0)?'查看结果':'下一回合';
+  },
+  next(){if(this.state.lives<=0||this.state.round>=10)this.gameOver();else this.nextRound();},
+  gameOver(){
+    this.state.playing=false;document.getElementById('fs-game').style.display='none';document.getElementById('fs-gameover').style.display='block';
+    const pct=this.state.total>0?(this.state.correct/this.state.total*100):0;const ws=this.state.score+(pct>=80?20:pct>=60?10:0);
+    let r='小鸡';for(const[n,d]of Object.entries(RANK_TIERS)){if(ws>=d.score)r=n;}const rd=RANK_TIERS[r];
+    document.getElementById('fs-go-rank').textContent=rd.icon;document.getElementById('fs-go-title').textContent=r+'（识人）';document.getElementById('fs-go-desc').textContent=rd.desc;
+    document.getElementById('fs-go-score').textContent=this.state.score;document.getElementById('fs-go-correct').textContent=this.state.correct+'/'+this.state.total+' ('+Math.round(pct)+'%)';document.getElementById('fs-go-streak').textContent=this.state.maxStreak;
+    const rEl=document.getElementById('fs-revive');if(rEl)rEl.style.display=this.state.lives<=0?'block':'none';
+    const re=document.getElementById('fs-restart-btn');if(re)re.style.display=this.state.lives<=0?'none':'';
+    saveHighScore('fs',this.state.score);saveTotalScore(this.state.score);
+    const ms=parseInt(localStorage.getItem('poker_max_streak')||'0');
+    if(this.state.maxStreak>ms)localStorage.setItem('poker_max_streak',String(this.state.maxStreak));
+    checkBadges(collectBadgeStats());trackDailyGame();
+    (function(ctx,rd){
+      if(!document.getElementById('fs-share-btn')){
+        const sb=document.createElement('button');sb.id='fs-share-btn';sb.className='btn-next';sb.style.cssText='margin-top:8px;background:rgba(68,160,255,0.15);color:#44a0ff;border-color:rgba(68,160,255,0.2)';
+        sb.textContent='📸 分享成绩';sb.onclick=function(){shareScore('识鸡辨鸡',ctx.state.score,rd.name,rd.icon,'正确率 '+Math.round(ctx.state.correct/ctx.state.total*100)+'%')};
+        document.querySelector('#fs-gameover .btn-next').before(sb);
+      }
+      if(!isUnlocked()){
+        let ug=document.getElementById('fs-unlock-guide');
+        if(!ug){
+          ug=document.createElement('div');ug.id='fs-unlock-guide';ug.className='unlock-guide';
+          ug.innerHTML='<div class="ug-title">🎯 欢迎来战！</div><div class="ug-desc">想挑战 🧮赔率速算 👀读心术 🧨全压赌命 🤖AI对战 吗？</div><button class="ug-btn ug-btn-invite" onclick="showInviteDialog()">👥 邀请3位好友免费解锁</button><button class="ug-btn ug-btn-primary" onclick="(function(){var o=document.createElement(\'div\');o.className=\'pay-overlay\';o.innerHTML=\'<div class=\\\"pay-box\\\"><div style=\\\"font-size:2.5rem;margin-bottom:8px\\\">🔓</div><h3>永久解锁</h3><div class=\\\"pay-desc\\\">29.9元永久解锁全部游戏+AI对战！联系卖家获取兑换码</div><div id=\\\"pay-redeem\\\"><input type=\\\"text\\\" id=\\\"code-input\\\" placeholder=\\\"输入兑换码\\\" style=\\\"width:100%;padding:12px;border-radius:8px;border:1px solid rgba(240,185,11,0.2);background:rgba(0,0,0,0.3);color:#e8d5c4;font-size:1rem;text-align:center;outline:none;box-sizing:border-box;margin-bottom:8px\\\"><button class=\\\"pay-btn pay-btn-primary\\\" onclick=\\\"redeemCode(document.getElementById(\'code-input\').value.trim())\\\">🚀 立即解锁</button></div><button class=\\\"pay-btn pay-btn-secondary\\\" onclick=\\\"this.closest(\'.pay-overlay\').remove()\\\">取消</button><div class=\\\"pay-msg\\\" id=\\\"pay-msg\\\"></div></div>\';document.body.appendChild(o)})()">🔥 立即解锁全部游戏</button>';
+          document.querySelector('#fs-gameover .game-area').appendChild(ug);
+        }
+        ug.classList.add('show');
+      }
+    })(this,rd);
+  },
+  setFishExpr(e){
+    const el=document.getElementById('fs-fish');el.classList.remove('chick-happy','chick-scared');
+    if(e==='happy')el.classList.add('chick-happy');if(e==='scared')el.classList.add('chick-scared');
+    const svg=document.getElementById('fs-fish-svg');const mouth=svg.querySelector('.expr-mouth'),eye=svg.querySelector('.expr-eye circle:first-child');
+    if(!mouth||!eye)return;
+    if(e==='happy'){mouth.setAttribute('d','M 64,114 100,136 136,114 122,124 100,140 78,124');eye.setAttribute('r','8');}
+    else if(e==='scared'){mouth.setAttribute('d','M 66,116 100,132 134,116 122,124 100,140 78,124');eye.setAttribute('r','12');}
+    else{mouth.setAttribute('d','M 68,112 100,132 132,112 120,122 100,136 80,122');eye.setAttribute('r','7');}
+  },
+};
+
+/* ==============================
+   ODDS CALC — GENERATOR
+   ============================== */
+const DRAWS=[
+  {o:2,n:'口袋对中三条'},{o:3,n:'三条补成葫芦'},{o:4,n:'卡顺听牌'},
+  {o:6,n:'两高张'},{o:8,n:'两头顺听牌'},{o:9,n:'同花听牌'},
+  {o:12,n:'同花+卡顺听牌'},{o:14,n:'顶对+同花听牌'},{o:15,n:'同花顺听牌'},
+];
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a}
+
+function makeQuiz(){
+  const t=pick(['draw','draw','rule','pot','pot']);const d=pick(DRAWS);
+  function fill(arr){while(arr.length<3){const v=Math.abs(arr[0]+arr.length*7)%97+1;if(!arr.includes(v))arr.push(v)}return arr}
+  if(t==='draw'){
+    const denom=pick([47,46]);const c=Math.round(d.o/denom*100);const stage=denom===47?'转牌':'河牌';
+    const wrongs=fill([Math.round(d.o/50*100),Math.round((d.o-1)/denom*100),d.o*2].filter(v=>v!==c&&v>0&&v<100));
+    const all=shuffle([c,...wrongs.slice(0,3)]);
+    return {q:'翻牌圈'+d.n+'，'+stage+'中牌概率？',opts:all.map(v=>'约'+v+'%'),correct:all.indexOf(c),explain:d.o+'÷'+denom+'≈'+c+'%',icon:'🃏'};
+  }
+  if(t==='rule'){
+    const mult=pick([4,2]);const c=d.o*mult;
+    const wrongs=fill([Math.round(d.o/47*100),mult===4?d.o*3:Math.round(d.o/46*100),c+4,c-4].filter(v=>v!==c&&v>0&&v<100));
+    const all=shuffle([c,...wrongs.slice(0,3)]);
+    return {q:(mult===4?'翻牌':'转牌')+'圈'+d.n+'，四二法则到河牌概率？',opts:all.map(v=>'约'+v+'%'),correct:all.indexOf(c),explain:d.o+'×'+mult+'='+c+'%',icon:'🧮'};
+  }
+  const pot=pick([50,75,100,120,150,180,200,250,300,400,500,600,800,1000]);
+  const bet=Math.max(5,Math.round(pot*pick([0.25,0.33,0.5,0.67,0.75,1.0])));
+  const c=Math.round(bet/(pot+bet+bet)*100);
+  const wrongs=fill([Math.round(bet/(pot+bet)*100),Math.round(bet/pot*100),c+5,c-5].filter(v=>v!==c&&v>0&&v<100));
+  const all=shuffle([c,...wrongs.slice(0,3)]);
+  return {q:'底池'+pot+'，对手下注'+bet+'，跟注需要多少胜率？',opts:all.map(v=>v+'%'),correct:all.indexOf(c),explain:bet+'÷('+pot+'+'+bet+'+'+bet+')='+c+'%',icon:'💰'};
+}
+
+/* ==============================
+   ODDS CALC — GAME LOGIC
+   ============================== */
+const oddsCalc = {
+  state:{playing:false,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null},
+  start(){
+    this.state={playing:true,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null};
+    document.getElementById('oc-start').style.display='none';document.getElementById('oc-game').style.display='block';document.getElementById('oc-gameover').style.display='none';this.nextRound();
+  },
+  nextRound(){
+    if(this.state.lives<=0||this.state.round>=10){this.gameOver();return}
+    this.state.round++;this.state.answered=false;
+    document.getElementById('oc-round').textContent=this.state.round+'/10';document.getElementById('oc-lives').textContent=this.state.lives;
+    document.getElementById('oc-result').className='result-box';document.querySelectorAll('.btn-odds').forEach(b=>{b.disabled=false;b.classList.remove('selected','wrong')});
+    document.getElementById('oc-fish-speech').textContent='让我算算概率...';document.getElementById('oc-shark-speech').textContent='计算时间！';
+    const s=makeQuiz();this.state.scenario=s;
+    document.getElementById('oc-hand-display').style.display='none';document.getElementById('oc-no-cards').style.display='block';
+    const labels={'\u{1F0CF}':'听牌概率','\u{1F9EE}':'四二法则','\u{1F4B0}':'底池赔率'};
+    document.getElementById('oc-no-cards').innerHTML='<div style="font-size:2.5rem;margin-bottom:2px">'+s.icon+'</div><div style="font-size:0.8rem;color:#8899aa">'+(labels[s.icon]||'扑克数学')+'</div>';
+    document.getElementById('oc-question').textContent=s.q;
+    for(let i=0;i<4;i++)document.getElementById('oc-opt-'+i).textContent=s.opts[i];
+  },
+  act(idx){
+    if(this.state.answered||!this.state.playing)return;
+    this.state.answered=true;this.state.total++;const s=this.state.scenario;const correct=idx===s.correct;
+    document.querySelectorAll('.btn-odds').forEach(b=>b.disabled=true);
+    const btns=document.querySelectorAll('.btn-odds');btns[idx].classList.add(correct?'selected':'wrong');
+    if(!correct)btns[s.correct].classList.add('selected');
+    const rb=document.getElementById('oc-result');rb.className='result-box show';const labels=['A','B','C','D'];
+    if(correct){
+      this.state.score+=10;this.state.streak++;this.state.correct++;
+      if(this.state.streak>this.state.maxStreak)this.state.maxStreak=this.state.streak;
+      let bonus='';if(this.state.streak>=3){const b=this.state.streak*2;this.state.score+=b;bonus=' \u{1F525} '+this.state.streak+'连对+'+b+'分！';}
+      rb.classList.add('correct');document.getElementById('oc-result-icon').textContent='✅';
+      document.getElementById('oc-result-text').textContent='正确！答案'+labels[s.correct]+bonus;
+      document.getElementById('oc-result-detail').textContent=s.explain;
+      document.getElementById('oc-fish-speech').textContent='算对了！';document.getElementById('oc-shark-speech').textContent='数学不错嘛';
+      document.getElementById('oc-fish').classList.add('bounce');setTimeout(()=>document.getElementById('oc-fish').classList.remove('bounce'),500);
+    }else{
+      this.state.lives--;this.state.streak=0;
+      rb.classList.add('wrong');document.getElementById('oc-result-icon').textContent='❌';
+      document.getElementById('oc-result-text').textContent='不对！正确答案是'+labels[s.correct];
+      document.getElementById('oc-result-detail').textContent=s.explain;
+      document.getElementById('oc-fish-speech').textContent='啊？算错了...';document.getElementById('oc-shark-speech').textContent='哈哈，再算算？';
+      document.getElementById('oc-fish').classList.add('shake');setTimeout(()=>document.getElementById('oc-fish').classList.remove('shake'),500);
+    }
+    document.getElementById('oc-score').textContent=this.state.score;document.getElementById('oc-lives').textContent=this.state.lives;
+    document.getElementById('oc-next-btn').textContent=(this.state.round>=10||this.state.lives<=0)?'查看结果 →':'下一回合 →';
+  },
+  next(){if(this.state.lives<=0||this.state.round>=10)this.gameOver();else this.nextRound();},
+  gameOver(){
+    this.state.playing=false;document.getElementById('oc-game').style.display='none';document.getElementById('oc-gameover').style.display='block';
+    const pct=this.state.total>0?(this.state.correct/this.state.total*100):0;const ws=this.state.score+(pct>=80?20:pct>=60?10:0);
+    let r='小鸡';for(const[n,d]of Object.entries(RANK_TIERS)){if(ws>=d.score)r=n;}const rd=RANK_TIERS[r];
+    document.getElementById('oc-go-rank').textContent=rd.icon;document.getElementById('oc-go-title').textContent=r+'（数学段位）';document.getElementById('oc-go-desc').textContent=rd.desc;
+    document.getElementById('oc-go-score').textContent=this.state.score;document.getElementById('oc-go-correct').textContent=this.state.correct+'/'+this.state.total+' ('+Math.round(pct)+'%)';document.getElementById('oc-go-streak').textContent=this.state.maxStreak;
+    const rEl=document.getElementById('oc-revive');if(rEl)rEl.style.display=this.state.lives<=0?'block':'none';
+    const re=document.getElementById('oc-restart-btn');if(re)re.style.display=this.state.lives<=0?'none':'';
+    saveHighScore('oc',this.state.score);saveTotalScore(this.state.score);
+    const ms=parseInt(localStorage.getItem('poker_max_streak')||'0');
+    if(this.state.maxStreak>ms)localStorage.setItem('poker_max_streak',String(this.state.maxStreak));
+    checkBadges(collectBadgeStats());trackDailyGame();
+    (function(ctx,rd){
+      if(!document.getElementById('oc-share-btn')){
+        const sb=document.createElement('button');sb.id='oc-share-btn';sb.className='btn-next';sb.style.cssText='margin:8px auto 0;background:rgba(68,160,255,0.15);color:#44a0ff;border-color:rgba(68,160,255,0.2)';
+        sb.textContent='📸 分享成绩';sb.onclick=function(){shareScore('赔率速算',ctx.state.score,rd.name,rd.icon,'正确率 '+Math.round(ctx.state.correct/ctx.state.total*100)+'%')};
+        document.querySelector('#oc-gameover .btn-next')?.before(sb);
+      }
+    })(this,rd);
+  },
+};
+
+/* ==============================
+   MIND READ — GAME DATA
+   ============================== */
+const MIND_SCENARIOS = [
+  {board:'K♠ 7♥ 2♦',action:'翻前加注，翻牌下注',opts:['顶对','中对','底对','空气'],correct:0,explain:'翻前加注翻牌c-bet，K高翻牌，顶对K最合理。'},
+  {board:'A♠ Q♥ 9♠',action:'翻前溜入，翻牌check-raise',opts:['顶对','两对','听花','空气'],correct:1,explain:'翻前溜入翻牌check-raise，最可能是两对（A9）。'},
+  {board:'J♠ 10♥ 9♠',action:'翻前加注，翻牌下注',opts:['顶对J','超对','顺子','听顺'],correct:2,explain:'JTx湿润翻牌，最可能是已成的顺子（KQ或87）。'},
+  {board:'A♦ A♣ 7♠',action:'翻前加注，翻牌过牌跟注',opts:['三条A','顶对A','对7','空气'],correct:3,explain:'翻前加注翻牌过牌跟注示弱，最有可能是没中的高张。'},
+  {board:'K♥ Q♥ 10♠',action:'翻前3bet，翻牌下注',opts:['顶对','超对','听顺','三条'],correct:1,explain:'翻前3bet范围极强，超对AA最自然。'},
+  {board:'9♠ 8♠ 3♣',action:'翻前溜入，翻牌反加',opts:['顶对9','两对','同花听牌','顺子听牌'],correct:2,explain:'同花听牌是常见的半诈唬牌型。'},
+  {board:'A♥ K♠ 7♦',action:'翻前加注，翻牌过牌',opts:['顶对A','顶对K','底对','空气'],correct:3,explain:'翻前加注翻牌过牌示弱，A高牌面没中。'},
+  {board:'Q♠ J♥ 10♣ 9♠',action:'翻前溜入，翻牌过牌，转牌下注',opts:['顺子','两对','顶对','听牌'],correct:0,explain:'转牌成顺面，翻前溜入转牌下注，意味着已经成顺。'},
+  {board:'8♣ 7♣ 3♣ 2♠',action:'翻前加注，翻牌下注，转牌再下注',opts:['同花','顶对','超对','空气'],correct:2,explain:'超对是标准价值牌（99-JJ等）。'},
+  {board:'A♠ K♠ 10♥',action:'翻前加注，翻牌下注，面对加注全压',opts:['顶对A','顶对K','顺子','听花+卡顺'],correct:3,explain:'听花+卡顺是强听牌半诈唬的典型牌型。'},
+  {board:'6♠ 6♥ 6♣',action:'翻前溜入，翻牌反加',opts:['明三条','顶对','对子','空气'],correct:0,explain:'翻前溜入翻牌反加，明三条最合理。'},
+  {board:'A♠ J♠ 7♦ 4♠ 2♣',action:'翻前加注，翻牌下注，转牌过牌，河牌下注',opts:['同花','顶对','对A','空气'],correct:0,explain:'河牌三张♠，同花是合理的价值下注。'},
+  {board:'7♠ 8♠ 9♦',action:'翻前加注被跟注，翻牌过牌跟注',opts:['顺子','听顺','顶对','超对'],correct:1,explain:'翻前加注翻牌过牌跟注，最可能是听顺牌型。'},
+  {board:'Q♥ 10♠ 4♣',action:'翻前溜入，翻牌下注转牌下注',opts:['顶对Q','顶对10','两对','空气'],correct:0,explain:'翻前溜入翻牌转牌连续下注，顶对Q合理。'},
+  {board:'3♣ 4♣ 5♠',action:'翻前跟注3bet，翻牌下注',opts:['顺子','超对','顶对','听花'],correct:1,explain:'翻前跟注3bet范围紧，超对（JJ/QQ）最合理。'},
+  {board:'K♠ 10♥ 7♠ 4♠',action:'翻前加注，翻牌过牌跟注，转牌反加',opts:['同花','顶对K','顶对10','听花'],correct:0,explain:'转牌到♠，转牌反加通常意味着已成的同花。'},
+  {board:'A♥ 9♠ 5♦ 10♠ 4♥',action:'翻前溜入，翻牌过牌，转牌下注，河牌下注',opts:['顶对','两对','顺子','三条'],correct:1,explain:'翻前溜入翻牌过牌后连续下注两条街，翻了很大牌。'},
+  {board:'A♠ 7♥ 2♠ 8♠',action:'翻前加注，翻牌下注，转牌下注',opts:['顶对A','同花','两对','三条'],correct:0,explain:'翻前加注翻牌转牌持续下注，顶对A最常见。'},
+  {board:'K♦ Q♥ J♠',action:'翻前加注被3bet，跟注，翻牌过牌加注',opts:['顺子','顶对','超对','空气'],correct:0,explain:'翻前跟注3bet翻牌过牌加注，过牌加注最可能是顺子。'},
+  {board:'8♠ 6♠ 5♥ 4♣',action:'翻前溜入，翻牌跟注，转牌加注',opts:['顺子','顶对','两对','听牌'],correct:0,explain:'转牌成顺面，翻前溜入转牌加注，顺子最合理。'},
+  {board:'A♠ K♠ 2♣',action:'翻前溜入，翻牌下注',opts:['顶对A','顶对K','底对','听花'],correct:0,explain:'翻前溜入翻牌下注，顶对A最常见。'},
+  {board:'9♣ 8♣ 7♠',action:'翻前加注，翻牌下注',opts:['超对','顶对9','顺子','同花听牌'],correct:2,explain:'987湿润面，顺子已成。'},
+  {board:'A♥ 9♥ 5♠',action:'翻前3bet，翻牌下注',opts:['顶对A','超对','同花听牌','空气'],correct:1,explain:'3bet范围紧，超对最合理。'},
+  {board:'K♠ 6♠ 6♥',action:'翻前溜入，翻牌反加',opts:['明三条6','顶对K','中对6','同花听牌'],correct:0,explain:'翻前溜入翻牌反加，中了三条。'},
+  {board:'Q♠ 5♠ 4♥',action:'翻前加注，翻牌过牌跟注',opts:['顶对Q','同花听牌','中对','空气'],correct:3,explain:'翻前加注翻牌过牌跟注，没中牌的高张。'},
+  {board:'J♠ 8♠ 2♣',action:'翻前跟注3bet，翻牌过牌加注',opts:['顶对J','同花听牌','三条','超对'],correct:1,explain:'同花听牌是常见半诈唬牌。'},
+  {board:'A♣ 8♣ 8♠',action:'翻前溜入，翻牌下注',opts:['顶对A','明三条8','对8','听花'],correct:1,explain:'翻前溜入翻牌下注，三条8最合理。'},
+  {board:'K♥ J♥ 10♠',action:'翻前加注，翻牌过牌加注',opts:['顺子','超对','顶对K','听顺'],correct:0,explain:'KJ10面顺子已成。'},
+  {board:'10♠ 9♠ 5♦',action:'翻前溜入，翻牌下注转牌下注',opts:['顶对10','两对','听顺','同花听牌'],correct:1,explain:'连续下注两街，两对牌力够强。'},
+  {board:'A♠ Q♠ 10♥ 7♠',action:'翻前加注，翻牌下注，转牌下注',opts:['顶对A','同花','两对','顶对Q'],correct:0,explain:'翻前加注者连续下注，顶对A最常见。'},
+  {board:'6♠ 5♠ 4♥',action:'翻前溜入，翻牌反加',opts:['顺子','顶对6','两对','同花听牌'],correct:0,explain:'溜入者翻牌反加，最可能已成顺子。'},
+  {board:'K♣ Q♥ 7♣ 3♠',action:'翻前加注，翻牌下注转牌过牌',opts:['顶对K','顶对Q','听花','空气'],correct:3,explain:'翻前加注翻牌下注转牌过牌，示弱牌。'},
+  {board:'J♣ 10♣ 9♣',action:'翻前加注被跟注，翻牌过牌跟注',opts:['同花','顺子','超对','顶对J'],correct:2,explain:'翻前加注翻牌过牌跟注，超对在湿润面慢打。'},
+  {board:'A♥ 6♥ 3♠ 2♦',action:'翻前溜入，翻牌过牌，转牌下注',opts:['顶对A','底对','顺子','听顺'],correct:0,explain:'转牌下注最可能是顶对A。'},
+  {board:'K♠ J♠ 7♦ 2♠ 10♣',action:'翻前加注，翻牌下注转牌下注河牌下注',opts:['同花','顶对K','顺子','两对'],correct:1,explain:'翻前加注连下三条街，顶对K标准价值。'},
+  {board:'9♦ 8♥ 7♦',action:'翻前加注，翻牌过牌',opts:['顶对9','顺子听牌','超对','空气'],correct:3,explain:'翻前加注翻牌过牌示弱，没中牌。'},
+  {board:'A♠ 2♠ 2♥',action:'翻前溜入，翻牌反加',opts:['明三条2','顶对A','对2','同花听牌'],correct:0,explain:'翻前溜入翻牌反加，三条2。'},
+  {board:'Q♠ 8♠ 5♣',action:'翻前加注，翻牌下注被跟注，转牌过牌',opts:['顶对Q','同花听牌','中对','空气'],correct:3,explain:'翻前加注翻牌c-bet被跟注转牌过牌，A高。'},
+  {board:'10♥ 8♠ 7♣ 5♦',action:'翻前跟注3bet，翻牌过牌，转牌下注',opts:['顺子','超对','顶对10','两对'],correct:0,explain:'跟注3bet后转牌下注，顺子最合理。'},
+  {board:'K♠ 9♠ 3♦',action:'翻前加注，翻牌下注',opts:['顶对K','超对','同花听牌','空气'],correct:0,explain:'翻前加注翻牌c-bet，顶对K最常见。'},
+  {board:'A♦ 10♣ 10♠ 6♠',action:'翻前溜入，翻牌过牌，转牌加注',opts:['明三条10','顶对A','两对','听花'],correct:0,explain:'翻前溜入转牌加注，三条10最合理。'},
+  {board:'K♣ Q♣ J♠ 9♠',action:'翻前加注，翻牌下注，转牌下注',opts:['顺子','顶对K','超对','听顺'],correct:0,explain:'KQJ9面顺子已成，连续下注顺子价值。'},
+  {board:'7♠ 6♥ 4♣',action:'翻前溜入，翻牌下注',opts:['顶对7','两对','顺子听牌','空气'],correct:0,explain:'翻前溜入翻牌下注，顶对7合理。'},
+  {board:'A♠ 5♠ 5♥ 2♣',action:'翻前加注，翻牌下注，转牌下注',opts:['顶对A','明三条5','两对','同花听牌'],correct:0,explain:'翻前加注者连下两注，顶对A价值。'},
+  {board:'J♠ 9♠ 3♥',action:'翻前加注被3bet，跟注，翻牌过牌跟注',opts:['顶对J','听花','超对','空气'],correct:1,explain:'跟注3bet翻牌过牌跟注，听花合理。'},
+  {board:'Q♣ 9♣ 5♠ 4♣',action:'翻前溜入，翻牌跟注，转牌加注',opts:['顶对Q','同花','两对','听花'],correct:1,explain:'转牌到♣，加注意味同花已成。'},
+  {board:'K♦ 7♣ 7♥ 3♠ 5♣',action:'翻前加注，翻牌下注，转牌过牌，河牌下注',opts:['顶对K','三条7','两对','顶对7'],correct:0,explain:'翻前加注河牌下注，顶对K价值。'},
+  {board:'A♠ 3♠ 3♣',action:'翻前溜入，翻牌反加全压',opts:['三条3','顶对A','对3','空气'],correct:0,explain:'翻前溜入翻牌全压，三条3无疑。'},
+  {board:'K♠ Q♠ 7♦ 6♠',action:'翻前加注，翻牌过牌，转牌下注',opts:['顶对K','同花','听花+卡顺','超对'],correct:2,explain:'转牌到♠，听花+卡顺是半诈唬牌型。'},
+  {board:'10♠ 9♠ 6♥ 5♣',action:'翻前溜入，翻牌下注转牌下注',opts:['顺子','顶对10','两对','听牌'],correct:0,explain:'T965面翻前溜入连下两注，顺子。'},
+  {board:'A♠ Q♠ 7♦ 2♥',action:'翻前加注，翻牌下注，转牌过牌跟注',opts:['顶对A','顶对Q','同花听牌','KQ'],correct:0,explain:'翻前加注翻牌c-bet转牌过牌跟注，顶对A。'},
+  {board:'9♠ 7♥ 5♦ 3♠',action:'翻前溜入，翻牌跟注，转牌加注',opts:['顺子','顶对9','两对','听花'],correct:0,explain:'转牌成顺面，加注最可能是顺子。'},
+  {board:'K♠ 2♠ 2♦',action:'翻前加注，翻牌下注被跟注，转牌过牌',opts:['顶对K','三条2','对2','空气'],correct:3,explain:'翻前加注翻牌c-bet被跟注转牌过牌，AK。'},
+  {board:'A♣ Q♣ J♠ 10♣ 9♣',action:'翻前加注，每条街都下注',opts:['同花','顺子','顶对A','两对'],correct:0,explain:'河牌到♣，翻前加注连下四条街，同花。'},
+  {board:'J♠ 6♠ 5♣',action:'翻前跟注3bet，翻牌过牌加注',opts:['顶对J','听花+卡顺','超对','同花听牌'],correct:1,explain:'跟注3bet后翻牌过牌加注，听花+卡顺半诈唬。'},
+  {board:'Q♠ 9♠ 8♥ 4♠',action:'翻前溜入，翻牌过牌，转牌下注',opts:['顶对Q','同花','顺子','听花'],correct:1,explain:'转牌到♠，下注意味着同花。'},
+  {board:'A♠ 8♠ 5♦ 3♠',action:'翻前加注，翻牌下注，转牌再下注',opts:['顶对A','同花','两对','听花'],correct:0,explain:'翻前加注连下两注，顶对A标准价值。'},
+  {board:'K♠ 10♠ 5♥ 8♥',action:'翻前溜入，翻牌过牌跟注，转牌反加',opts:['顶对K','同花','两对','听花'],correct:2,explain:'转牌反加最可能是成两对。'},
+  {board:'7♠ 6♥ 5♠ 4♣ 3♥',action:'翻前加注，翻牌下注转牌下注河牌下注',opts:['顺子','顶对7','超对','同花'],correct:0,explain:'公共牌已成顺子面，连下三注。'},
+  {board:'A♠ 10♠ 5♠ 2♣',action:'翻前加注，翻牌下注转牌过牌',opts:['顶对A','同花','两对','空气'],correct:0,explain:'翻前加注翻牌c-bet转牌过牌，顶对A。'},
+  {board:'K♠ 9♠ 5♦ 7♣',action:'翻前溜入，翻牌下注转牌下注',opts:['顶对K','两对','顶对9','听牌'],correct:1,explain:'连下两注，两对合理。'},
+  {board:'Q♠ J♠ 9♠ 4♥',action:'翻前加注，翻牌下注转牌再下注',opts:['同花','顶对Q','顺子','超对'],correct:0,explain:'三张♠面，翻前加注者中同花了。'},
+  {board:'9♠ 5♥ 4♠ 3♥',action:'翻前溜入，翻牌跟注，转牌加注',opts:['顶对9','两对','顺子','听花'],correct:2,explain:'转牌成顺面，加注是顺子。'},
+  {board:'A♠ J♠ 6♣',action:'翻前加注，翻牌过牌跟注',opts:['顶对A','同花听牌','顶对J','空气'],correct:1,explain:'翻前加注翻牌过牌跟注，同花听牌合理。'},
+  {board:'8♠ 7♠ 3♣ 5♥',action:'翻前溜入，翻牌过牌跟注，转牌下注',opts:['顺子','顶对8','两对','听牌'],correct:0,explain:'转牌成顺面，下注意味着顺子已成。'},
+  {board:'10♠ 5♠ 4♥ 5♣',action:'翻前加注，翻牌下注转牌过牌跟注',opts:['顶对10','三条5','两对','同花听牌'],correct:0,explain:'翻前加注翻牌c-bet转牌过牌跟注，顶对10。'},
+  {board:'K♠ 7♠ 5♣ 9♥ 3♠',action:'翻前加注，翻牌过牌，转牌过牌，河牌下注',opts:['同花','顶对K','超对','K高'],correct:0,explain:'河牌到♠，下注意味着同花。'},
+  {board:'A♠ J♠ 10♥ 9♦',action:'翻前跟注3bet，翻牌过牌加注',opts:['顶对A','顺子','同花听牌','超对'],correct:1,explain:'跟注3bet翻牌过牌加注，顺子最合理。'}
+];
+
+const mindRead = {
+  state:{playing:false,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null,usedScenarios:[]},
+  start(){
+    this.state={playing:true,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null,usedScenarios:[]};
+    document.getElementById('mr-start').style.display='none';document.getElementById('mr-game').style.display='block';document.getElementById('mr-gameover').style.display='none';this.nextRound();
+  },
+  nextRound(){
+    if(this.state.lives<=0||this.state.round>=10){this.gameOver();return}
+    this.state.round++;this.state.answered=false;
+    document.getElementById('mr-round').textContent=this.state.round+'/10';document.getElementById('mr-lives').textContent=this.state.lives;
+    document.getElementById('mr-result').className='result-box';document.querySelectorAll('#mr-actions .btn-odds').forEach(b=>{b.disabled=false;b.classList.remove('selected','wrong')});
+    document.getElementById('mr-fish-speech').textContent='让我看穿你的心思！';document.getElementById('mr-shark-speech').textContent='你猜不到我在想什么...';
+    let available=MIND_SCENARIOS.filter((_,i)=>!this.state.usedScenarios.includes(i));
+    if(available.length===0)this.state.usedScenarios=[];available=MIND_SCENARIOS.filter((_,i)=>!this.state.usedScenarios.includes(i));
+    const idx=Math.floor(Math.random()*available.length);const s=available[idx];
+    this.state.usedScenarios.push(MIND_SCENARIOS.indexOf(s));this.state.scenario=s;
+    const cards=s.board.split(' ');
+    document.getElementById('mr-board').innerHTML=cards.map(c=>{const suit=c.slice(-1);const rank=c.slice(0,-1);const isRed=(suit==='♥'||suit==='♦');return '<div class="card '+(isRed?'red':'black')+'"><div class="cr">'+rank+'</div><div class="cs">'+suit+'</div></div>';}).join('');
+    document.getElementById('mr-action-line').textContent='▸ '+s.action;document.getElementById('mr-question').innerHTML='<strong>这个对手有什么牌？</strong>';
+    for(let i=0;i<4;i++)document.getElementById('mr-opt-'+i).textContent=s.opts[i];
+  },
+  act(idx){
+    if(this.state.answered||!this.state.playing)return;
+    this.state.answered=true;this.state.total++;const s=this.state.scenario;const correct=idx===s.correct;
+    document.querySelectorAll('#mr-actions .btn-odds').forEach(b=>b.disabled=true);
+    const btns=document.querySelectorAll('#mr-actions .btn-odds');btns[idx].classList.add(correct?'selected':'wrong');
+    if(!correct)btns[s.correct].classList.add('selected');
+    const rb=document.getElementById('mr-result');rb.className='result-box show';const labels=['A','B','C','D'];
+    if(correct){
+      this.state.score+=10;this.state.streak++;this.state.correct++;
+      if(this.state.streak>this.state.maxStreak)this.state.maxStreak=this.state.streak;
+      let bonus='';if(this.state.streak>=3){const b=this.state.streak*2;this.state.score+=b;bonus=' 🔥 '+this.state.streak+'连对+'+b+'分！';}
+      rb.classList.add('correct');document.getElementById('mr-result-icon').textContent='✅';
+      document.getElementById('mr-result-text').textContent='正确！答案'+labels[s.correct]+bonus;document.getElementById('mr-result-detail').textContent=s.explain;
+      document.getElementById('mr-fish-speech').textContent='哈哈，被我看穿了！';
+      document.getElementById('mr-fish').classList.add('bounce');setTimeout(()=>document.getElementById('mr-fish').classList.remove('bounce'),500);
+    }else{
+      this.state.lives--;this.state.streak=0;
+      rb.classList.add('wrong');document.getElementById('mr-result-icon').textContent='❌';
+      document.getElementById('mr-result-text').textContent='不对！正确答案是'+labels[s.correct];document.getElementById('mr-result-detail').textContent=s.explain;
+      document.getElementById('mr-fish-speech').textContent='呃…看走眼了';
+      document.getElementById('mr-fish').classList.add('shake');setTimeout(()=>document.getElementById('mr-fish').classList.remove('shake'),500);
+    }
+    document.getElementById('mr-score').textContent=this.state.score;document.getElementById('mr-lives').textContent=this.state.lives;
+    document.getElementById('mr-next-btn').textContent=(this.state.round>=10||this.state.lives<=0)?'查看结果 →':'下一回合 →';
+  },
+  next(){if(this.state.lives<=0||this.state.round>=10)this.gameOver();else this.nextRound();},
+  gameOver(){
+    this.state.playing=false;document.getElementById('mr-game').style.display='none';document.getElementById('mr-gameover').style.display='block';
+    const pct=this.state.total>0?(this.state.correct/this.state.total*100):0;const ws=this.state.score+(pct>=80?20:pct>=60?10:0);
+    let r='小鸡';for(const[n,d]of Object.entries(RANK_TIERS)){if(ws>=d.score)r=n;}const rd=RANK_TIERS[r];
+    document.getElementById('mr-go-rank').textContent=rd.icon;document.getElementById('mr-go-title').textContent=r+'（读心段位）';document.getElementById('mr-go-desc').textContent=rd.desc;
+    document.getElementById('mr-go-score').textContent=this.state.score;document.getElementById('mr-go-correct').textContent=this.state.correct+'/'+this.state.total+' ('+Math.round(pct)+'%)';document.getElementById('mr-go-streak').textContent=this.state.maxStreak;
+    const rEl=document.getElementById('mr-revive');if(rEl)rEl.style.display=this.state.lives<=0?'block':'none';
+    const re=document.getElementById('mr-restart-btn');if(re)re.style.display=this.state.lives<=0?'none':'';
+    saveHighScore('mr',this.state.score);saveTotalScore(this.state.score);
+    const ms=parseInt(localStorage.getItem('poker_max_streak')||'0');
+    if(this.state.maxStreak>ms)localStorage.setItem('poker_max_streak',String(this.state.maxStreak));
+    checkBadges(collectBadgeStats());trackDailyGame();
+    (function(ctx,rd){
+      if(!document.getElementById('mr-share-btn')){
+        const sb=document.createElement('button');sb.id='mr-share-btn';sb.className='btn-next';sb.style.cssText='margin:8px auto 0;background:rgba(68,160,255,0.15);color:#44a0ff;border-color:rgba(68,160,255,0.2)';
+        sb.textContent='📸 分享成绩';sb.onclick=function(){shareScore('读心术',ctx.state.score,rd.name,rd.icon,'正确率 '+Math.round(ctx.state.correct/ctx.state.total*100)+'%')};
+        document.querySelector('#mr-gameover .btn-next')?.before(sb);
+      }
+    })(this,rd);
+  },
+};
+
+/* ==============================
+   ALL-IN PUSH — GAME DATA
+   ============================== */
+const PUSH_SCENARIOS = [
+  {hand:['A','♠'],hand2:['8','♥'],pos:'BTN',stack:8,correct:true,explain:'BTN位8BB推A8o是标准操作。'},
+  {hand:['7','♠'],hand2:['2','♥'],pos:'BTN',stack:10,correct:false,explain:'72o是最烂起手牌。'},
+  {hand:['K','♠'],hand2:['9','♠'],pos:'BTN',stack:9,correct:true,explain:'BTN位9BB推K9s标准操作。'},
+  {hand:['A','♥'],hand2:['10','♠'],pos:'CO',stack:12,correct:true,explain:'CO位12BB推ATo是标准+EV。'},
+  {hand:['8','♠'],hand2:['5','♦'],pos:'CO',stack:10,correct:false,explain:'CO位10BB推85o太弱。'},
+  {hand:['J','♠'],hand2:['10','♠'],pos:'SB',stack:7,correct:true,explain:'SB位7BB推JTs是标准。'},
+  {hand:['7','♠'],hand2:['4','♥'],pos:'SB',stack:8,correct:false,explain:'SB位8BB推74o太弱。'},
+  {hand:['Q','♠'],hand2:['7','♠'],pos:'BTN',stack:6,correct:true,explain:'BTN位6BB推Q7s足够全压。'},
+  {hand:['A','♠'],hand2:['5','♥'],pos:'UTG',stack:10,correct:false,explain:'UTG位10BB推A5o太松。'},
+  {hand:['9','♠'],hand2:['9','♥'],pos:'CO',stack:14,correct:true,explain:'CO位14BB推99是标准操作。'},
+  {hand:['A','♠'],hand2:['Q','♠'],pos:'MP',stack:12,correct:true,explain:'MP位12BB推AQs是标准+EV。'},
+  {hand:['6','♠'],hand2:['4','♠'],pos:'BTN',stack:9,correct:false,explain:'BTN位9BB推64s胜率不足。'},
+  {hand:['K','♠'],hand2:['2','♠'],pos:'BTN',stack:7,correct:true,explain:'BTN位7BB推K2s是标准。'},
+  {hand:['Q','♠'],hand2:['6','♦'],pos:'SB',stack:6,correct:true,explain:'SB位6BB推Q6o合理。'},
+  {hand:['J','♠'],hand2:['8','♠'],pos:'CO',stack:15,correct:false,explain:'CO位15BB推J8s太松。'},
+  {hand:['A','♠'],hand2:['2','♠'],pos:'BTN',stack:8,correct:true,explain:'BTN位8BB推A2s是标准。'},
+  {hand:['5','♠'],hand2:['5','♥'],pos:'UTG',stack:9,correct:false,explain:'UTG位9BB推55太弱。'},
+  {hand:['9','♠'],hand2:['3','♦'],pos:'BTN',stack:12,correct:false,explain:'BTN位12BB推93o不在推范围内。'},
+  {hand:['7','♠'],hand2:['6','♠'],pos:'BTN',stack:8,correct:true,explain:'BTN位8BB推76s是标准。'},
+  {hand:['A','♠'],hand2:['J','♠'],pos:'UTG',stack:15,correct:false,explain:'UTG位15BB不应该推AJs。'},
+  {hand:['A','♠'],hand2:['5','♥'],pos:'BTN',stack:8,correct:true,explain:'BTN位8BB推A5s标准操作。'},
+  {hand:['K','♠'],hand2:['10','♥'],pos:'CO',stack:10,correct:true,explain:'CO位10BB推KTo标准。'},
+  {hand:['7','♠'],hand2:['7','♥'],pos:'UTG',stack:9,correct:true,explain:'UTG位9BB推77是标准+EV。'},
+  {hand:['Q','♠'],hand2:['J','♦'],pos:'MP',stack:11,correct:false,explain:'MP位11BB推QJo太松。'},
+  {hand:['J','♠'],hand2:['9','♠'],pos:'SB',stack:8,correct:true,explain:'SB位8BB推J9s标准。'},
+  {hand:['A','♠'],hand2:['4','♦'],pos:'CO',stack:12,correct:true,explain:'CO位12BB推A4o是标准。'},
+  {hand:['K','♠'],hand2:['8','♦'],pos:'BTN',stack:7,correct:true,explain:'BTN位7BB推K8o标准。'},
+  {hand:['10','♠'],hand2:['9','♠'],pos:'MP',stack:10,correct:false,explain:'MP位10BB推T9s太松。'},
+  {hand:['8','♠'],hand2:['8','♥'],pos:'SB',stack:6,correct:true,explain:'SB位6BB推88标准。'},
+  {hand:['A','♠'],hand2:['K','♠'],pos:'UTG',stack:15,correct:true,explain:'UTG位15BB推AKs毫无疑问。'},
+  {hand:['Q','♠'],hand2:['10','♦'],pos:'BTN',stack:14,correct:false,explain:'BTN位14BB推QTo太松。'},
+  {hand:['K','♠'],hand2:['Q','♠'],pos:'SB',stack:8,correct:true,explain:'SB位8BB推KQs标准。'},
+  {hand:['A','♠'],hand2:['2','♠'],pos:'MP',stack:7,correct:true,explain:'MP位7BB推A2s标准。'},
+  {hand:['J','♠'],hand2:['10','♦'],pos:'UTG',stack:6,correct:true,explain:'UTG位6BB推JTo是标准。'},
+  {hand:['9','♠'],hand2:['8','♠'],pos:'BTN',stack:5,correct:true,explain:'BTN位5BB推98s标准。'},
+  {hand:['K','♠'],hand2:['J','♥'],pos:'MP',stack:15,correct:false,explain:'MP位15BB推KJo太松。'},
+  {hand:['Q','♠'],hand2:['9','♠'],pos:'CO',stack:8,correct:true,explain:'CO位8BB推Q9s标准。'},
+  {hand:['10','♠'],hand2:['8','♠'],pos:'SB',stack:7,correct:true,explain:'SB位7BB推T8s合理。'},
+  {hand:['A','♠'],hand2:['6','♦'],pos:'UTG',stack:9,correct:false,explain:'UTG位9BB推A6o太弱。'},
+  {hand:['K','♠'],hand2:['5','♠'],pos:'BTN',stack:6,correct:true,explain:'BTN位6BB推K5s标准。'},
+  {hand:['7','♠'],hand2:['6','♠'],pos:'BB',stack:4,correct:true,explain:'BB位4BB推76s对抗偷盲标准。'},
+  {hand:['Q','♠'],hand2:['8','♠'],pos:'CO',stack:9,correct:false,explain:'CO位9BB推Q8s太松。'},
+  {hand:['J','♠'],hand2:['J','♥'],pos:'SB',stack:12,correct:true,explain:'SB位12BB推JJ毫无疑问。'},
+  {hand:['A','♠'],hand2:['9','♠'],pos:'BTN',stack:10,correct:true,explain:'BTN位10BB推A9s标准。'},
+  {hand:['K','♠'],hand2:['6','♠'],pos:'SB',stack:7,correct:true,explain:'SB位7BB推K6s合理。'},
+  {hand:['8','♠'],hand2:['5','♠'],pos:'BTN',stack:8,correct:false,explain:'BTN位8BB推85s胜率不足。'},
+  {hand:['A','♠'],hand2:['10','♥'],pos:'MP',stack:12,correct:true,explain:'MP位12BB推ATo标准。'},
+  {hand:['Q','♠'],hand2:['Q','♥'],pos:'CO',stack:20,correct:true,explain:'任何位置任何筹码深度QQ都值得全压。'},
+  {hand:['6','♠'],hand2:['6','♥'],pos:'BTN',stack:12,correct:false,explain:'BTN位12BB推66太松。'},
+  {hand:['K','♠'],hand2:['10','♠'],pos:'CO',stack:7,correct:true,explain:'CO位7BB推KTs标准。'},
+  {hand:['A','♠'],hand2:['K','♦'],pos:'SB',stack:20,correct:true,explain:'SB位20BB推AKs标准。'},
+  {hand:['J','♠'],hand2:['8','♦'],pos:'BTN',stack:7,correct:false,explain:'BTN位7BB推J8o不在范围内。'},
+  {hand:['Q','♠'],hand2:['J','♠'],pos:'UTG',stack:5,correct:true,explain:'UTG位5BB推QJs是标准。'},
+  {hand:['K','♠'],hand2:['9','♦'],pos:'MP',stack:8,correct:true,explain:'MP位8BB推K9o标准。'},
+  {hand:['10','♠'],hand2:['10','♥'],pos:'CO',stack:15,correct:true,explain:'CO位15BB推TT标准。'},
+  {hand:['A','♠'],hand2:['7','♦'],pos:'BTN',stack:9,correct:true,explain:'BTN位9BB推A7o标准。'},
+  {hand:['5','♠'],hand2:['5','♥'],pos:'SB',stack:9,correct:true,explain:'SB位9BB推55标准。'},
+  {hand:['K','♠'],hand2:['Q','♦'],pos:'BB',stack:3,correct:true,explain:'BB位3BB面对偷盲推KQo价值足够。'},
+  {hand:['9','♠'],hand2:['6','♦'],pos:'CO',stack:7,correct:false,explain:'CO位7BB推96o太弱。'},
+  {hand:['A','♠'],hand2:['5','♠'],pos:'UTG',stack:7,correct:true,explain:'UTG位7BB推A5s标准。'},
+  {hand:['J','♠'],hand2:['9','♦'],pos:'MP',stack:6,correct:true,explain:'MP位6BB推J9o合理。'},
+  {hand:['Q','♠'],hand2:['7','♦'],pos:'SB',stack:6,correct:false,explain:'SB位6BB推Q7o太弱。'},
+  {hand:['K','♠'],hand2:['J','♠'],pos:'BTN',stack:14,correct:false,explain:'BTN位14BB推KJs太松。'},
+  {hand:['8','♠'],hand2:['7','♠'],pos:'CO',stack:6,correct:true,explain:'CO位6BB推87s标准。'},
+  {hand:['A','♠'],hand2:['J','♠'],pos:'SB',stack:15,correct:true,explain:'SB位15BB推AJs标准。'},
+  {hand:['K','♠'],hand2:['4','♦'],pos:'BTN',stack:5,correct:true,explain:'BTN位5BB推K4o足够。'},
+  {hand:['Q','♠'],hand2:['10','♠'],pos:'MP',stack:7,correct:false,explain:'MP位7BB推QTs太松。'},
+  {hand:['8','♠'],hand2:['8','♥'],pos:'CO',stack:12,correct:true,explain:'CO位12BB推88标准。'},
+  {hand:['A','♠'],hand2:['Q','♥'],pos:'BTN',stack:20,correct:false,explain:'BTN位20BB推AQo太激进。'},
+  {hand:['10','♠'],hand2:['7','♠'],pos:'SB',stack:6,correct:false,explain:'SB位6BB推T7s胜率不足。'}
+];
+
+const allinPush = {
+  state:{playing:false,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null,usedScenarios:[]},
+  start(){
+    this.state={playing:true,round:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,total:0,answered:false,scenario:null,usedScenarios:[]};
+    document.getElementById('ap-start').style.display='none';document.getElementById('ap-game').style.display='block';document.getElementById('ap-gameover').style.display='none';this.nextRound();
+  },
+  nextRound(){
+    if(this.state.lives<=0||this.state.round>=10){this.gameOver();return}
+    this.state.round++;this.state.answered=false;
+    document.getElementById('ap-round').textContent=this.state.round+'/10';document.getElementById('ap-lives').textContent=this.state.lives;
+    document.getElementById('ap-result').className='result-box';document.querySelectorAll('#ap-actions .btn-action').forEach(b=>b.disabled=false);
+    document.getElementById('ap-fish-speech').textContent='这把拼了！';document.getElementById('ap-shark-speech').textContent='敢推吗？';
+    let available=PUSH_SCENARIOS.filter((_,i)=>!this.state.usedScenarios.includes(i));
+    if(available.length===0)this.state.usedScenarios=[];available=PUSH_SCENARIOS.filter((_,i)=>!this.state.usedScenarios.includes(i));
+    const idx=Math.floor(Math.random()*available.length);const s=available[idx];
+    this.state.usedScenarios.push(PUSH_SCENARIOS.indexOf(s));this.state.scenario=s;
+    const isRed1=(s.hand[1]==='♥'||s.hand[1]==='♦');const isRed2=(s.hand2[1]==='♥'||s.hand2[1]==='♦');
+    document.getElementById('ap-cards').innerHTML='<div class="card '+(isRed1?'red':'black')+'"><div class="cr">'+s.hand[0]+'</div><div class="cs">'+s.hand[1]+'</div></div><div class="card '+(isRed2?'red':'black')+'"><div class="cr">'+s.hand2[0]+'</div><div class="cs">'+s.hand2[1]+'</div></div>';
+    const blindLevel=Math.min(10+this.state.round*2,50);
+    document.getElementById('ap-blind-label').textContent=' · 盲注:'+blindLevel+'/'+(blindLevel*2);document.getElementById('ap-stack-display').textContent=s.stack+' BB 筹码';document.getElementById('ap-pos-display').textContent='位置：'+s.pos;
+    const posNames={UTG:'枪口位',MP:'中间位',CO:'切菜位',BTN:'按钮位',SB:'小盲'};
+    document.getElementById('ap-question').innerHTML='<strong>'+s.hand[0]+s.hand[1]+' '+s.hand2[0]+s.hand2[1]+'</strong> · '+(posNames[s.pos]||s.pos)+' '+s.stack+'BB，全压还是弃牌？';
+  },
+  act(action){
+    if(this.state.answered||!this.state.playing)return;
+    this.state.answered=true;this.state.total++;const s=this.state.scenario;const correct=action===s.correct;
+    document.querySelectorAll('#ap-actions .btn-action').forEach(b=>b.disabled=true);
+    const rb=document.getElementById('ap-result');rb.className='result-box show';
+    if(correct){
+      this.state.score+=10;this.state.streak++;this.state.correct++;
+      if(this.state.streak>this.state.maxStreak)this.state.maxStreak=this.state.streak;
+      let bonus='';if(this.state.streak>=3){const b=this.state.streak*2;this.state.score+=b;bonus=' 🔥 '+this.state.streak+'连对+'+b+'分！';}
+      rb.classList.add('correct');document.getElementById('ap-result-icon').textContent='✅';
+      document.getElementById('ap-result-text').textContent=(action?'ALL-IN正确！':'弃牌正确！')+bonus;document.getElementById('ap-result-detail').textContent=s.explain;
+      document.getElementById('ap-fish-speech').textContent=action?'哈哈！这把是对的！':'等待更好的机会…';
+      document.getElementById('ap-shark-speech').textContent=action?'切，让你挖到了':'哈哈，就知道你不敢！';
+      document.getElementById('ap-fish').classList.add('bounce');setTimeout(()=>document.getElementById('ap-fish').classList.remove('bounce'),500);
+    }else{
+      this.state.lives--;this.state.streak=0;
+      rb.classList.add('wrong');document.getElementById('ap-result-icon').textContent='❌';
+      document.getElementById('ap-result-text').textContent='不对！'+(action?'这把应该弃牌！':'这把应该ALL-IN！');document.getElementById('ap-result-detail').textContent=s.explain;
+      document.getElementById('ap-fish-speech').textContent='呃…做错决定了';document.getElementById('ap-shark-speech').textContent='哈哈，菜鸟就是菜鸟！';
+      document.getElementById('ap-fish').classList.add('shake');setTimeout(()=>document.getElementById('ap-fish').classList.remove('shake'),500);
+    }
+    document.getElementById('ap-score').textContent=this.state.score;document.getElementById('ap-lives').textContent=this.state.lives;
+    document.getElementById('ap-next-btn').textContent=(this.state.round>=10||this.state.lives<=0)?'查看结果 →':'下一回合 →';
+  },
+  next(){if(this.state.lives<=0||this.state.round>=10)this.gameOver();else this.nextRound();},
+  gameOver(){
+    this.state.playing=false;document.getElementById('ap-game').style.display='none';document.getElementById('ap-gameover').style.display='block';
+    const pct=this.state.total>0?(this.state.correct/this.state.total*100):0;const ws=this.state.score+(pct>=80?20:pct>=60?10:0);
+    let r='小鸡';for(const[n,d]of Object.entries(RANK_TIERS)){if(ws>=d.score)r=n;}const rd=RANK_TIERS[r];
+    document.getElementById('ap-go-rank').textContent=rd.icon;document.getElementById('ap-go-title').textContent=r+'（决策段位）';document.getElementById('ap-go-desc').textContent=rd.desc;
+    document.getElementById('ap-go-score').textContent=this.state.score;document.getElementById('ap-go-correct').textContent=this.state.correct+'/'+this.state.total+' ('+Math.round(pct)+'%)';document.getElementById('ap-go-streak').textContent=this.state.maxStreak;
+    const rEl=document.getElementById('ap-revive');if(rEl)rEl.style.display=this.state.lives<=0?'block':'none';
+    const re=document.getElementById('ap-restart-btn');if(re)re.style.display=this.state.lives<=0?'none':'';
+    saveHighScore('ap',this.state.score);saveTotalScore(this.state.score);
+    const ms=parseInt(localStorage.getItem('poker_max_streak')||'0');
+    if(this.state.maxStreak>ms)localStorage.setItem('poker_max_streak',String(this.state.maxStreak));
+    checkBadges(collectBadgeStats());trackDailyGame();
+    (function(ctx,rd){
+      if(!document.getElementById('ap-share-btn')){
+        const sb=document.createElement('button');sb.id='ap-share-btn';sb.className='btn-next';sb.style.cssText='margin:8px auto 0;background:rgba(68,160,255,0.15);color:#44a0ff;border-color:rgba(68,160,255,0.2)';
+        sb.textContent='📸 分享成绩';sb.onclick=function(){shareScore('全压赌命',ctx.state.score,rd.name,rd.icon,'正确率 '+Math.round(ctx.state.correct/ctx.state.total*100)+'%')};
+        document.querySelector('#ap-gameover .btn-next')?.before(sb);
+      }
+    })(this,rd);
+  },
+};
+
+/* ==============================
+   AI TEXAS HOLDEM BATTLE
+   ============================== */
+const SUITS = ['♠','♥','♦','♣'];
+const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+const RANK_VALUES = {2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,J:11,Q:12,K:13,A:14};
+function createDeck(){const d=[];for(const r of RANKS)for(const s of SUITS)d.push([r,s]);return d}
+function shuffleDeck(d){for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]]}return d}
+function cardStr(c){return c[0]+c[1]}
+function isRed(s){return s==='♥'||s==='♦'}
+function cardHtml(c){return '<div class="card '+(isRed(c[1])?'red':'black')+'"><div class="cr">'+c[0]+'</div><div class="cs">'+c[1]+'</div></div>'}
+function handRank(hand,board){
+  const cards=[...hand,...board];const values=cards.map(c=>RANK_VALUES[c[0]]).sort((a,b)=>b-a);
+  const suits=cards.map(c=>c[1]);const counts={};for(const v of values)counts[v]=(counts[v]||0)+1;
+  const pairs=Object.entries(counts).filter(([_,c])=>c===2).length;
+  const trips=Object.entries(counts).filter(([_,c])=>c===3).length;
+  const quads=Object.entries(counts).filter(([_,c])=>c===4).length;
+  const flushSuits=Object.values(suits.reduce((a,s)=>{a[s]=a[s]||[];a[s].push(s);return a},{}));
+  const isFlush=flushSuits.some(g=>g.length>=5);
+  const straight=straightCheck([...new Set(values)].sort((a,b)=>b-a));
+  if(straight&&isFlush&&values.some(v=>v===14))return {score:10,name:'皇家同花顺'};
+  if(straight&&isFlush)return {score:9,name:'同花顺'};
+  if(quads)return {score:8,name:'四条'};
+  if(trips>=2||(trips&&pairs>=1))return {score:7,name:'葫芦'};
+  if(isFlush)return {score:6,name:'同花'};
+  if(straight)return {score:5,name:'顺子'};
+  if(trips)return {score:4,name:'三条'};
+  if(pairs>=2)return {score:3,name:'两对'};
+  if(pairs===1)return {score:2,name:'一对'};
+  return {score:1,name:'高牌'};
+}
+function straightCheck(values){
+  for(let i=0;i<=values.length-5;i++){if(values[i]-values[i+4]===4)return true}
+  if(values.some(v=>v===14)&&values.some(v=>v===2)&&values.some(v=>v===3)&&values.some(v=>v===4)&&values.some(v=>v===5))return true;
+  return false;
+}
+function aiStrength(hand,board){
+  const r=handRank(hand,board);
+  if(r.score>=8)return 1.0;if(r.score===7)return 0.95;if(r.score===6)return 0.85;
+  if(r.score===5)return 0.75;if(r.score===4)return 0.65;if(r.score===3)return 0.5;
+  if(r.score===2){
+    const pv=RANK_VALUES[hand[0][0]]===RANK_VALUES[hand[1][0]]?RANK_VALUES[hand[0][0]]:Math.max(RANK_VALUES[hand[0][0]],RANK_VALUES[hand[1][0]]);
+    return pv>=12?0.5:pv>=10?0.4:0.3;
+  }
+  return Math.max(RANK_VALUES[hand[0][0]],RANK_VALUES[hand[1][0]])>=14?0.3:0.15;
+}
+const aiBattle = {
+  state:{playing:false,round:0,maxRounds:5,myChips:1000,aiChips:1000,pot:0,myHand:[],aiHand:[],board:[],deck:[],stage:'preflop',roundOver:false,wins:0,
+         myStreetBet:0,aiStreetBet:0,currentBet:0,myActed:false,aiActed:false,sb:5,bb:10},
+  start(){
+    this.state={playing:true,round:0,maxRounds:5,myChips:1000,aiChips:1000,pot:0,myHand:[],aiHand:[],board:[],deck:[],stage:'preflop',roundOver:false,wins:0,
+                myStreetBet:0,aiStreetBet:0,currentBet:0,myActed:false,aiActed:false,sb:5,bb:10};
+    document.getElementById('ai-start').style.display='none';document.getElementById('ai-game').style.display='block';document.getElementById('ai-gameover').style.display='none';
+    this.nextRound();
+  },
+  updateUI(){
+    document.getElementById('ai-chips').textContent=this.state.myChips;
+    document.getElementById('ai-ai-chips').textContent=this.state.aiChips;
+    document.getElementById('ai-my-chips').textContent=this.state.myChips;
+    document.getElementById('ai-pot').textContent=this.state.pot;
+    document.getElementById('ai-round-display').textContent=this.state.round+'/'+this.state.maxRounds;
+    document.getElementById('ai-bet-display').textContent=this.state.currentBet;
+    // Stage label
+    const stageNames={preflop:'翻牌前',flop:'翻牌',turn:'转牌',river:'河牌'};
+    document.getElementById('ai-stage-label').textContent='📌 '+stageNames[this.state.stage];
+    // Position label
+    if(this.state.stage==='preflop'){
+      document.getElementById('ai-position-label').textContent='你:小盲(SB) '+this.state.sb+' | AI:大盲(BB) '+this.state.bb;
+    }else{
+      document.getElementById('ai-position-label').textContent='AI先行动(BB位)';
+    }
+    // Button labels - dynamically change based on situation
+    const callBtn=document.querySelector('#ai-actions .btn-call');
+    const raiseBtn=document.querySelector('#ai-actions .btn-raise');
+    if(this.state.currentBet>0){
+      const toCall=this.state.currentBet-(this.state.stage==='preflop'?this.state.myStreetBet:(this.state.stage==='preflop'?this.state.myStreetBet:0));
+      const mc=this.state.myStreetBet;
+      const actualToCall=Math.max(0,this.state.currentBet-mc);
+      callBtn.textContent=actualToCall>0?'跟注 '+actualToCall:'过牌';
+      const minRaise=Math.min(actualToCall+20,Math.min(200,this.state.myChips));
+      raiseBtn.textContent=this.state.myChips>actualToCall?'加注至 '+Math.min(actualToCall+40,this.state.myChips):'---';
+    }else{
+      callBtn.textContent='过牌';
+      raiseBtn.textContent=this.state.myChips>0?'下注 20':'---';
+    }
+    this.state.lastMsg='';
+  },
+  logMsg(msg,cls){
+    this.state.lastMsg=msg;
+    document.getElementById('ai-result-text').textContent=msg;
+    document.getElementById('ai-result').className='result-box show'+(cls?' '+cls:'');
+  },
+  setButtons(disabled){
+    document.querySelectorAll('#ai-actions .btn-action').forEach(b=>b.disabled=disabled);
+  },
+  nextRound(){
+    if(this.state.round>=this.state.maxRounds){this.gameOver();return}
+    this.state.round++;
+    const ante=this.state.sb+this.state.bb;
+    if(this.state.myChips<ante||this.state.aiChips<ante){this.gameOver();return}
+    this.state.pot=0;this.state.board=[];this.state.stage='preflop';this.state.roundOver=false;
+    this.state.myStreetBet=0;this.state.aiStreetBet=0;this.state.currentBet=0;
+    this.state.myActed=false;this.state.aiActed=false;
+    const sbi=this.state.sb,bbi=this.state.bb;
+    this.state.myChips-=sbi;this.state.myStreetBet=sbi;
+    this.state.aiChips-=bbi;this.state.aiStreetBet=bbi;
+    this.state.pot=sbi+bbi;this.state.currentBet=bbi;
+    this.state.deck=shuffleDeck(createDeck());
+    this.state.myHand=[this.state.deck.pop(),this.state.deck.pop()];
+    this.state.aiHand=[this.state.deck.pop(),this.state.deck.pop()];
+    document.getElementById('ai-round-display').textContent=this.state.round+'/'+this.state.maxRounds;
+    document.getElementById('ai-board').innerHTML='';
+    document.getElementById('ai-my-cards').innerHTML=cardHtml(this.state.myHand[0])+cardHtml(this.state.myHand[1]);
+    document.getElementById('ai-ai-cards').innerHTML='<div class="card card-back"></div><div class="card card-back"></div>';
+    document.getElementById('ai-next-btn').style.display='none';
+    this.updateUI();
+    const handStr=cardStr(this.state.myHand[0])+' '+cardStr(this.state.myHand[1]);
+    this.logMsg('回合 '+this.state.round+' — 手牌:'+handStr+' | SB '+sbi+' BB '+bbi+'，小盲先行动');
+    this.setButtons(false);
+  },
+  streetDone(){
+    const s=this.state;
+    return s.myActed&&s.aiActed&&s.currentBet===s.myStreetBet&&s.currentBet===s.aiStreetBet;
+  },
+  act(action){
+    if(this.state.roundOver||!this.state.playing)return;
+    const s=this.state;
+    if(action==='fold'){
+      document.getElementById('ai-ai-cards').innerHTML=cardHtml(s.aiHand[0])+cardHtml(s.aiHand[1]);
+      s.roundOver=true;s.aiChips+=s.pot;
+      this.logMsg('你弃牌了！AI赢得 '+s.pot+' 筹码','wrong');
+      this.setButtons(true);document.getElementById('ai-next-btn').style.display='inline-block';
+      this.updateUI();return;
+    }
+    if(action==='check'||action==='call'){
+      const toCall=Math.max(0,s.currentBet-s.myStreetBet);
+      if(toCall>0){
+        const callAmt=Math.min(toCall,s.myChips);
+        s.myChips-=callAmt;s.myStreetBet+=callAmt;s.pot+=callAmt;
+        this.logMsg('你跟注 '+callAmt);this.updateUI();
+      }else{
+        this.logMsg('你过牌');this.updateUI();
+      }
+      s.myActed=true;
+      if(this.streetDone()){this.setButtons(true);setTimeout(()=>this.advanceStreet(),500);}
+      else{this.setButtons(true);setTimeout(()=>this.aiAct(),500);}
+      return;
+    }
+    if(action==='raise'){
+      const toCall=Math.max(0,s.currentBet-s.myStreetBet);
+      if(s.myChips<=toCall){this.act('call');return;}
+      const raiseTotal=Math.min(toCall+40,s.myChips);
+      const rAmt=raiseTotal-s.myStreetBet;
+      s.myChips-=rAmt;s.myStreetBet+=rAmt;s.pot+=rAmt;s.currentBet=s.myStreetBet;
+      s.myActed=true;s.aiActed=false; // AI must respond to raise
+      this.logMsg('你加注至 '+s.currentBet+'（+'+rAmt+'）');this.updateUI();
+      this.setButtons(true);setTimeout(()=>this.aiAct(),500);
+      return;
+    }
+  },
+  aiAct(){
+    const s=this.state;
+    if(s.roundOver)return;
+    document.getElementById('ai-ai-cards').innerHTML=cardHtml(s.aiHand[0])+cardHtml(s.aiHand[1]);
+    const str=aiStrength(s.aiHand,s.board);
+    const toCall=Math.max(0,s.currentBet-s.aiStreetBet);
+    const aiCall=Math.min(toCall,s.aiChips);
+    if(toCall>0){
+      if(str>0.75&&s.aiChips>toCall+20){
+        const rSize=Math.min(toCall+40,s.aiChips);
+        const addAmt=rSize-s.aiStreetBet;
+        s.aiChips-=addAmt;s.aiStreetBet+=addAmt;s.pot+=addAmt;s.currentBet=s.aiStreetBet;
+        s.aiActed=true;s.myActed=false; // player must respond to raise
+        this.logMsg('AI强牌加注至 '+s.currentBet);this.updateUI();
+        this.setButtons(false);
+      }else if(str>0.35){
+        s.aiChips-=aiCall;s.aiStreetBet+=aiCall;s.pot+=aiCall;
+        s.aiActed=true;
+        this.logMsg('AI跟注 '+aiCall);this.updateUI();
+        if(this.streetDone()){this.setButtons(true);setTimeout(()=>this.advanceStreet(),500);}
+        else{this.setButtons(false);}
+      }else{
+        s.roundOver=true;s.myChips+=s.pot;
+        this.logMsg('AI弃牌！你赢得 '+s.pot+' 筹码','correct');
+        this.setButtons(true);document.getElementById('ai-next-btn').style.display='inline-block';
+        this.updateUI();
+      }
+      return;
+    }
+    if(str>0.65&&s.aiChips>20){
+      const betAmt=Math.min(20,s.aiChips);
+      s.aiChips-=betAmt;s.aiStreetBet+=betAmt;s.pot+=betAmt;s.currentBet=s.aiStreetBet;
+      s.aiActed=true;s.myActed=false; // player must respond to bet
+      this.logMsg('AI下注 '+betAmt);this.updateUI();
+      this.setButtons(false);
+    }else{
+      s.aiActed=true;
+      this.logMsg('AI过牌');this.updateUI();
+      if(this.streetDone()){this.setButtons(true);setTimeout(()=>this.advanceStreet(),500);}
+      else{this.setButtons(false);}
+    }
+  },
+  advanceStreet(){
+    const s=this.state;
+    if(s.stage==='preflop'){
+      s.stage='flop';s.board=[s.deck.pop(),s.deck.pop(),s.deck.pop()];
+    }else if(s.stage==='flop'){
+      s.stage='turn';s.board.push(s.deck.pop());
+    }else if(s.stage==='turn'){
+      s.stage='river';s.board.push(s.deck.pop());
+    }else{
+      this.showdown();return;
+    }
+    s.myStreetBet=0;s.aiStreetBet=0;s.currentBet=0;s.myActed=false;s.aiActed=false;
+    document.getElementById('ai-board').innerHTML=s.board.map(c=>cardHtml(c)).join('');
+    const sn={flop:'翻牌',turn:'转牌',river:'河牌'};
+    this.logMsg(sn[s.stage]+'：'+s.board.map(c=>cardStr(c)).join(' '));
+    this.updateUI();
+    // Postflop: AI acts first (BB position)
+    this.setButtons(true);setTimeout(()=>this.aiAct(),500);
+  },
+  showdown(){
+    const s=this.state;s.roundOver=true;this.setButtons(true);
+    document.getElementById('ai-ai-cards').innerHTML=cardHtml(s.aiHand[0])+cardHtml(s.aiHand[1]);
+    document.getElementById('ai-board').innerHTML=s.board.map(c=>cardHtml(c)).join('');
+    const mr=handRank(s.myHand,s.board);const ar=handRank(s.aiHand,s.board);
+    let t='',win=false;
+    if(mr.score>ar.score){t='🎉 你赢了！';win=true;s.wins++;s.myChips+=s.pot;}
+    else if(mr.score<ar.score){t='😔 AI赢了！';s.aiChips+=s.pot;}
+    else{t='🤝 平局！';s.myChips+=Math.floor(s.pot/2);s.aiChips+=Math.ceil(s.pot/2);}
+    this.logMsg(t+' 你：'+mr.name+' — AI：'+ar.name,win?'correct':(mr.score===ar.score?'draw':'wrong'));
+    document.getElementById('ai-next-btn').style.display='inline-block';
+    this.updateUI();
+  },
+  next(){
+    if(this.state.round>=this.state.maxRounds)this.gameOver();
+    else this.nextRound();
+  },
+  gameOver(){
+    this.state.playing=false;document.getElementById('ai-game').style.display='none';document.getElementById('ai-gameover').style.display='block';
+    const net=this.state.myChips-1000;
+    document.getElementById('ai-go-chips').textContent=this.state.myChips;
+    document.getElementById('ai-go-wins').textContent=this.state.wins+'/'+this.state.maxRounds;
+    document.getElementById('ai-go-desc').textContent=net>0?'盈利 '+net+' 筹码！战胜AI！':net===0?'不输不赢':'亏损 '+Math.abs(net)+' 筹码…继续努力！';
+    saveTotalScore(Math.max(0,net));
+    // Save AI net for badge tracking
+    localStorage.setItem('poker_ai_net',String(net));
+    localStorage.setItem('poker_ai_wins',String(aiBattle.state.wins));
+    checkBadges(collectBadgeStats());trackDailyGame();
+    // Add share button
+    if(!document.getElementById('ai-share-btn')){
+      const sb=document.createElement('button');sb.id='ai-share-btn';sb.className='btn-next';sb.style.cssText='margin:8px auto 0;background:rgba(68,160,255,0.15);color:#44a0ff;border-color:rgba(68,160,255,0.2)';
+      sb.textContent='📸 分享成绩';sb.onclick=function(){shareScore('AI对战',Math.abs(net),(net>0?'盈利':'亏损')+Math.abs(net),(net>0?'🎉':'😔'),'盈利 '+Math.max(0,net)+' | 胜 '+aiBattle.state.wins+'/5')};
+      document.querySelector('#ai-gameover .btn-next')?.before(sb);
+    }
+  },
+};
+
+/* ==============================
+   DAILY CHALLENGE
+   ============================== */
+function renderDaily(){
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('dc-date').textContent=today+' 🐤 每日挑战';
+  if(localStorage.getItem('poker_daily_date')===today){
+    document.getElementById('dc-content').innerHTML='<div class="dc-completed">✅ 今日挑战已完成！<br><span style="font-size:0.85rem;color:#a09080">明天再来吧</span></div>';
+    return;
+  }
+  const seed=today.split('-').reduce((a,b)=>a+parseInt(b),0);
+  const games=[{name:'翻前斗鸡',id:'pd',page:'preflop-duel'},{name:'识鸡辨鸡',id:'fs',page:'fish-or-shark'},{name:'赔率速算',id:'oc',page:'odds-calc'},{name:'读心术',id:'mr',page:'mind-read'},{name:'全压赌命',id:'ap',page:'allin-push'}];
+  const gi=Math.floor((seed*9301+49297)%233280/games.length%games.length);
+  const g=games[gi];
+  document.getElementById('dc-content').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:3rem;margin-bottom:12px">🌟</div><h3 style="color:#f0b90b;margin-bottom:8px">今日挑战：'+g.name+'</h3><p style="color:#a09080;margin-bottom:16px">完成可获得<span style="color:#f0b90b;font-weight:700">双倍积分</span>！</p><button class="hero-btn" onclick="localStorage.setItem(\'poker_daily_date\',new Date().toISOString().slice(0,10));localStorage.removeItem(\'poker_daily_counted\');navigate(\''+g.page+'\');setTimeout(()=>window[\''+g.id+'_start\'](),100)">开始今日挑战</button></div>';
+  window[g.id+'_start']=function(){const map={pd:preflopDuel,fs:fishOrShark,oc:oddsCalc,mr:mindRead,ap:allinPush};map[g.id].start();};
+}
+
+/* ==============================
+   ACHIEVEMENTS
+   ============================== */
+function renderAchievements(){
+  const total=getTotalScore();const rank=getRankForScore(total);
+  document.getElementById('ach-total-rank').textContent=RANK_TIERS[rank].icon;
+  document.getElementById('ach-total-title').textContent=rank;
+  document.getElementById('ach-total-score').textContent='总得分: '+total;
+  const keys=['pd','fs','oc','mr','ap'];const names={pd:'翻前斗鸡',fs:'识鸡辨鸡',oc:'赔率速算',mr:'读心术',ap:'全压赌命'};
+  const icons={pd:'🃏',fs:'🐤',oc:'🧮',mr:'👀',ap:'🔥'};
+  let html='';
+  for(const k of keys){
+    const hs=getHighScore(k);const gr=getRankForScore(hs);
+    html+='<div class="ach-card"><div class="ach-rank">'+RANK_TIERS[gr].icon+'</div><div class="ach-name">'+icons[k]+' '+names[k]+'</div><div class="ach-score">'+gr+'</div><div class="ach-high">最高分: '+hs+'</div></div>';
+  }
+  document.getElementById('ach-grid').innerHTML=html;
+  // Badges
+  const ub=getUnlockedBadges();const stats=collectBadgeStats();
+  const unlockedCnt=ub.length;const totalCnt=BADGES.length;
+  let bh='<div style="display:flex;justify-content:space-between;align-items:center;margin:24px 0 6px">'+
+    '<h3 style="color:#f0b90b;font-size:1.1rem">🏅 徽章 <span style="color:#a09080;font-size:0.8rem">'+unlockedCnt+'/'+totalCnt+'</span></h3>'+
+    '<span style="font-size:0.75rem;color:#a09080">'+(totalCnt-unlockedCnt)+'枚待解锁</span></div>'+
+    '<div style="width:100%;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-bottom:12px;overflow:hidden">'+
+    '<div style="height:100%;background:linear-gradient(90deg,#f0b90b,#ffd700);border-radius:2px;transition:width 0.5s;width:'+(unlockedCnt/totalCnt*100)+'%"></div></div>'+
+    '<div class="badge-grid">';
+  for(const b of BADGES){
+    const unlocked=ub.includes(b.id);
+    const p=b.progress(stats);const pct=Math.min(100,p.cur/p.tar*100);
+    bh+='<div class="badge-item'+(unlocked?' unlocked':' locked')+'" onclick="showBadgeDetail(\''+b.id+'\')" title="'+b.desc+'">'+
+      '<span class="bi-icon">'+(unlocked?b.icon:'🔒')+'</span>'+
+      '<span class="bi-name">'+(unlocked?b.name:'???')+'</span>'+
+      '<div class="bi-bar"><div class="bi-bar-fill" style="width:'+pct+'%"></div></div></div>';
+  }
+  bh+='</div>';
+  document.getElementById('ach-grid').innerHTML+=bh;
+  updateBadgeCount();
+}
+
+/* ==============================
+   HOME PAGE
+   ============================== */
+function renderHome(){
+  const cta=document.getElementById('home-invite-cta');
+  if(!cta)return;
+  const unlocked=isUnlocked();
+  cta.style.display=unlocked?'none':'block';
+  const cnt=getReferralCount();
+  const el=document.getElementById('invite-count-home');
+  if(el)el.textContent=cnt;
+  // Update badge count in nav
+  updateBadgeCount();
+}
+function trackDailyGame(){
+  const today=new Date().toISOString().slice(0,10);
+  if(localStorage.getItem('poker_daily_date')===today&&!localStorage.getItem('poker_daily_counted')){
+    localStorage.setItem('poker_daily_counted','true');
+    const c=parseInt(localStorage.getItem('poker_daily_count')||'0');
+    localStorage.setItem('poker_daily_count',String(c+1));
+  }
+}
+function updateBadgeCount(){
+  const cnt=getBadgeCount();
+  const pill=document.getElementById('nav-badge-pill');
+  const num=document.getElementById('nav-badge-num');
+  if(pill&&num){
+    if(cnt>0){pill.style.display='inline-flex';num.textContent=cnt;}
+    else{pill.style.display='none';}
+  }
+}
+
+/* ==============================
+   INIT
+   ============================== */
+  (async function(){
+    const p=new URLSearchParams(window.location.search);
+    const c=p.get('code');
+    if(c&&await validateRedeemCode(c))localStorage.setItem('poker_unlocked','true');
+  })();
+  navigate('home');
+  updateBadgeCount();
+</script>
+</body>
+</html>
