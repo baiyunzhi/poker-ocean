@@ -555,8 +555,9 @@ function connectWS() {
       msg.style.display = 'block';
       setTimeout(() => { msg.style.display = 'none'; }, 3000);
     } else if (data.type === 'signal') {
-      addSignals(data.signals);
-      data.signals.forEach(function(s) { showSignalToast(s); });
+      const newOnes = data.signals.filter(function(s) { return !allSignals.some(function(ex) { return ex.id === s.id; }); });
+      addSignals(newOnes);
+      newOnes.forEach(function(s) { showSignalToast(s); });
     }
   };
   ws.onclose = function() { setTimeout(connectWS, 1000); };
