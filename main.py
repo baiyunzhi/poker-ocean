@@ -4,6 +4,7 @@ import json
 import math
 import os
 import random
+import statistics
 import urllib.request
 import uuid
 from collections import deque
@@ -321,6 +322,150 @@ def calc_ma(candles: list, period: int) -> list:
         result.append({"time": candles[i]["time"], "value": round(avg, 2)})
     return result
 
+
+def calc_deviation(ma20_val: float, ma60_val: float, ma120_val: float) -> float:
+    """计算偏离度 = (max - min) / median x 100%"""
+    vals = [ma20_val, ma60_val, ma120_val]
+    ma_min = min(vals)
+    ma_max = max(vals)
+    ma_median = statistics.median(vals)
+    if ma_median == 0:
+        return 0.0
+    return round((ma_max - ma_min) / ma_median * 100, 2)
+
+
+def get_ma_values(pid: str) -> tuple:
+    """获取当前品种的最新 MA20/MA60/MA120 值 (使用1h K线)"""
+    candles_1h = kline_data.get(pid, {}).get("1h", [])
+    if len(candles_1h) < 120:
+        return None, None, None
+    ma20_list = calc_ma(candles_1h, 20)
+    ma60_list = calc_ma(candles_1h, 60)
+    ma120_list = calc_ma(candles_1h, 120)
+    if not ma20_list or not ma60_list or not ma120_list:
+        return None, None, None
+    return ma20_list[-1]["value"], ma60_list[-1]["value"], ma120_list[-1]["value"]
+
+
+def compute_deviation_zone(deviation: float) -> str:
+    """确定偏离度所在区间"""
+    if deviation <= 3.0:
+        return "convergence"        # 聚合
+    elif deviation <= 5.0:
+        return "divergence_start"   # 发散初期
+    elif deviation <= 10.0:
+        return "divergence_mid"     # 发散中期
+    else:
+        return "divergence_end"     # 发散末期
+
+
+SIGNAL_META = {
+    "golden_cross": {
+        "severity": "info",
+        "title": "⭐ 金叉信号",
+    },
+    "death_cross": {
+        "severity": "warning",
+        "title": "💀 死叉信号",
+    },
+    "convergence": {
+        "severity": "info",
+        "title": "📊 聚合信号",
+    },
+    "divergence_start": {
+        "severity": "info",
+        "title": "🚀 发散初期",
+    },
+    "divergence_mid": {
+        "severity": "warning",
+        "title": "🔥 发散中期",
+    },
+    "divergence_end": {
+        "severity": "critical",
+        "title": "⚠️ 发散末期",
+    },
+}
+
+
+def detect_signals() -> list:
+    """检测所有品种的交易信号，返回新触发的信号列表"""
+    new_signals = []
+
+    for pid in PRODUCTS:
+        ma20, ma60, ma120 = get_ma_values(pid)
+        if ma20 is None:
+            continue
+
+        cfg = PRODUCTS[pid]
+        deviation = calc_deviation(ma20, ma60, ma120)
+        zone = compute_deviation_zone(deviation)
+
+        # ── 判断金叉/死叉 ──
+        # 金叉: MA20 > MA60; 死叉: MA20 < MA60
+        threshold = 0.05  # 5分钱容差避免反复切换
+        if ma20 > ma60 + threshold:
+            new_cross = "golden"
+        elif ma20 < ma60 - threshold:
+            new_cross = "death"
+        else:
+            new_cross = signal_state.get(pid, {}).get("cross_state", None)
+
+        prev_state = signal_state.get(pid, {"cross_state": None, "deviation_zone": None})
+
+        # 检测交叉状态变化
+        if prev_state["cross_state"] != new_cross and new_cross in ("golden", "death"):
+            signal_type = "golden_cross" if new_cross == "golden" else "death_cross"
+            meta = SIGNAL_META[signal_type]
+            sig = {
+                "id": f"sig_{int(datetime.now().timestamp())}_{pid}_{signal_type}",
+                "time": int(datetime.now().timestamp()),
+                "product": pid,
+                "product_name": cfg["name"],
+                "signal_type": signal_type,
+                "severity": meta["severity"],
+                "title": meta["title"],
+                "detail": (
+                    f"MA20({ma20}) {'上穿' if new_cross == 'golden' else '下穿'} MA60({ma60})"
+                ),
+                "values": {"ma20": ma20, "ma60": ma60, "ma120": ma120, "deviation": deviation},
+            }
+            new_signals.append(sig)
+            signal_history.append(sig)
+
+        # 检测偏离度区间变化
+        if prev_state["deviation_zone"] != zone:
+            meta = SIGNAL_META.get(zone, {})
+            if meta:
+                zone_labels = {
+                    "convergence": "偏离度 ≤ 3%，均线聚合",
+                    "divergence_start": "偏离度 3%-5%，发散初期",
+                    "divergence_mid": "偏离度 5%-10%，发散中期",
+                    "divergence_end": "偏离度 > 10%，发散末期",
+                }
+                sig = {
+                    "id": f"sig_{int(datetime.now().timestamp())}_{pid}_{zone}",
+                    "time": int(datetime.now().timestamp()),
+                    "product": pid,
+                    "product_name": cfg["name"],
+                    "signal_type": zone,
+                    "severity": meta["severity"],
+                    "title": meta["title"],
+                    "detail": zone_labels.get(zone, ""),
+                    "values": {"ma20": ma20, "ma60": ma60, "ma120": ma120, "deviation": deviation},
+                }
+                new_signals.append(sig)
+                signal_history.append(sig)
+
+        # 更新状态
+        signal_state[pid] = {"cross_state": new_cross, "deviation_zone": zone}
+
+    # 限制信号历史数量
+    if len(signal_history) > 200:
+        signal_history[:] = signal_history[-200:]
+
+    return new_signals
+
+
 # ─── WebSocket 连接管理 ────────────────────────────────────
 connected_clients: list[WebSocket] = []
 
@@ -359,6 +504,11 @@ async def price_tick():
 
         recalc_account()
         check_liquidation()
+
+        # Detect and broadcast trading signals
+        new_signals = detect_signals()
+        if new_signals:
+            asyncio.create_task(broadcast({"type": "signal", "signals": new_signals}))
 
         # Broadcast
         market = {
@@ -489,6 +639,8 @@ async def reset_account():
     init_kline()
     for pid, price in saved_prices.items():
         PRODUCTS[pid]["price"] = price
+    signal_state.clear()
+    signal_history.clear()
     return {"success": True}
 
 @app.get("/api/kline")
