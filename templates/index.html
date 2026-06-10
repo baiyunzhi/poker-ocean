@@ -211,6 +211,55 @@ body{
 .period-btn:hover{border-color:#5e7ce0;color:#d0d4dc}
 .period-btn.active{background:#5e7ce0;border-color:#5e7ce0;color:#fff}
 #chartContainer{width:100%;height:480px}
+
+/* ─── Signals ─────────────────── */
+.signal-scroll{max-height:260px;overflow-y:auto}
+.signal-scroll::-webkit-scrollbar{width:4px}
+.signal-scroll::-webkit-scrollbar-thumb{background:#1f2530;border-radius:2px}
+.signal-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;
+  border-radius:6px;
+  margin-bottom:6px;
+  background:#0b0e14;
+  border-left:3px solid #6b7280;
+}
+.signal-item:last-child{margin-bottom:0}
+.signal-item.severity-info{border-left-color:#3498db}
+.signal-item.severity-warning{border-left-color:#f39c12}
+.signal-item.severity-critical{border-left-color:#e74c3c}
+.signal-time{font-size:11px;color:#6b7280;white-space:nowrap;min-width:60px}
+.signal-prod-tag{
+  font-size:11px;font-weight:600;
+  padding:2px 6px;border-radius:3px;
+  background:#1f2530;color:#5e7ce0;
+  white-space:nowrap;min-width:36px;text-align:center;
+}
+.signal-body{flex:1;min-width:0}
+.signal-title{font-size:13px;font-weight:600;color:#e8ecf0}
+.signal-detail{font-size:11px;color:#6b7280;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.signal-badge{
+  font-size:10px;padding:2px 6px;border-radius:3px;
+  white-space:nowrap;font-weight:600;
+}
+.signal-badge.info{background:rgba(52,152,219,.15);color:#3498db}
+.signal-badge.warning{background:rgba(243,156,18,.15);color:#f39c12}
+.signal-badge.critical{background:rgba(231,76,60,.15);color:#e74c3c}
+
+/* ─── Signal Toast ─────────────── */
+.signal-toast{
+  position:fixed;top:16px;right:16px;z-index:9999;
+  padding:12px 20px;border-radius:8px;
+  background:#1a1f2a;border:1px solid #1f2530;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+  max-width:360px;
+  animation:toastIn .3s ease,toastOut .3s ease 2.7s forwards;
+  pointer-events:none;
+}
+.signal-toast .toast-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.signal-toast .toast-detail{font-size:12px;color:#6b7280}
+@keyframes toastIn{0%{opacity:0;transform:translateX(40px)}100%{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{0%{opacity:1}100%{opacity:0;transform:translateY(-10px)}}
 </style>
 </head>
 <body>
@@ -300,6 +349,17 @@ body{
       </span>
     </div>
     <div id="chartContainer"></div>
+  </div>
+
+  <!-- Trading Signals -->
+  <div class="panel full-width">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h3 style="margin:0;padding:0;border:none">📡 交易信号</h3>
+      <span id="signalBadge" style="font-size:11px;color:#6b7280">等待信号...</span>
+    </div>
+    <div class="signal-scroll" id="signalContainer">
+      <div class="empty-state">暂无交易信号</div>
+    </div>
   </div>
 
   <!-- Positions -->
