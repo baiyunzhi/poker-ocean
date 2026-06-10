@@ -387,6 +387,9 @@ body{
 let currentDir = 'long';
 let currentLeverage = 10;
 
+// ─── Signal State ────────────────
+let allSignals = [];
+
 // ─── Direction ───────────────────
 function setDirection(dir) {
   currentDir = dir;
@@ -476,6 +479,57 @@ async function closePosition(id) {
   return r.json();
 }
 
+// ─── Signals ─────────────────────
+function addSignals(newSignals) {
+  for (const s of newSignals) {
+    if (allSignals.some(ex => ex.id === s.id)) continue;
+    allSignals.unshift(s);
+  }
+  if (allSignals.length > 100) allSignals.length = 100;
+  renderSignals();
+}
+
+function renderSignals() {
+  const container = document.getElementById('signalContainer');
+  const badge = document.getElementById('signalBadge');
+  if (!container) return;
+  if (allSignals.length === 0) {
+    container.innerHTML = '<div class="empty-state">暂无交易信号</div>';
+    badge.textContent = '等待信号...';
+    return;
+  }
+  badge.textContent = '共 ' + allSignals.length + ' 条';
+  let html = '';
+  for (const s of allSignals) {
+    const sev = s.severity || 'info';
+    const time = new Date(s.time * 1000).toLocaleTimeString('zh-CN', {hour12: false});
+    const sevLabel = sev === 'critical' ? '严重' : sev === 'warning' ? '警告' : '提示';
+    html += '<div class="signal-item severity-' + sev + '">' +
+      '<span class="signal-time">' + time + '</span>' +
+      '<span class="signal-prod-tag">' + s.product + '</span>' +
+      '<div class="signal-body">' +
+        '<div class="signal-title">' + s.title + '</div>' +
+        '<div class="signal-detail">' + (s.detail || '') + '</div>' +
+      '</div>' +
+      '<span class="signal-badge ' + sev + '">' + sevLabel + '</span>' +
+    '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function showSignalToast(signal) {
+  const existing = document.querySelector('.signal-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.className = 'signal-toast';
+  const color = signal.severity === 'critical' ? '#e74c3c' : signal.severity === 'warning' ? '#f39c12' : '#3498db';
+  toast.innerHTML =
+    '<div class="toast-title" style="color:' + color + '">' + signal.title + ' — ' + signal.product_name + '</div>' +
+    '<div class="toast-detail">' + (signal.detail || '') + '</div>';
+  document.body.appendChild(toast);
+  setTimeout(function() { if (toast.parentNode) toast.remove(); }, 3000);
+}
+
 // ─── Reset Account ───────────────
 async function resetAccount() {
   if (!confirm('确定要重置账户吗？所有持仓将被清空。')) return;
@@ -500,6 +554,9 @@ function connectWS() {
       msg.textContent = data.msg;
       msg.style.display = 'block';
       setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    } else if (data.type === 'signal') {
+      addSignals(data.signals);
+      data.signals.forEach(function(s) { showSignalToast(s); });
     }
   };
   ws.onclose = function() { setTimeout(connectWS, 1000); };
@@ -607,6 +664,20 @@ async function loadHistory() {
   }
   html += '</tbody></table>';
   container.innerHTML = html;
+}
+
+// ─── Load Signals on mount ───────
+async function loadSignals() {
+  try {
+    const r = await fetch('/api/signals?limit=100');
+    const signals = await r.json();
+    if (signals && signals.length > 0) {
+      allSignals = signals;
+      renderSignals();
+    }
+  } catch(e) {
+    console.warn('Load signals error:', e);
+  }
 }
 
 // ─── K-line Chart ─────────────────
@@ -751,6 +822,7 @@ function updateChartTick(klineData) {
 updateTradeBtn();
 updateMarginPreview();
 connectWS();
+loadSignals();
 loadHistory();
 initChart();
 // Reload history periodically
