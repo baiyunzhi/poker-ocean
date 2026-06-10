@@ -402,6 +402,7 @@ def detect_signals() -> list:
             continue
 
         prev_state = signal_state.get(pid, {"cross_state": None, "deviation_zone": None})
+        cfg = PRODUCTS[pid]
         deviation = calc_deviation(ma20, ma60, ma120)
         zone = compute_deviation_zone(deviation, prev_state["deviation_zone"])
 
