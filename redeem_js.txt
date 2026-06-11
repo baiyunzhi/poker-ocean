@@ -1,0 +1,75 @@
+/* ==============================
+   REDEEM CODE SYSTEM
+   ============================== */
+const REDEEM_CODES = {
+  _codes: new Set(['PKR-G343-KKKYP', 'PKR-78PL-QHTYT', 'PKR-7MJT-D7J72', 'PKR-NU5F-GL8Z3', 'PKR-E7RY-Q4JK1', 'PKR-V6P6-X84L6', 'PKR-KKV3-TB261', 'PKR-WTK7-9FVV2', 'PKR-2QQJ-4SXRR', 'PKR-49JV-9EZDP', 'PKR-BBND-P28R6', 'PKR-LGQU-VZFFT', 'PKR-QWHX-HGWU9', 'PKR-XXUU-VYP9L', 'PKR-7N3N-ABVTZ', 'PKR-Z6S8-KYYD6', 'PKR-E3Y6-9K8Q6', 'PKR-D9FS-YNRX3', 'PKR-6MAE-AMU99', 'PKR-GLX8-H89LN', 'PKR-SH8L-AJKR7', 'PKR-PB5F-MSN7Y', 'PKR-E9DV-VKM48', 'PKR-4NRB-V2FGR', 'PKR-U2MY-T6M79', 'PKR-CYWG-A8PD7', 'PKR-3R4C-UFQJY', 'PKR-5Z3A-ZWDK3', 'PKR-CZYR-VMDXP', 'PKR-HNG9-BTHQ5', 'PKR-9Z69-MKF68', 'PKR-PLX8-LTTL8', 'PKR-4TQZ-FRA84', 'PKR-7DU7-NAEQS', 'PKR-9URT-2Q6CW', 'PKR-HHJ4-92Y2N', 'PKR-JNFU-2TLT3', 'PKR-SNKK-2NMZ8', 'PKR-AJYQ-UYQV2', 'PKR-XPGS-UL7B6', 'PKR-SE7S-CAU2T', 'PKR-D3YP-GHQUX', 'PKR-SEA9-9DDEL', 'PKR-TZGW-LMEFN', 'PKR-BLPZ-4VFBL', 'PKR-ALKQ-MLGFR', 'PKR-E82H-YY869', 'PKR-7GK9-BLMVZ', 'PKR-JU6A-VRX4L', 'PKR-W6VA-4EEX8', 'PKR-F7VS-9KB55', 'PKR-WTJB-83FS9', 'PKR-28T3-EKA82', 'PKR-YN67-4URH5', 'PKR-2DPU-ZWQ9Y', 'PKR-A6VV-FNTCQ', 'PKR-T6VG-VHHSL', 'PKR-4X8G-3L8WM', 'PKR-WKF4-VAMB2', 'PKR-8FYY-8BWF7', 'PKR-WHW5-AGSZL', 'PKR-PE58-EJFSQ', 'PKR-ZK5A-NWSNM', 'PKR-CH5H-VL2G7', 'PKR-4Q6T-BR3SP', 'PKR-G5PF-3NSHU', 'PKR-SZDR-9PDX4', 'PKR-85YL-HWXP3', 'PKR-LAHN-YSL4R', 'PKR-3AEG-NYAKZ', 'PKR-APG2-UMUTX', 'PKR-HTTE-8FJG4', 'PKR-LWF2-TU9H5', 'PKR-83RU-F8844', 'PKR-G4W2-HGMB6', 'PKR-WN7G-59PC8', 'PKR-TPW6-ZGLWT', 'PKR-VPUA-M69K3', 'PKR-7HDC-37W98', 'PKR-CSPK-22FJ9', 'PKR-4EH4-2NA73', 'PKR-7X3W-NBSYX', 'PKR-FMFG-FAF89', 'PKR-QPE9-TDE2U', 'PKR-VQYB-5MLH2', 'PKR-PUUQ-NXGY9', 'PKR-Z6Q5-F4C4R', 'PKR-L6UX-SRQ2Z', 'PKR-UYWT-RPBS8', 'PKR-E7QW-ES5YL', 'PKR-WBNZ-KU4X9', 'PKR-53Z5-3NL51', 'PKR-EQ64-KF5UP', 'PKR-YFPL-YQ2KN', 'PKR-2RXL-GZKLL', 'PKR-V2MT-93XM8', 'PKR-E2A2-PEXF1', 'PKR-TTVY-XFHC6', 'PKR-KJRH-R79J9', 'PKR-6ASV-4XPL8', 'PKR-JW34-PK57Z', 'PKR-B76Y-84YV7', 'PKR-UUBZ-QHZYL', 'PKR-AJ6K-TNSJM', 'PKR-RNG4-DFQR8', 'PKR-E8K2-W4B32', 'PKR-G5JU-7EEF6', 'PKR-CEVH-M4JF5', 'PKR-AP6P-L5257', 'PKR-XC2A-QVXHX', 'PKR-2V3X-J8VFX', 'PKR-XWW5-WE3Z0', 'PKR-QJXK-C8DQQ', 'PKR-F4ZF-JC7QV', 'PKR-R3QJ-UKQ23', 'PKR-4SDW-KD9Q9', 'PKR-E73K-3PS9T', 'PKR-BXZZ-UZUVL', 'PKR-6XM5-NBPZL', 'PKR-A6H3-LZSCU', 'PKR-9AC8-URJU9', 'PKR-DR3G-GZ8Z3', 'PKR-PLPU-CX523', 'PKR-2GNC-G84B7', 'PKR-ZNF7-CNLX4', 'PKR-V3FQ-E4ZZP', 'PKR-F5EG-Y8YX9', 'PKR-B3JX-8L2W8', 'PKR-N5VW-G4JB5', 'PKR-NXQP-GH4T8', 'PKR-5UTF-GLV96', 'PKR-LTPB-9PMXL', 'PKR-D824-YTMA1', 'PKR-F5SY-4FA6L', 'PKR-U95M-YMSJV', 'PKR-VMPL-Y9PL9', 'PKR-SVJM-C74QP', 'PKR-8SVP-SZEWY', 'PKR-T2NM-FKXFS', 'PKR-W83V-X2D3M', 'PKR-QTFM-P3B72', 'PKR-DJ7H-6K2U7', 'PKR-A9MQ-JGUQR', 'PKR-HZ6Y-A4RQ9', 'PKR-RDWH-NYRFS', 'PKR-3LD6-JEFF6', 'PKR-B5R3-WVKF8', 'PKR-ZRC6-CH6BN', 'PKR-FT8V-RG9VS', 'PKR-7ULL-84FVS', 'PKR-7UUR-Z2Z7S', 'PKR-Q7PR-4TFRL', 'PKR-3ECT-YWS35', 'PKR-59ET-Q3H7U', 'PKR-J8RU-3C6CL', 'PKR-VXST-W5VCY', 'PKR-C6BS-ZK652', 'PKR-M5EL-BZ449', 'PKR-ZPM2-BCA9N', 'PKR-P2HJ-MLX8M', 'PKR-TC7G-YSTH7', 'PKR-VUL6-Q6NKP', 'PKR-EN4Q-WUBA7', 'PKR-HVRN-2K5AX', 'PKR-HZJN-N4LGR', 'PKR-UA8Y-CWQ24', 'PKR-5L5Q-79SM9', 'PKR-PKLM-4ZLL4', 'PKR-MDN4-9UNPP', 'PKR-NXZY-QQK3X', 'PKR-HBS3-J7S6N', 'PKR-NXUW-ZQZL5', 'PKR-GHKA-RX2WQ', 'PKR-62KQ-6JSCN', 'PKR-P6HH-266G3', 'PKR-MU45-MC86T', 'PKR-3HDW-2CWEM', 'PKR-K4XP-5GRR7', 'PKR-4NWV-BRX6T', 'PKR-WD8N-GRH88', 'PKR-HRTN-T7SR8', 'PKR-VPPW-9MQPS', 'PKR-XWRG-7SSVZ', 'PKR-ESXA-XE8FN', 'PKR-4AJW-4QAPS', 'PKR-4QBE-RJZ22', 'PKR-7N2J-LWJAV', 'PKR-FJP6-3GST5', 'PKR-B5GQ-F8MVW', 'PKR-M2HW-LUQFY', 'PKR-N6BZ-USKBX', 'PKR-65V8-F5YW8', 'PKR-J3KC-K2RAP', 'PKR-UDZ4-EKDL7', 'PKR-5CQC-Z543L', 'PKR-DUFQ-76XQ6', 'PKR-ULZV-CCKXY', 'PKR-TXTE-GLJQR', 'PKR-BZPA-47SAS', 'PKR-KJX4-4WZHQ', 'PKR-24G7-JUW5Z', 'PKR-5WAU-WZ940', 'PKR-YF79-AJZ3M', 'PKR-8L23-B8MVQ', 'PKR-3CGB-VYQF5', 'PKR-9UVL-7DHWL', 'PKR-TZ38-ZLLQ6', 'PKR-VAMW-MYJEN', 'PKR-JTZY-AHYX3', 'PKR-CJPW-WRU97', 'PKR-YGMC-D95LU', 'PKR-XK6H-C2J46', 'PKR-85UX-Q9VWT', 'PKR-TU45-JUXP3', 'PKR-N4K4-J9EZ7', 'PKR-VYWY-Q4ZYR', 'PKR-BGH2-ESED8', 'PKR-UUL4-HZYH9', 'PKR-FXZ7-TKZA5', 'PKR-SH8H-YWSEP', 'PKR-WUJC-AL76Z', 'PKR-HHWS-MDVTT', 'PKR-Z4FE-YUUDL', 'PKR-BYZU-PXQK6', 'PKR-3HAZ-TNVSM', 'PKR-3NS2-TGSVL', 'PKR-A6J9-KPSL2', 'PKR-YAQB-84JV7', 'PKR-PRG2-74XY5', 'PKR-CM29-7JC7N', 'PKR-Z3HJ-CQUEP', 'PKR-H8P7-UHXJ6', 'PKR-X467-ZPK8L', 'PKR-7CBP-7CBV2', 'PKR-R9RB-3QEM3', 'PKR-MZSJ-E962Q', 'PKR-37Q6-DTK8W', 'PKR-6ZXG-LZM62', 'PKR-QZLG-9L5EM', 'PKR-S9VA-KYWJ4', 'PKR-BA9H-56KJN', 'PKR-Z6EK-GF74L', 'PKR-ZVAR-4QUTP', 'PKR-NBP6-B6MVX', 'PKR-CKZR-T357T', 'PKR-TDT9-R42A2', 'PKR-8X35-GY5MN', 'PKR-UD2B-MU6NZ', 'PKR-4E6Y-VZAK4', 'PKR-BKVH-3MYU3', 'PKR-822H-JN4Q9', 'PKR-AMS3-2MDAL', 'PKR-96EZ-6EFYN', 'PKR-66WD-XSSQY', 'PKR-8SQ3-KG7H4', 'PKR-YULN-YYJQP', 'PKR-PZSS-TVPA3', 'PKR-ACAJ-X2DD5', 'PKR-XUZY-P5ZM4', 'PKR-GFCX-4QU88', 'PKR-VVTA-ES2T9', 'PKR-N2JS-B4PJT', 'PKR-MQ7J-ZRCHY', 'PKR-96BP-QSPB5', 'PKR-E9FG-R5EL7', 'PKR-BQZZ-JJV85', 'PKR-9T8X-4QMJ7', 'PKR-CTZ6-HDRX7', 'PKR-T2CE-AFURL', 'PKR-PSVC-VU6SN', 'PKR-NCNN-A2DEP', 'PKR-ETXU-42QYY', 'PKR-LN47-H4YST', 'PKR-UA3L-S53VL', 'PKR-8C8R-VNYZ6', 'PKR-DPJA-VY23Z', 'PKR-5A6X-CQPP6', 'PKR-T7CD-YA4PW', 'PKR-PBH4-H9WJW', 'PKR-PQW9-UPP44', 'PKR-A3FM-EKAJ6', 'PKR-UA8Q-FBB52', 'PKR-KV9P-NLE3L', 'PKR-CQ2F-PGT7U', 'PKR-Z572-396A7', 'PKR-TADQ-UU7T9', 'PKR-7SRX-FJBKT', 'PKR-943C-VGC61', 'PKR-XU7V-RDZY9', 'PKR-6L7U-ZD981', 'PKR-VP6H-BPQPZ', 'PKR-WMK2-PVWBL', 'PKR-4US5-BSDCT', 'PKR-E6TG-4Y593', 'PKR-MPCL-ZNA27', 'PKR-D2XN-BK5V2', 'PKR-UPUJ-SH7N0', 'PKR-WLHN-Y9KZN', 'PKR-5XCT-8J8NS', 'PKR-6L7T-S7XV5', 'PKR-56S3-R4S68', 'PKR-JRHC-3W9N6', 'PKR-X8YY-JX89X', 'PKR-SPLR-Q6796', 'PKR-PB2Q-6JPMY', 'PKR-YALX-NAKXN', 'PKR-M9V6-QNYS7', 'PKR-U4HB-2ZJ41', 'PKR-KL2Y-Z8UU8', 'PKR-9DHA-YW633', 'PKR-B8WM-RQXD7', 'PKR-DZKV-GM63L', 'PKR-U4MQ-D5SLP', 'PKR-EFHX-KFPZ2', 'PKR-6PW8-86P4R', 'PKR-EF8J-HLYDN', 'PKR-PRS5-9CDEV', 'PKR-WHLF-BCYRM', 'PKR-WJHJ-8A367', 'PKR-ACK8-FV2FP', 'PKR-W5WW-GLQWT', 'PKR-9VU6-8SN8R', 'PKR-JGA2-C36P8', 'PKR-N6X6-Q6ZC4', 'PKR-WWB7-C7K88', 'PKR-URNW-ZBQKL', 'PKR-T4QK-NN7UN', 'PKR-N4M4-LDLRX', 'PKR-4SK5-J43RU', 'PKR-85YB-8LMRR', 'PKR-KFFW-JSNB5', 'PKR-DKC7-6RAJ0', 'PKR-KYP6-3H999', 'PKR-VCES-CGQVN', 'PKR-3WG6-NDMBN', 'PKR-97R9-HF2Z7', 'PKR-V5MN-CZYRL', 'PKR-BQP8-K39TL', 'PKR-PE6M-FPLSP', 'PKR-U2Z5-6Q6M4', 'PKR-W4TG-SDWJ8', 'PKR-WXEE-ET8WM', 'PKR-W46G-4Q4HT', 'PKR-TW3Q-XJDH7', 'PKR-4T4V-E37NZ', 'PKR-H6SM-2XT6Y', 'PKR-HWE6-66CBV', 'PKR-A7W5-WBVLP', 'PKR-C6GC-NTBXP', 'PKR-LKG6-URGHL', 'PKR-TRDJ-GSBY5', 'PKR-PEZA-NZ2AM', 'PKR-J3QD-MNFP3', 'PKR-DLVN-D9WU7', 'PKR-W4JQ-GYRT8', 'PKR-W58X-5N4EL', 'PKR-NSZC-YPFXM', 'PKR-WVS2-4735P', 'PKR-DJRE-GPW69', 'PKR-DE4G-L6ENM', 'PKR-AWR9-24791', 'PKR-FUPX-3PJAT', 'PKR-U48N-VRS71', 'PKR-NSBQ-YJ4Q6', 'PKR-6D9Z-VKNPN', 'PKR-M6GK-FHEKZ', 'PKR-EJV3-ZCPKS', 'PKR-PN4C-2BXEL', 'PKR-LRUP-GVQP7', 'PKR-PQVM-M48YY', 'PKR-CNGG-QB5Z1', 'PKR-J5HN-ZGLHL', 'PKR-SHA8-TX76T', 'PKR-VJGK-3S8K9', 'PKR-MWRZ-JDBG3', 'PKR-NVFF-NBWQ4', 'PKR-3H5Q-S2QSQ', 'PKR-KQRJ-GJPB5', 'PKR-UGRU-RZR8X', 'PKR-FYD8-AL3F5', 'PKR-3HZJ-GKSJQ', 'PKR-LK7H-DXUR3', 'PKR-4JPW-46D7U', 'PKR-9QZ6-XCFN9', 'PKR-SCVQ-3RKEU', 'PKR-SG4M-U5PC6', 'PKR-YC58-DG422', 'PKR-89H3-NYDZX', 'PKR-5FU7-YSPD7', 'PKR-JUKZ-TABP7', 'PKR-FKMR-JU669', 'PKR-PFRV-2X2J4', 'PKR-FMHV-NJUCM', 'PKR-LAPK-GW3H1', 'PKR-L8HH-VE2Z9', 'PKR-QXQC-RB7W9', 'PKR-9KEN-LNBA2', 'PKR-V6KN-EEDF7', 'PKR-3XY6-AHL8M', 'PKR-8HML-TV9E1', 'PKR-88A3-CGYP9', 'PKR-M9NH-9P6LM', 'PKR-8EQQ-KM937', 'PKR-WJMC-Q52Z3', 'PKR-ND6N-ZK9M1', 'PKR-42Z5-NPGWX', 'PKR-VU3H-MXQWR', 'PKR-J36T-G7QPL', 'PKR-LEXX-24FRP', 'PKR-RHLP-EGKP7', 'PKR-MA6R-KV3EV', 'PKR-7A8Z-BFPW7', 'PKR-MH3J-HANM4', 'PKR-FQ3V-JZSP3', 'PKR-P3ZT-D2AM3', 'PKR-XT6T-GTV56', 'PKR-928X-7XL2S', 'PKR-D6UV-AZL84', 'PKR-YFWD-R7W4Q', 'PKR-4SA8-XXSGL', 'PKR-GPKY-QDX68', 'PKR-TCT4-WTH35', 'PKR-WFRR-SWFEU', 'PKR-FHBK-JUMDM', 'PKR-7VPL-9GVB1', 'PKR-863P-TGB4L', 'PKR-363P-CA97N', 'PKR-XFM6-G6JFU', 'PKR-MY4Q-WYJMQ', 'PKR-2P8R-GVTPP', 'PKR-C2AY-G79UP', 'PKR-629U-MUGE8', 'PKR-SBLH-UP4QV', 'PKR-U76S-2PGNS', 'PKR-QUEQ-BBZUM', 'PKR-UCF6-ZUTU8', 'PKR-2YBU-C8PT1', 'PKR-5SSB-6V7FL', 'PKR-CPWX-D4HD6', 'PKR-H8YB-UJ5Z9', 'PKR-U79C-J2767', 'PKR-SPUF-WKPY1', 'PKR-NH9R-VLEZN', 'PKR-HGBA-UANWP', 'PKR-EWYW-DFG3S', 'PKR-BBDT-LA9T4', 'PKR-F4BP-Z2BST', 'PKR-ZZ79-Q87MX', 'PKR-AGD3-UQZD3', 'PKR-4LGZ-CJ2A5', 'PKR-F7JF-TQNJL', 'PKR-7CGQ-KESF9', 'PKR-F6UA-WV9FN', 'PKR-YUQL-FJ4V1', 'PKR-JZYU-G3XY3', 'PKR-XLM8-DK99Q', 'PKR-D7K4-GBWF4', 'PKR-KUQY-ZAV9S', 'PKR-MD3Z-NX8YX', 'PKR-8ZF4-V6YV7', 'PKR-KG9T-MV7J3', 'PKR-AJ2V-VQJPW', 'PKR-CESZ-A2F8L', 'PKR-MDVJ-KL8LN', 'PKR-99YG-MLLWQ', 'PKR-BMTN-QMDW6', 'PKR-NGVD-UX6G3', 'PKR-FD4E-GA3EM', 'PKR-MXH8-3YCT8', 'PKR-UZYR-S7TNN', 'PKR-J5XH-Z8WP2', 'PKR-U35S-LCVP5', 'PKR-SFMP-83LFZ', 'PKR-LJCS-NQXG6', 'PKR-LNG6-JJ939', 'PKR-Q8V7-QHC6N', 'PKR-8SSN-D8KG8', 'PKR-YLNH-392WW', 'PKR-JDAS-THD77', 'PKR-L4KW-H7NG4', 'PKR-JP5V-3WN6Z', 'PKR-95HG-WWSJ8', 'PKR-3C4R-LAL6V', 'PKR-2TS5-9LGWX', 'PKR-K454-H2RF2', 'PKR-3T4W-YGFC9', 'PKR-5BGE-TJCBL', 'PKR-X48Y-ULBB2', 'PKR-MXLQ-6VM9W', 'PKR-YWWN-867F0', 'PKR-4BUX-5VF9T', 'PKR-7NB9-X35W9', 'PKR-LFCZ-9BRD0', 'PKR-M4HN-GBQS4', 'PKR-APMY-2K2P4', 'PKR-GK76-TV5Y5', 'PKR-H8ZD-DWYY7', 'PKR-M66Q-SGZH6', 'PKR-WUMF-TRXYQ', 'PKR-H6LD-NJ2D0']),
+
+  _check(code) {
+    // Format: PKR-XXXX-XXXXC
+    const m = code.match(/^PKR-([A-HJ-NP-Z2-9]{4})-([A-HJ-NP-Z2-9]{4}[A-HJ-NP-Z2-9])$/);
+    if (!m) return false;
+    const body = m[1] + m[2].slice(0, -1);
+    const givenC = m[2].slice(-1);
+    // Compute expected checksum
+    const s = [...body].reduce((sum, c) => sum + c.charCodeAt(0), 0) % 36;
+    const expectedC = s < 10 ? String(s) : 'LMNPQRSTUVWXYZ23456789'[(s - 10) % 22];
+    return givenC === expectedC;
+  },
+
+  redeem(code) {
+    const c = code.toUpperCase().trim();
+    // Already used?
+    const used = JSON.parse(localStorage.getItem('poker_redeemed') || '[]');
+    if (used.includes(c)) return {ok:false, msg:'此兑换码已使用过'};
+    // Validate format + checksum
+    if (!this._check(c)) return {ok:false, msg:'兑换码格式不正确'};
+    // Check against valid codes list
+    if (!this._codes.has(c)) return {ok:false, msg:'兑换码无效'};
+    // Mark used
+    used.push(c);
+    localStorage.setItem('poker_redeemed', JSON.stringify(used));
+    return {ok:true, msg:'复活成功！已恢复3条命'};
+  },
+
+  showDialog(callback) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:999';
+    overlay.innerHTML = `
+      <div style="background:#1a2838;border-radius:16px;padding:28px;max-width:360px;width:90%;border:1px solid rgba(240,185,11,0.2);text-align:center">
+        <div style="font-size:2.5rem;margin-bottom:8px">\u{1F7E5}</div>
+        <h3 style="color:#f0b90b;margin-bottom:6px">花1元复活</h3>
+        <p style="color:#8899aa;font-size:0.85rem;margin-bottom:16px;line-height:1.5">
+          去闲鱼搜索 <strong>"扑克海洋复活币"</strong><br>
+          花1元购买，获得复活码<br>
+          输入下方即可继续游戏！
+        </p>
+        <input id="redeem-input" placeholder="输入复活码" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(240,185,11,0.2);background:rgba(0,0,0,0.3);color:#e8eef4;font-size:1rem;text-align:center;box-sizing:border-box;outline:none">
+        <div style="color:#6a8a9a;font-size:0.75rem;margin:6px 0">格式：PKR-XXXX-XXXXX</div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button id="redeem-cancel" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(100,120,140,0.2);background:transparent;color:#8899aa;cursor:pointer;font-size:0.9rem">取消</button>
+          <button id="redeem-confirm" style="flex:1;padding:10px;border-radius:8px;border:none;background:linear-gradient(135deg,#f0b90b,#d4a008);color:#0d1b2a;font-weight:700;cursor:pointer;font-size:0.9rem">验证复活</button>
+        </div>
+        <div id="redeem-msg" style="margin-top:10px;font-size:0.85rem;min-height:20px"></div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    overlay.querySelector('#redeem-cancel').onclick = () => { overlay.remove(); if(callback) callback(false); };
+    overlay.querySelector('#redeem-confirm').onclick = () => {
+      const input = overlay.querySelector('#redeem-input');
+      const msg = overlay.querySelector('#redeem-msg');
+      const result = REDEEM_CODES.redeem(input.value);
+      if (result.ok) {
+        msg.style.color = '#44cc44';
+        msg.textContent = result.msg;
+        setTimeout(() => { overlay.remove(); if(callback) callback(true); }, 1200);
+      } else {
+        msg.style.color = '#ff4444';
+        msg.textContent = result.msg;
+      }
+    };
+    overlay.querySelector('#redeem-input').onkeydown = (e) => {
+      if (e.key === 'Enter') overlay.querySelector('#redeem-confirm').click();
+    };
+    setTimeout(() => overlay.querySelector('#redeem-input').focus(), 100);
+  }
+};
