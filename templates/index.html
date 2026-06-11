@@ -210,7 +210,7 @@ body{
 }
 .period-btn:hover{border-color:#5e7ce0;color:#d0d4dc}
 .period-btn.active{background:#5e7ce0;border-color:#5e7ce0;color:#fff}
-#chartContainer{width:100%;height:480px}
+#chartContainer{width:100%;height:560px}
 
 /* ─── Signals ─────────────────── */
 .signal-scroll{max-height:260px;overflow-y:auto}
@@ -346,6 +346,8 @@ body{
         <span style="color:#f0b90b">MA20</span>
         <span style="color:#e91e63;margin-left:8px">MA60</span>
         <span style="color:#7c4dff;margin-left:8px">MA120</span>
+        <span style="margin-left:16px;color:#26a69a">📊 量</span>
+        <span style="margin-left:8px;color:#ff9800">📈 仓</span>
       </span>
     </div>
     <div id="chartContainer"></div>
@@ -698,6 +700,8 @@ let candleSeries = null;
 let ma20Series = null;
 let ma60Series = null;
 let ma120Series = null;
+let volumeSeries = null;
+let oiSeries = null;
 let chartPeriod = '1h';
 let chartProduct = 'AU';
 let chartRefreshTimer = null;
@@ -773,6 +777,24 @@ function initChart() {
     priceLineVisible: false,
   });
 
+  // Volume histogram (bottom 20% of chart area)
+  volumeSeries = chart.addHistogramSeries({
+    priceFormat: { type: 'volume' },
+    priceScaleId: 'volume',
+  });
+  chart.priceScale('volume').applyOptions({
+    scaleMargins: { top: 0.82, bottom: 0.02 },
+  });
+
+  // OI line overlay on volume area
+  oiSeries = chart.addLineSeries({
+    priceScaleId: 'volume',
+    color: '#ff9800',
+    lineWidth: 1,
+    lastValueVisible: false,
+    priceLineVisible: false,
+  });
+
   chart.timeScale().fitContent();
   loadChart();
 }
@@ -789,6 +811,27 @@ async function loadChart() {
     ma20Series.setData(data.mas.MA20 || []);
     ma60Series.setData(data.mas.MA60 || []);
     ma120Series.setData(data.mas.MA120 || []);
+
+    // Volume histogram: colored by up/down candle
+    if (volumeSeries) {
+      const volData = data.candles.map(function(c) {
+        return {
+          time: c.time,
+          value: c.volume || 0,
+          color: c.close >= c.open ? 'rgba(14,203,129,0.5)' : 'rgba(246,70,93,0.5)',
+        };
+      });
+      volumeSeries.setData(volData);
+    }
+
+    // OI line
+    if (oiSeries) {
+      const oiData = data.candles.map(function(c) {
+        return { time: c.time, value: c.oi || 0 };
+      });
+      oiSeries.setData(oiData);
+    }
+
     chart.timeScale().fitContent();
   } catch(e) {
     console.warn('Chart load error:', e);
@@ -818,16 +861,32 @@ function updateChartTick(klineData) {
   if (!data) return;
   const cc = data[chartPeriod] || data['1h'];
   if (!cc || !cc.time) return;
+  const time = Math.floor(cc.time);
   candleSeries.update({
-    time: Math.floor(cc.time),
+    time: time,
     open: cc.open,
     high: cc.high,
     low: cc.low,
     close: cc.close,
   });
-  // Full reload every 30s to keep MAs aligned
+  // Update volume forming candle
+  if (volumeSeries && cc.volume !== undefined) {
+    volumeSeries.update({
+      time: time,
+      value: cc.volume || 0,
+      color: cc.close >= cc.open ? 'rgba(14,203,129,0.5)' : 'rgba(246,70,93,0.5)',
+    });
+  }
+  // Update OI forming candle
+  if (oiSeries && cc.oi !== undefined) {
+    oiSeries.update({
+      time: time,
+      value: cc.oi || 0,
+    });
+  }
+  // Full reload every 60s to keep MAs and history aligned
   chartTickCount++;
-  if (chartTickCount % 30 === 0) loadChart();
+  if (chartTickCount % 60 === 0) loadChart();
 }
 
 // ─── Init ────────────────────────
